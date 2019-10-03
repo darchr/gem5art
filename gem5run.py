@@ -11,8 +11,8 @@ import os
 import signal
 import subprocess
 import time
-import shutil
 from uuid import UUID
+import zipfile
 
 
 class gem5Run:
@@ -287,19 +287,20 @@ class gem5Run:
 
         self.dumpJson('info.json')
 
-        shutil.make_archive('results', 'zip', self.getOutdir())
+        files = os.listdir(self.getOutdir())
+        with zipfile.ZipFile(os.path.join(self.outdir, 'results.zip'), 'w',
+                             zipfile.ZIP_DEFLATED) as zipf:
+            for f in files:
+                zipf.write(os.path.join(self.getOutdir(), f), f)
 
         self.results = artifact.Artifact.registerArtifact(
                 command = 'zip results.zip -r' + self.getOutdir(),
                 name = 'results',
                 typ = 'directory',
-                path =  './results.zip',
+                path =  os.path.join(self.getOutdir(), 'results.zip'),
                 cwd = './',
                 documentation = 'Compressed version of the results directory'
         )
-
-
-        os.remove('./results.zip')
 
 
 class gem5RunFS(gem5Run):
