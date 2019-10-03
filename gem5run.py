@@ -292,7 +292,7 @@ class gem5Run:
                 zipf.write(os.path.join(self.getOutdir(), f), f)
 
         self.results = artifact.Artifact.registerArtifact(
-                command = 'zip results.zip -r' + self.getOutdir(),
+                command = f'zip results.zip -r {self.getOutdir()}',
                 name = 'results',
                 typ = 'directory',
                 path =  os.path.join(self.getOutdir(), 'results.zip'),
