@@ -83,10 +83,9 @@ class gem5Run:
         # Initially, there are no results
         self.results = None
 
-        # If this is the first time this has been run, dump the info
-        # Note: we don't want to overwrite the last run!
-        if not os.path.exists(os.path.join(self.outdir, 'info.json')):
-            self.dumpJson('info.json')
+        self.hash = self._getHash()
+
+        self.dumpJson('info.json')
 
     def checkArtifacts(self):
         """Checks to make sure all of the artifacts are up to date
@@ -155,7 +154,6 @@ class gem5Run:
         # Remove list of artifacts
         del d['artifacts']
 
-        d['hash'] = self._getHash()
         return d
 
     def _getHash(self):
