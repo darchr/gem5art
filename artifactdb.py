@@ -25,9 +25,13 @@ class ArtifactDB:
 
     def put(self, key, artifact):
         # Insert the artifact into the database
-        assert(artifact._id == key)
-        self.artifacts.insert_one(vars(artifact))
-
+        if type(artifact) is dict:
+            assert(artifact['_id'] == key)
+            self.artifacts.insert_one(artifact)
+        else:
+            assert(artifact._id == key)
+            self.artifacts.insert_one(vars(artifact))
+            
     def upload(self, key, path):
         """Upload the file at path to the database with _id of key"""
         with open(path, 'rb') as f:

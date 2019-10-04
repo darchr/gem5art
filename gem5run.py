@@ -4,6 +4,7 @@ There is one task, `run`, which will run a gem5 instance.
 """
 
 from . import artifact
+from .artifact import _db
 
 import hashlib
 import json
@@ -11,7 +12,7 @@ import os
 import signal
 import subprocess
 import time
-from uuid import UUID
+from uuid import UUID, uuid4
 import zipfile
 
 
@@ -48,6 +49,7 @@ class gem5Run:
         self.run_script_git_artifact = run_script_git_artifact
         self.artifacts = [gem5_artifact, gem5_git_artifact,
                           run_script_git_artifact]
+        self._id = uuid4()
         self.timeout = timeout
 
         # Assumes **/<gem5_name>/gem5.<anything>
@@ -146,6 +148,7 @@ class gem5Run:
         """Returns a dictionary that can be used to recreate this object"""
         # Grab all of the member variables
         d = vars(self).copy()
+        d['_id'] = self._id
         # Replace the artifacts with their UUIDs
         d['gem5_artifact'] = self.gem5_artifact._id
         d['gem5_git_artifact'] = self.gem5_git_artifact._id
@@ -300,6 +303,8 @@ class gem5Run:
                 documentation = 'Compressed version of the results directory'
         )
 
+        #Store current gem5 run in the database
+        _db.put(self._id, self._getSerializable())
 
 class gem5RunFS(gem5Run):
 
