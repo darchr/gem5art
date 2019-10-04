@@ -292,7 +292,8 @@ class gem5Run:
         with zipfile.ZipFile(os.path.join(self.outdir, 'results.zip'), 'w',
                              zipfile.ZIP_DEFLATED) as zipf:
             for f in files:
-                zipf.write(os.path.join(self.getOutdir(), f), f)
+                if (f != 'results.zip'):
+                    zipf.write(os.path.join(self.getOutdir(), f))
 
         self.results = artifact.Artifact.registerArtifact(
                 command = f'zip results.zip -r {self.getOutdir()}',
