@@ -224,6 +224,11 @@ class gem5Run:
         other applications can poll those files.
         task is the celery task that is running this gem5 instance.
         """
+        #Check if the run is already in the database
+        if(self.hash in _db):
+            print("Error: Have already run {}. Exiting!".format(''.join(self.command)))
+            return
+
         self.status = "Begin run"
         self.dumpJson('info.json')
 
