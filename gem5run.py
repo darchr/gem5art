@@ -147,12 +147,12 @@ class gem5Run:
         """Returns a dictionary that can be used to recreate this object"""
         # Grab all of the member variables
         d = vars(self).copy()
-        d['_id'] = self._id
         # Replace the artifacts with their UUIDs
         d['gem5_artifact'] = self.gem5_artifact._id
         d['gem5_git_artifact'] = self.gem5_git_artifact._id
         d['run_script_git_artifact'] = self.run_script_git_artifact._id
         if d['results']: d['results'] = self.results._id
+        d['type'] = 'gem5 run'
         # Remove list of artifacts
         del d['artifacts']
 
