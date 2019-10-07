@@ -367,6 +367,7 @@ class gem5RunFS(gem5Run):
         d = super(gem5RunFS, self)._getSerializable()
         d['linux_binary_artifact'] = self.linux_binary_artifact._id
         d['disk_image_artifact'] = self.disk_image_artifact._id
+        d['type'] = 'gem5 run fs'
         return d
 
     @classmethod
@@ -392,3 +393,19 @@ class gem5RunFS(gem5Run):
                   ]
 
         return hashlib.md5(b''.join(to_hash)).hexdigest()
+
+def getRuns(fs_only = False, limit = 0):
+    """Returns a generator of gem5Run objects.
+
+    If fs_only is True, then only full system runs will be returned.
+    Limit specifies the maximum number of runs to return.
+    """
+
+    runs = _db.artifact.find({'type':'gem5 run'}, limit=limit)
+    fsruns = _db.artifact.find({'type':'gem5 run fs'}, limit=limit)
+
+    for run in runs:
+        yield gem5Run.loadFromDict(run)
+
+    for run in fsruns:
+        yield gem5RunFS.loadFromDict(run)

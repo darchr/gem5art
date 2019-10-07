@@ -5,8 +5,8 @@ from uuid import UUID
 
 class ArtifactDB:
     """
-    This is a mongodb database connector for storing Artifacts (as defined
-    above).
+    This is a mongodb database connector for storing Artifacts (as defined in
+    artifact.py).
 
     This database stores the data in three collections:
     - artifacts: This stores the json serialized Artifact class
@@ -31,7 +31,7 @@ class ArtifactDB:
         else:
             assert(artifact._id == key)
             self.artifacts.insert_one(vars(artifact))
-            
+
     def upload(self, key, path):
         """Upload the file at path to the database with _id of key"""
         with open(path, 'rb') as f:

@@ -141,6 +141,8 @@ class Artifact:
         """Constructs the object from the database based on a UUID or
         dictionary from the database
         """
+        if isinstance(other, str):
+            other = UUID(other)
         if isinstance(other, UUID):
             other = _db.get(other)
 
@@ -199,3 +201,44 @@ class Artifact:
             print(f"WARNING: input mismatch for {self.name}! {mismatch}")
 
         return True
+
+def _getByType(typ, limit):
+    data = _db.artifacts.find({'type':typ}, limit=limit)
+
+    for d in data:
+        yield Artifact(d)
+
+def getDiskImages(limit = 0):
+    """Returns a generator of disk images (type = disk image).
+
+    Limit specifies the maximum number of results to return.
+    """
+
+    return _getByType('disk image', limit)
+
+def getgem5Binaries(limit = 0):
+    """Returns a generator of gem5 binaries (type = gem5 binary).
+
+    Limit specifies the maximum number of results to return.
+    """
+
+    return _getByType('gem5 binary', limit)
+
+
+def getLinuxBinaries(limit = 0):
+    """Returns a generator of Linux kernel binaries (type = kernel).
+
+    Limit specifies the maximum number of results to return.
+    """
+
+    return _getByType('kernel', limit)
+
+def getByName(name, limit = 0):
+    """Returns all objects mathching `name` in database.
+
+    Limit specifies the maximum number of results to return.
+    """
+    data = _db.artifacts.find({'name': name}, limit=limit)
+
+    for d in data:
+        yield Artifact(d)
