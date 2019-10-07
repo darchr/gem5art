@@ -49,7 +49,6 @@ class gem5Run:
         self.run_script_git_artifact = run_script_git_artifact
         self.artifacts = [gem5_artifact, gem5_git_artifact,
                           run_script_git_artifact]
-        self._id = uuid4()
         self.timeout = timeout
 
         # Assumes **/<gem5_name>/gem5.<anything>
@@ -224,9 +223,9 @@ class gem5Run:
         other applications can poll those files.
         task is the celery task that is running this gem5 instance.
         """
-        #Check if the run is already in the database
-        if(self.hash in _db):
-            print("Error: Have already run {}. Exiting!".format(''.join(self.command)))
+        # Check if the run is already in the database
+        if self.hash in _db:
+            print(f"Error: Have already run {self.command}. Exiting!")
             return
 
         self.status = "Begin run"
@@ -293,12 +292,21 @@ class gem5Run:
 
         self.dumpJson('info.json')
 
-        files = os.listdir(self.getOutdir())
+        self.saveResults()
+
+        # Store current gem5 run in the database
+        _db.put(self._id, self._getSerializable())
+
+    def saveResults(self):
+        """Zip up the output directory and store the results in the database.
+        """
+        files = filter(lambda f: f != 'results.zip',
+                       os.listdir(self.getOutdir()))
+
         with zipfile.ZipFile(os.path.join(self.outdir, 'results.zip'), 'w',
                              zipfile.ZIP_DEFLATED) as zipf:
             for f in files:
-                if (f != 'results.zip'):
-                    zipf.write(os.path.join(self.getOutdir(), f))
+                zipf.write(os.path.join(self.getOutdir(), f))
 
         self.results = artifact.Artifact.registerArtifact(
                 command = f'zip results.zip -r {self.getOutdir()}',
@@ -308,9 +316,6 @@ class gem5Run:
                 cwd = './',
                 documentation = 'Compressed version of the results directory'
         )
-
-        #Store current gem5 run in the database
-        _db.put(self._id, self._getSerializable())
 
 class gem5RunFS(gem5Run):
 
@@ -387,6 +392,3 @@ class gem5RunFS(gem5Run):
                   ]
 
         return hashlib.md5(b''.join(to_hash)).hexdigest()
-
-
-
