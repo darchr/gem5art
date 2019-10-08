@@ -49,6 +49,7 @@ class gem5Run:
         self.run_script_git_artifact = run_script_git_artifact
         self.artifacts = [gem5_artifact, gem5_git_artifact,
                           run_script_git_artifact]
+        self._id = uuid4()
         self.timeout = timeout
 
         # Assumes **/<gem5_name>/gem5.<anything>
