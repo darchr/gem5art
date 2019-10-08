@@ -144,7 +144,11 @@ class gem5Run:
                 return False
 
     def _getSerializable(self):
-        """Returns a dictionary that can be used to recreate this object"""
+        """Returns a dictionary that can be used to recreate this object
+
+        Note: All artifacts must be manually converted to a UUID instead of
+        an artifact class.
+        """
         # Grab all of the member variables
         d = vars(self).copy()
         # Replace the artifacts with their UUIDs
@@ -176,24 +180,20 @@ class gem5Run:
 
     @classmethod
     def _convertForJson(cls, d):
+        """Converts UUID objects to strings for json compatibility"""
         for k,v in d.items():
             if isinstance(v, UUID):
                 d[k] = str(v)
         return d
 
     def dumpJson(self, filename):
-        """
-        Dump all info into a json file. This could be used to reconstruct
-        this instance, but that functionality doesn't exist, yet.
-        """
+        """Dump all info into a json file"""
         d = self._convertForJson(self._getSerializable())
         with open(os.path.join(self.outdir, filename), 'w') as f:
             json.dump(d, f)
 
     def dumpsJson(self):
-        """
-        Like dumpJson except returns string
-        """
+        """Like dumpJson except returns string"""
         d = self._convertForJson(self._getSerializable())
         return json.dumps(d)
 
@@ -201,6 +201,10 @@ class gem5Run:
     def loadJson(cls, filename):
         with open(filename) as f:
             d = json.load(f)
+            for k,v in d.iteritems():
+                # Convert string version of UUID to UUID object
+                if k.endswith('_artifact'):
+                    d[k] = UUID(v)
         try:
             return cls.loadFromDict(d)
         except KeyError:
@@ -209,15 +213,17 @@ class gem5Run:
 
     @classmethod
     def loadFromDict(cls, d):
+        """Returns new gem5Run instance from the dictionary of values in d"""
         return cls(d['gem5_binary'], d['run_script'],
-                   artifact.Artifact(UUID(d['gem5_artifact'])),
-                   artifact.Artifact(UUID(d['gem5_git_artifact'])),
-                   artifact.Artifact(UUID(d['run_script_git_artifact'])),
+                   artifact.Artifact(d['gem5_artifact']),
+                   artifact.Artifact(d['gem5_git_artifact']),
+                   artifact.Artifact(d['run_script_git_artifact']),
                   *d['extra_params'], timeout=d['timeout'])
 
     def run(self, task = None):
-        """
-        Actually run the test. Just calls Popen with the command.
+        """Actually run the test.
+
+        Calls Popen with the command to fork a new process.
         Then, this function polls the process every 5 seconds to check if it
         has finished or not. Each time it checks, it dumps the json info so
         other applications can poll those files.
@@ -363,7 +369,6 @@ class gem5RunFS(gem5Run):
                             *self.local_extra_params)
 
     def _getSerializable(self):
-        """Returns a dictionary that can be used to recreate this object"""
         d = super(gem5RunFS, self)._getSerializable()
         d['linux_binary_artifact'] = self.linux_binary_artifact._id
         d['disk_image_artifact'] = self.disk_image_artifact._id
