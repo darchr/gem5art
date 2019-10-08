@@ -373,12 +373,12 @@ class gem5RunFS(gem5Run):
     @classmethod
     def loadFromDict(cls, d):
         return cls(d['gem5_binary'], d['run_script'],
-                   artifact.Artifact(UUID(d['gem5_artifact'])),
-                   artifact.Artifact(UUID(d['gem5_git_artifact'])),
-                   artifact.Artifact(UUID(d['run_script_git_artifact'])),
+                   artifact.Artifact(d['gem5_artifact']),
+                   artifact.Artifact(d['gem5_git_artifact']),
+                   artifact.Artifact(d['run_script_git_artifact']),
                    d['linux_binary'], d['disk_image'],
-                   artifact.Artifact(UUID(d['linux_binary_artifact'])),
-                   artifact.Artifact(UUID(d['disk_image_artifact'])),
+                   artifact.Artifact(d['linux_binary_artifact']),
+                   artifact.Artifact(d['disk_image_artifact']),
                   *d['local_extra_params'])
 
 
@@ -401,8 +401,8 @@ def getRuns(fs_only = False, limit = 0):
     Limit specifies the maximum number of runs to return.
     """
 
-    runs = _db.artifact.find({'type':'gem5 run'}, limit=limit)
-    fsruns = _db.artifact.find({'type':'gem5 run fs'}, limit=limit)
+    runs = _db.artifacts.find({'type':'gem5 run'}, limit=limit)
+    fsruns = _db.artifacts.find({'type':'gem5 run fs'}, limit=limit)
 
     for run in runs:
         yield gem5Run.loadFromDict(run)
