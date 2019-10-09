@@ -324,6 +324,11 @@ class gem5Run:
                 documentation = 'Compressed version of the results directory'
         )
 
+    def __str__(self):
+        gem5_info = f"{self.gem5_name} {self.script_name}"
+        params = ' '.join(self.extra_params)
+        return  gem5_info + ' ' + params + ' -> ' + self.status
+
 class gem5RunFS(gem5Run):
 
     def __init__(self, gem5_binary, run_script,
@@ -400,6 +405,12 @@ class gem5RunFS(gem5Run):
 
         return hashlib.md5(b''.join(to_hash)).hexdigest()
 
+    def __str__(self):
+        gem5_info = f"{self.gem5_name} {self.script_name}"
+        fs_info = f"{self.linux_name} {self.disk_name}"
+        params = ' '.join(self.local_params)
+        return  gem5_info + ' ' + fs_info + ' ' + params + ' -> ' + self.status
+
 def getRuns(fs_only = False, limit = 0):
     """Returns a generator of gem5Run objects.
 
@@ -407,11 +418,11 @@ def getRuns(fs_only = False, limit = 0):
     Limit specifies the maximum number of runs to return.
     """
 
-    runs = _db.artifacts.find({'type':'gem5 run'}, limit=limit)
+    if not fs_only:
+        runs = _db.artifacts.find({'type':'gem5 run'}, limit=limit)
+        for run in runs:
+            yield gem5Run.loadFromDict(run)
+
     fsruns = _db.artifacts.find({'type':'gem5 run fs'}, limit=limit)
-
-    for run in runs:
-        yield gem5Run.loadFromDict(run)
-
     for run in fsruns:
         yield gem5RunFS.loadFromDict(run)
