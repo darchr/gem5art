@@ -408,7 +408,7 @@ class gem5RunFS(gem5Run):
     def __str__(self):
         gem5_info = f"{self.gem5_name} {self.script_name}"
         fs_info = f"{self.linux_name} {self.disk_name}"
-        params = ' '.join(self.local_params)
+        params = ' '.join(self.local_extra_params)
         return  gem5_info + ' ' + fs_info + ' ' + params + ' -> ' + self.status
 
 def getRuns(fs_only = False, limit = 0):

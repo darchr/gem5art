@@ -158,13 +158,17 @@ class Artifact:
         self.hash = other['hash']
         self.git = other['git']
         self.cwd = other['cwd']
-        self.inputs = other['inputs']
+        self.inputs = [Artifact(i) for i in other['inputs']]
 
-    def __repr__(self):
+    def __str__(self):
+        inputs = ', '.join([i.name+':'+str(i._id) for i in self.inputs])
         return "\n    ".join([self.name, f'id: {self._id}',
                               f'type: {self.type}', f'path: {self.path}',
-                              f'inputs: {self.inputs}',
+                              f'inputs: {inputs}',
                               self.documentation])
+
+    def __repr__(self):
+        return vars(self).__repr__()
 
     def __eq__(self, other):
         """checks if two artifacts are the same.
