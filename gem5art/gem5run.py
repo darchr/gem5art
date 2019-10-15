@@ -1,6 +1,9 @@
 """
-This file defines a celery app for gem5.
-There is one task, `run`, which will run a gem5 instance.
+This file defines a gem5Run object which contains all information needed to
+run a single gem5 test.
+
+This class works closely with the artifact module to ensure that the gem5
+experiment is reproducible and the output is saved to the database.
 """
 
 from . import artifact
