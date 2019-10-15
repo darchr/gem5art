@@ -3,13 +3,13 @@
 from setuptools import setup, find_packages
 
 
-with open('README.md', encoding='utf-8') as f:
+with open('../README.md', encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name = "gem5art",
+    name = "gem5art-artifact",
     version = "0.1.0",
-    description = "An artifact, reproducibility, and testing library for gem5",
+    description = "Artifacts for gem5art",
     long_description = long_description,
     long_description_content_type='text/markdown',
     url='https://github.com/darchr/gem5art',
@@ -27,9 +27,6 @@ setup(
     packages=find_packages(),
     install_requires=['pymongo'],
     python_requires='>=3.6',
-    extras_require={
-         'celery': ['celery', 'flower'],
-    },
     project_urls={
         'Bug Reports':'https://github.com/darchr/gem5art/issues',
         'Source':'https://github.com/darchr/gem5art',
