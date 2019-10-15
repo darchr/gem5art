@@ -3,4 +3,4 @@
 .venv
 __pycache__
 dist/
-gem5art.egg-info/
+*.egg-info/
