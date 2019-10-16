@@ -1,5 +1,5 @@
-
-from . import getDBConnection
+"""File contains the Artifact class and helper functions
+"""
 
 import hashlib
 from inspect import cleandoc
@@ -7,12 +7,16 @@ import os
 from pymongo import MongoClient
 import subprocess
 import time
+import typing
+from typing import Any, Dict, Iterator, List, Union
 from uuid import UUID, uuid4
+
+from . import getDBConnection
 
 
 _db = getDBConnection()
 
-def getHash(path):
+def getHash(path: str) -> str:
     """
     Returns an md5 hash for the file in self.path.
     """
@@ -26,7 +30,7 @@ def getHash(path):
 
     return md5.hexdigest()
 
-def getGit(path):
+def getGit(path: str) -> Dict[str,str]:
     """
     Returns dictionary with origin, current commit, and repo name for the
     base repository for `path`.
@@ -75,9 +79,27 @@ class Artifact:
        as a list of uuids
     """
 
+    _id: UUID
+    name: str
+    type: str
+    documentation: str
+    command: str
+    path: str
+    hash: str
+    git: Dict[str,str]
+    cwd: str
+    inputs: List[Artifact]
+
     @classmethod
-    def registerArtifact(cls, command, name, cwd, typ, path, documentation,
-                         inputs=[]):
+    def registerArtifact(cls,
+                         command: str,
+                         name: str,
+                         cwd: str,
+                         typ: str,
+                         path: str,
+                         documentation: str,
+                         inputs: List[Artifact] = []
+                         ) -> Artifact:
         """Constructs a new artifact.
 
         This assume either it's not in the database or it is the exact same as
@@ -85,51 +107,51 @@ class Artifact:
         """
 
         # Dictionary with all of the kwargs for construction.
-        self = {}
+        data: Dict[str, Any] = {}
 
-        self['name'] = name
-        self['type'] = typ
-        self['documentation'] = cleandoc(documentation)
-        if len(self['documentation']) < 10: # 10 characters is arbitrary
+        data['name'] = name
+        data['type'] = typ
+        data['documentation'] = cleandoc(documentation)
+        if len(data['documentation']) < 10: # 10 characters is arbitrary
             raise Exception(cleandoc("""Must provide longer documentation!
-                This documentation is how your future self will remember what
+                This documentation is how your future data will remember what
                 this artifact is and how it was created."""))
 
-        self['command'] = cleandoc(command)
+        data['command'] = cleandoc(command)
 
-        self['path'] = path
+        data['path'] = path
         if os.path.isfile(path):
-            self['hash'] = getHash(path)
-            self['git'] = None
+            data['hash'] = getHash(path)
+            data['git'] = ''
         elif os.path.isdir(path):
-            self['git'] = getGit(path)
-            self['hash'] = self['git']['hash']
+            data['git'] = getGit(path)
+            data['hash'] = data['git']['hash']
         else:
             raise Exception("Path {} doesn't exist".format(path))
 
-        self['cwd'] = cwd
+        data['cwd'] = cwd
         if not os.path.exists(cwd):
             raise Exception("cwd {} doesn't exits.".format(cwd))
 
-        self['inputs'] = [i._id for i in inputs]
+        data['inputs'] = [i._id for i in inputs]
 
-        if self['hash'] in _db:
-            old_artifact = Artifact(_db.get(self['hash']))
-            self['_id'] = old_artifact._id
+        if data['hash'] in _db:
+            old_artifact = Artifact(_db.get(data['hash']))
+            data['_id'] = old_artifact._id
 
             # Now that we have a complete object, construct it
-            self = cls(self)
+            self = cls(data)
             if old_artifact != self:
                 print(f"Current: {vars(self)}")
                 print(f"From DB: {vars(old_artifact)}")
                 raise Exception("Found matching hash in DB, but object "
                     "doesn't match. Use the UUID constructor instead.")
         else:
-            self['_id'] = uuid4()
+            data['_id'] = uuid4()
 
             # Now that we have a complete object, construct it
-            self = cls(self)
-            _db.put(self._id, self)
+            self = cls(data)
+            _db.put(self._id, self._getSerializable())
 
             # Upload the file if there is one.
             if os.path.isfile(self.path):
@@ -137,7 +159,7 @@ class Artifact:
 
         return self
 
-    def __init__(self, other):
+    def __init__(self, other: Union[str, UUID, Dict[str, Any]]) -> None:
         """Constructs the object from the database based on a UUID or
         dictionary from the database
         """
@@ -149,6 +171,7 @@ class Artifact:
         if not other:
             raise Exception("Cannot construct artifact")
 
+        assert isinstance(other['_id'], UUID)
         self._id = other['_id']
         self.name = other['name']
         self.type = other['type']
@@ -156,21 +179,25 @@ class Artifact:
         self.command = other['command']
         self.path = other['path']
         self.hash = other['hash']
+        assert isinstance(other['git'], dict)
         self.git = other['git']
         self.cwd = other['cwd']
         self.inputs = [Artifact(i) for i in other['inputs']]
 
-    def __str__(self):
+    def __str__(self) -> str:
         inputs = ', '.join([i.name+':'+str(i._id) for i in self.inputs])
         return "\n    ".join([self.name, f'id: {self._id}',
                               f'type: {self.type}', f'path: {self.path}',
                               f'inputs: {inputs}',
                               self.documentation])
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return vars(self).__repr__()
 
-    def __eq__(self, other):
+    def _getSerializable(self) -> Dict[str, Any]:
+        return vars(self)
+
+    def __eq__(self, other: object) -> bool:
         """checks if two artifacts are the same.
 
         Two artifacts are the same if they have the same UUID and the same
@@ -178,6 +205,8 @@ class Artifact:
         are different and the hash is the same, this is suggestive that the
         user is doing something wrong.
         """
+        if not isinstance(other, Artifact):
+            return NotImplemented
 
         if self.hash != other.hash or self._id != other._id:
             return False
@@ -206,13 +235,13 @@ class Artifact:
 
         return True
 
-def _getByType(typ, limit):
+def _getByType(typ: str, limit: int) -> Iterator[Artifact]:
     data = _db.artifacts.find({'type':typ}, limit=limit)
 
     for d in data:
         yield Artifact(d)
 
-def getDiskImages(limit = 0):
+def getDiskImages(limit: int = 0) -> Iterator[Artifact]:
     """Returns a generator of disk images (type = disk image).
 
     Limit specifies the maximum number of results to return.
@@ -220,7 +249,7 @@ def getDiskImages(limit = 0):
 
     return _getByType('disk image', limit)
 
-def getgem5Binaries(limit = 0):
+def getgem5Binaries(limit: int = 0) -> Iterator[Artifact]:
     """Returns a generator of gem5 binaries (type = gem5 binary).
 
     Limit specifies the maximum number of results to return.
@@ -229,7 +258,7 @@ def getgem5Binaries(limit = 0):
     return _getByType('gem5 binary', limit)
 
 
-def getLinuxBinaries(limit = 0):
+def getLinuxBinaries(limit: int = 0) -> Iterator[Artifact]:
     """Returns a generator of Linux kernel binaries (type = kernel).
 
     Limit specifies the maximum number of results to return.
@@ -237,7 +266,7 @@ def getLinuxBinaries(limit = 0):
 
     return _getByType('kernel', limit)
 
-def getByName(name, limit = 0):
+def getByName(name: str, limit: int = 0) -> Iterator[Artifact]:
     """Returns all objects mathching `name` in database.
 
     Limit specifies the maximum number of results to return.
