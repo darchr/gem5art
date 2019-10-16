@@ -1,6 +1,6 @@
 """This is the gem5 artifact package"""
 
-import gem5art.artifact.artifactdb
+import gem5art.artifact._artifactdb
 
 def getDBConnection():
     """Returns the database connection
@@ -8,4 +8,4 @@ def getDBConnection():
     Eventually, this should likely read from a config file to get the database
     information. However, for now, we'll use mongodb defaults
     """
-    return artifactdb.ArtifactDB()
+    return _artifactdb.ArtifactDB()
