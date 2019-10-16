@@ -1,4 +1,4 @@
-# gem5art: An artifact, reproducibility, and testing library for gem5
+# gem5art: Artifact, reproducibility, and testing utilities for gem5
 
 ## Installing gem5art
 

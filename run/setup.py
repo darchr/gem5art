@@ -1,14 +1,16 @@
 """A setuptools based setup module."""
 
+from os.path import join
+from pathlib import Path
 from setuptools import setup, find_packages
 
 
-with open('../README.md', encoding='utf-8') as f:
+with open(Path(__file__).parent / 'README.md', encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
     name = "gem5art-run",
-    version = "0.1.0",
+    version = "0.1.3",
     description = "A collection of utilities for running gem5",
     long_description = long_description,
     long_description_content_type='text/markdown',
