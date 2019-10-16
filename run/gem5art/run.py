@@ -6,18 +6,20 @@ This class works closely with the artifact module to ensure that the gem5
 experiment is reproducible and the output is saved to the database.
 """
 
-from  gem5art.artifact import getDBConnection
-
 import hashlib
 import json
 import os
 import signal
 import subprocess
 import time
+from typing import Any, Dict, Iterable, Optional, Union
 from uuid import UUID, uuid4
 import zipfile
 
-_db = getDBConnection()
+from gem5art.artifact import artifact
+from gem5art.artifact.artifact import Artifact
+
+_db: artifact.ArtifactDB = artifact.getDBConnection()
 
 class gem5Run:
     """
@@ -26,9 +28,14 @@ class gem5Run:
     the disk image/kernel in FS mode) you should extend this class.
     """
 
-    def __init__(self, gem5_binary, run_script,
-                 gem5_artifact, gem5_git_artifact, run_script_git_artifact,
-                 *params, timeout=60*15):
+    def __init__(self,
+                 gem5_binary: str,
+                 run_script: str,
+                 gem5_artifact: Artifact,
+                 gem5_git_artifact: Artifact,
+                 run_script_git_artifact: Artifact,
+                 *params: str,
+                 timeout: int = 60*15) -> None:
         """
         gem5_binary and run_script are the paths to the binary to run
         and the script to pass to gem5. Full paths are better.
@@ -75,24 +82,24 @@ class gem5Run:
         self.running = False
 
         self.enqueue_time = time.time()
-        self.start_time = 0
-        self.end_time = 0
+        self.start_time = 0.0
+        self.end_time = 0.0
 
-        self.return_code = None
-        self.kill_reason = None
+        self.return_code = 0
+        self.kill_reason = ''
         self.status = "Created"
 
         self.pid = 0
         self.task_id = None
 
         # Initially, there are no results
-        self.results = None
+        self.results: Optional[Artifact] = None
 
         self.hash = self._getHash()
 
         self.dumpJson('info.json')
 
-    def checkArtifacts(self):
+    def checkArtifacts(self) -> bool:
         """Checks to make sure all of the artifacts are up to date
 
         This should happen just before running gem5. This function will return
@@ -114,10 +121,10 @@ class gem5Run:
 
         return True
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return repr(self.__dict__)
 
-    def getOutdir(self):
+    def getOutdir(self) -> str:
         """
         Constructs the output directory from the gem5 build opts (e.g., X86,
         ARM, MOESI_hammer), the gem5 run script, and the extra parameters.
@@ -127,7 +134,7 @@ class gem5Run:
                             self.script_name,
                             *self.extra_params)
 
-    def checkKernelPanic(self):
+    def checkKernelPanic(self) -> bool:
         """
         Returns true if the gem5 instance specified in args has a kernel panic
         Note: this gets around the problem that gem5 doesn't exit on panics.
@@ -147,7 +154,7 @@ class gem5Run:
             else:
                 return False
 
-    def _getSerializable(self):
+    def _getSerializable(self) -> Dict[str, Union[str, UUID]]:
         """Returns a dictionary that can be used to recreate this object
 
         Note: All artifacts must be manually converted to a UUID instead of
@@ -166,7 +173,7 @@ class gem5Run:
 
         return d
 
-    def _getHash(self):
+    def _getHash(self) -> str:
         """Return a single value that uniquely identifies this run
 
         To uniquely identify this run, the gem5 binary, gem5 scripts, and
@@ -183,26 +190,26 @@ class gem5Run:
         return hashlib.md5(b''.join(to_hash)).hexdigest()
 
     @classmethod
-    def _convertForJson(cls, d):
+    def _convertForJson(cls, d: Dict[str, Any]) -> Dict[str, str]:
         """Converts UUID objects to strings for json compatibility"""
         for k,v in d.items():
             if isinstance(v, UUID):
                 d[k] = str(v)
         return d
 
-    def dumpJson(self, filename):
+    def dumpJson(self, filename: str) -> None:
         """Dump all info into a json file"""
         d = self._convertForJson(self._getSerializable())
         with open(os.path.join(self.outdir, filename), 'w') as f:
             json.dump(d, f)
 
-    def dumpsJson(self):
+    def dumpsJson(self) -> str:
         """Like dumpJson except returns string"""
         d = self._convertForJson(self._getSerializable())
         return json.dumps(d)
 
     @classmethod
-    def loadJson(cls, filename):
+    def loadJson(cls, filename: str) -> Artifact:
         with open(filename) as f:
             d = json.load(f)
             for k,v in d.iteritems():
@@ -216,15 +223,15 @@ class gem5Run:
             raise
 
     @classmethod
-    def loadFromDict(cls, d):
+    def loadFromDict(cls, d: Dict[str, str]) -> gem5Run:
         """Returns new gem5Run instance from the dictionary of values in d"""
         return cls(d['gem5_binary'], d['run_script'],
                    artifact.Artifact(d['gem5_artifact']),
                    artifact.Artifact(d['gem5_git_artifact']),
                    artifact.Artifact(d['run_script_git_artifact']),
-                  *d['extra_params'], timeout=d['timeout'])
+                  *d['extra_params'], timeout = int(d['timeout']))
 
-    def run(self, task = None):
+    def run(self, task: Any = None) -> None:
         """Actually run the test.
 
         Calls Popen with the command to fork a new process.
@@ -307,7 +314,7 @@ class gem5Run:
         # Store current gem5 run in the database
         _db.put(self._id, self._getSerializable())
 
-    def saveResults(self):
+    def saveResults(self) -> None:
         """Zip up the output directory and store the results in the database.
         """
         files = filter(lambda f: f != 'results.zip',
@@ -327,18 +334,24 @@ class gem5Run:
                 documentation = 'Compressed version of the results directory'
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         gem5_info = f"{self.gem5_name} {self.script_name}"
         params = ' '.join(self.extra_params)
         return  gem5_info + ' ' + params + ' -> ' + self.status
 
 class gem5RunFS(gem5Run):
 
-    def __init__(self, gem5_binary, run_script,
-                gem5_artifact, gem5_git_artifact, run_script_git_artifact,
-                linux_binary, disk_image,
-                linux_binary_artifact, disk_image_artifact,
-                *params):
+    def __init__(self,
+                 gem5_binary: str,
+                 run_script: str,
+                 gem5_artifact: Artifact,
+                 gem5_git_artifact: Artifact,
+                 run_script_git_artifact: Artifact,
+                 linux_binary: str,
+                 disk_image: str,
+                 linux_binary_artifact: Artifact,
+                 disk_image_artifact: Artifact,
+                *params: str) -> None:
         """
         gem5_binary and run_script are the paths to the binary to run
         and the script to pass to gem5.
@@ -369,7 +382,7 @@ class gem5RunFS(gem5Run):
 
         self.artifacts.extend([disk_image_artifact, linux_binary_artifact])
 
-    def getOutdir(self):
+    def getOutdir(self) -> str:
         return os.path.join('results',
                             self.gem5_name,
                             self.script_name,
@@ -377,7 +390,7 @@ class gem5RunFS(gem5Run):
                             self.disk_name,
                             *self.local_extra_params)
 
-    def _getSerializable(self):
+    def _getSerializable(self) -> Dict[str, Union[str, UUID]]:
         d = super(gem5RunFS, self)._getSerializable()
         d['linux_binary_artifact'] = self.linux_binary_artifact._id
         d['disk_image_artifact'] = self.disk_image_artifact._id
@@ -385,7 +398,7 @@ class gem5RunFS(gem5Run):
         return d
 
     @classmethod
-    def loadFromDict(cls, d):
+    def loadFromDict(cls, d: Dict[str,str]) -> gem5RunFS:
         return cls(d['gem5_binary'], d['run_script'],
                    artifact.Artifact(d['gem5_artifact']),
                    artifact.Artifact(d['gem5_git_artifact']),
@@ -396,7 +409,7 @@ class gem5RunFS(gem5Run):
                   *d['local_extra_params'])
 
 
-    def _getHash(self):
+    def _getHash(self) -> str:
         to_hash = [self.gem5_artifact._id.bytes,  # UUID of gem5 binary
                    self.gem5_git_artifact._id.bytes, # UUID of gem5 git
                    self.run_script_git_artifact._id.bytes, # UUID of cur repo
@@ -408,13 +421,13 @@ class gem5RunFS(gem5Run):
 
         return hashlib.md5(b''.join(to_hash)).hexdigest()
 
-    def __str__(self):
+    def __str__(self) -> str:
         gem5_info = f"{self.gem5_name} {self.script_name}"
         fs_info = f"{self.linux_name} {self.disk_name}"
         params = ' '.join(self.local_extra_params)
         return  gem5_info + ' ' + fs_info + ' ' + params + ' -> ' + self.status
 
-def getRuns(fs_only = False, limit = 0):
+def getRuns(fs_only: bool = False, limit: int = 0) -> Iterable[gem5Run]:
     """Returns a generator of gem5Run objects.
 
     If fs_only is True, then only full system runs will be returned.
