@@ -6,7 +6,7 @@ This class works closely with the artifact module to ensure that the gem5
 experiment is reproducible and the output is saved to the database.
 """
 
-from  gem5art.artifact.artifactdb import ArtifactDB
+from  gem5art.artifact import getDBConnection
 
 import hashlib
 import json
@@ -17,7 +17,7 @@ import time
 from uuid import UUID, uuid4
 import zipfile
 
-_db = ArtifactDB()
+_db = getDBConnection()
 
 class gem5Run:
     """

@@ -1,5 +1,5 @@
 
-from .artifactdb import ArtifactDB
+from . import getDBConnection
 
 import hashlib
 from inspect import cleandoc
@@ -10,7 +10,7 @@ import time
 from uuid import UUID, uuid4
 
 
-_db = ArtifactDB()
+_db = getDBConnection()
 
 def getHash(path):
     """
