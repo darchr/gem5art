@@ -16,7 +16,7 @@ from typing import Any, Dict, Iterable, Optional, Union
 from uuid import UUID, uuid4
 import zipfile
 
-from gem5art.artifact import artifact
+from gem5art import artifact
 from gem5art.artifact.artifact import Artifact
 
 _db: artifact.ArtifactDB = artifact.getDBConnection()
@@ -223,7 +223,7 @@ class gem5Run:
             raise
 
     @classmethod
-    def loadFromDict(cls, d: Dict[str, str]) -> gem5Run:
+    def loadFromDict(cls, d: Dict[str, str]) -> 'gem5Run':
         """Returns new gem5Run instance from the dictionary of values in d"""
         return cls(d['gem5_binary'], d['run_script'],
                    artifact.Artifact(d['gem5_artifact']),
@@ -398,7 +398,7 @@ class gem5RunFS(gem5Run):
         return d
 
     @classmethod
-    def loadFromDict(cls, d: Dict[str,str]) -> gem5RunFS:
+    def loadFromDict(cls, d: Dict[str,str]) -> 'gem5RunFS':
         return cls(d['gem5_binary'], d['run_script'],
                    artifact.Artifact(d['gem5_artifact']),
                    artifact.Artifact(d['gem5_git_artifact']),

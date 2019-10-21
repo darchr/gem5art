@@ -5,7 +5,6 @@ import typing
 from typing import Any, Dict, Union
 from uuid import UUID
 
-from .artifact import Artifact
 
 class ArtifactDB:
     """

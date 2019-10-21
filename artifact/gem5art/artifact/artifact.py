@@ -88,7 +88,7 @@ class Artifact:
     hash: str
     git: Dict[str,str]
     cwd: str
-    inputs: List[Artifact]
+    inputs: List['Artifact']
 
     @classmethod
     def registerArtifact(cls,
@@ -98,8 +98,8 @@ class Artifact:
                          typ: str,
                          path: str,
                          documentation: str,
-                         inputs: List[Artifact] = []
-                         ) -> Artifact:
+                         inputs: List['Artifact'] = []
+                         ) -> 'Artifact':
         """Constructs a new artifact.
 
         This assume either it's not in the database or it is the exact same as
