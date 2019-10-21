@@ -194,8 +194,10 @@ class Artifact:
     def __repr__(self) -> str:
         return vars(self).__repr__()
 
-    def _getSerializable(self) -> Dict[str, Any]:
-        return vars(self)
+    def _getSerializable(self) -> Dict[str, Union[str, UUID]]:
+        data = vars(self)
+        data['inputs'] = [input._id for input in self.inputs]
+        return data
 
     def __eq__(self, other: object) -> bool:
         """checks if two artifacts are the same.
