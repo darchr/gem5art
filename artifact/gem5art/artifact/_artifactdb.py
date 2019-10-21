@@ -26,7 +26,7 @@ class ArtifactDB:
         self.artifacts = self.db.artifacts
         self.fs = gridfs.GridFSBucket(self.db, disable_md5=True)
 
-    def put(self, key: UUID, artifact: Dict[str,str]) -> None:
+    def put(self, key: UUID, artifact: Dict[str,Union[str,UUID]]) -> None:
         """Insert the artifact into the database with the key"""
         assert artifact['_id'] == key
         self.artifacts.insert_one(artifact)
