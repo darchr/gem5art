@@ -237,6 +237,9 @@ class Artifact:
 
         return True
 
+    def __hash__(self) -> int:
+        return self._id.int
+
 def _getByType(typ: str, limit: int) -> Iterator[Artifact]:
     data = _db.artifacts.find({'type':typ}, limit=limit)
 

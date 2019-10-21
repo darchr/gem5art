@@ -109,10 +109,10 @@ class gem5Run:
         """
         for v in self.artifacts:
             if v.type == 'git repo':
-                new = artifact.getGit(v.path)['hash']
+                new = artifact.artifact.getGit(v.path)['hash']
                 old = v.git['hash']
             else:
-                new = artifact.getHash(v.path)
+                new = artifact.artifact.getHash(v.path)
                 old = v.hash
 
             if new != v.hash:
@@ -325,7 +325,7 @@ class gem5Run:
             for f in files:
                 zipf.write(os.path.join(self.getOutdir(), f))
 
-        self.results = artifact.Artifact.registerArtifact(
+        self.results = Artifact.registerArtifact(
                 command = f'zip results.zip -r {self.getOutdir()}',
                 name = 'results',
                 typ = 'directory',
