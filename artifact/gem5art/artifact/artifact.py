@@ -122,7 +122,7 @@ class Artifact:
         data['path'] = path
         if os.path.isfile(path):
             data['hash'] = getHash(path)
-            data['git'] = ''
+            data['git'] = {}
         elif os.path.isdir(path):
             data['git'] = getGit(path)
             data['hash'] = data['git']['hash']
