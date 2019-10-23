@@ -1,6 +1,6 @@
 
-import gridfs
-from pymongo import MongoClient
+import gridfs # type: ignore
+from pymongo import MongoClient # type: ignore
 import typing
 from typing import Any, Dict, Union
 from uuid import UUID

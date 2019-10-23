@@ -4,7 +4,6 @@
 import hashlib
 from inspect import cleandoc
 import os
-from pymongo import MongoClient
 import subprocess
 import time
 import typing
