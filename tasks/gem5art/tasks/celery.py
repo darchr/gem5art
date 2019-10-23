@@ -1,5 +1,5 @@
 
-from celery import Celery
+from celery import Celery # type: ignore
 
 # Create a celery server. If you run celery with this file, it will start a
 # server that will accept tasks specified by the "run" below.
