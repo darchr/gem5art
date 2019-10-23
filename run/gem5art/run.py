@@ -12,7 +12,7 @@ import os
 import signal
 import subprocess
 import time
-from typing import Any, Dict, Iterable, List, Optional, Union
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 from uuid import UUID, uuid4
 import zipfile
 
@@ -26,6 +26,45 @@ class gem5Run:
     This class holds all of the info required to run gem5.
     """
 
+    _id: UUID
+    hash: str
+    type: str
+    gem5_binary: str
+    run_script: str
+    gem5_artifact: Artifact
+    gem5_git_artifact: Artifact
+    run_script_git_artifact: Artifact
+    params: Tuple[str, ...]
+    timeout: int
+
+    gem5_name: str
+    script_name: str
+    linux_name: str
+    disk_name: str
+    string: str
+    relative_outdir: str
+    outdir: str
+
+    linux_binary: str
+    disk_image: str
+    linux_binary_artifact: Artifact
+    disk_image_artifact: Artifact
+
+    command: List[str]
+
+    running: bool
+    enqueue_time: float
+    start_time: float
+    end_time: float
+    return_code: int
+    kill_reason: str
+    status: str
+    pid: int
+    task_id: Any
+
+    results: Optional[Artifact]
+    artifacts: List[Artifact]
+
     @classmethod
     def _create(cls,
                 gem5_binary: str,
@@ -33,7 +72,7 @@ class gem5Run:
                 gem5_artifact: Artifact,
                 gem5_git_artifact: Artifact,
                 run_script_git_artifact: Artifact,
-                params: List[str],
+                params: Tuple[str, ...],
                 timeout: int) -> 'gem5Run':
         """
         Shared code between SE and FS when creating a run object.
@@ -66,7 +105,9 @@ class gem5Run:
         run.task_id = None
 
         # Initially, there are no results
-        run.results: Optional[Artifact] = None
+        run.results = None
+
+        return run
 
     @classmethod
     def createSERun(cls,
@@ -93,9 +134,9 @@ class gem5Run:
         of this class.
         """
 
-        run = _create(gem5_binary, run_script, gem5_artifact,
-                      gem5_git_artifact, run_script_git_artifact, params,
-                      timeout)
+        run = cls._create(gem5_binary, run_script, gem5_artifact,
+                          gem5_git_artifact, run_script_git_artifact, params,
+                          timeout)
 
         run.artifacts = [gem5_artifact, gem5_git_artifact,
                          run_script_git_artifact]
@@ -111,7 +152,7 @@ class gem5Run:
                                            run.script_name,
                                            *run.params)
 
-        run.outdir = os.path.abspath(run.getOutdir())
+        run.outdir = os.path.abspath(run.outdir)
         # Make the directory if it doesn't exist
         os.makedirs(run.outdir, exist_ok=True)
 
@@ -150,9 +191,9 @@ class gem5Run:
         parameters will be passed in order to the gem5 run script.
         """
 
-        run = _create(gem5_binary, run_script, gem5_artifact,
-                      gem5_git_artifact, run_script_git_artifact, params,
-                      timeout)
+        run = cls._create(gem5_binary, run_script, gem5_artifact,
+                          gem5_git_artifact, run_script_git_artifact, params,
+                          timeout)
         run.linux_binary = linux_binary
         run.disk_image = disk_image
         run.linux_binary_artifact = linux_binary_artifact
@@ -181,7 +222,7 @@ class gem5Run:
                                            run.disk_name,
                                            *run.params)
 
-        run.outdir = os.path.abspath(run.getOutdir())
+        run.outdir = os.path.abspath(run.relative_outdir)
         # Make the directory if it doesn't exist
         os.makedirs(run.outdir, exist_ok=True)
 
@@ -199,7 +240,7 @@ class gem5Run:
         return run
 
     @classmethod
-    def loadJson(cls, filename: str) -> Artifact:
+    def loadJson(cls, filename: str) -> 'gem5Run':
         with open(filename) as f:
             d = json.load(f)
             # Convert string version of UUID to UUID object
@@ -250,7 +291,7 @@ class gem5Run:
         return True
 
     def __repr__(self) -> str:
-        return self._getSerializable()
+        return str(self._getSerializable())
 
     def checkKernelPanic(self) -> bool:
         """
@@ -299,7 +340,7 @@ class gem5Run:
         """
         to_hash = [art._id.bytes for art in self.artifacts]
         to_hash.append(self.run_script.encode())
-        to_hash.append(' '.join(self.extra_params).encode())
+        to_hash.append(' '.join(self.params).encode())
 
         return hashlib.md5(b''.join(to_hash)).hexdigest()
 
@@ -409,18 +450,18 @@ class gem5Run:
         """Zip up the output directory and store the results in the database.
         """
         files = filter(lambda f: f != 'results.zip',
-                       os.listdir(self.getOutdir()))
+                       os.listdir(self.outdir))
 
         with zipfile.ZipFile(os.path.join(self.outdir, 'results.zip'), 'w',
                              zipfile.ZIP_DEFLATED) as zipf:
             for f in files:
-                zipf.write(os.path.join(self.getOutdir(), f))
+                zipf.write(os.path.join(self.outdir, f))
 
         self.results = Artifact.registerArtifact(
-                command = f'zip results.zip -r {self.getOutdir()}',
+                command = f'zip results.zip -r {self.outdir}',
                 name = 'results',
                 typ = 'directory',
-                path =  os.path.join(self.getOutdir(), 'results.zip'),
+                path =  os.path.join(self.outdir, 'results.zip'),
                 cwd = './',
                 documentation = 'Compressed version of the results directory'
         )
