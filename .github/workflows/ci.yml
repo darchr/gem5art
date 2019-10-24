@@ -1,0 +1,50 @@
+name: CI
+
+on: [push]
+
+jobs:
+  install_deps:
+    name: Install dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install pip dependencies
+        run: pip install mypy
+  
+  test_artifact:
+    name: tests for artifact
+    runs-on: ubuntu-latest
+    needs: [install_deps]
+
+    steps:
+      - name: Run static analyzer
+        working-directory: ./artifact/
+        run: mypy -p gem5art.artifact
+      - name: Run unittest
+        working-directory: ./artifact/
+        run: python3 -m unittest
+      
+  test_run:
+    name: tests for run
+    runs-on: ubuntu-latest
+    needs: [install_deps]
+
+    steps:
+      - name: Run static analyzer
+        working-directory: ./run/
+        run: mypy -p gem5art.run
+      - name: Run unittest
+        working-directory: ./run/
+        run: python3 -m unittest
+      
+  test_tasks:
+    name: tests for tasks
+    runs-on: ubuntu-latest
+    needs: [install_deps]
+
+    steps:
+      - name: Run static analyzer
+        working-directory: ./tasks/
+        run: mypy -p gem5art.tasks
+      - name: Run unittest
+        working-directory: ./tasks/
+        run: python3 -m unittest
