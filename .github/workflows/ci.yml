@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Install pip dependencies
-        run: pip install mypy
+        run: pip3 install mypy
   
   test_artifact:
     name: tests for artifact
