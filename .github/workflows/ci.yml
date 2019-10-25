@@ -14,7 +14,7 @@ jobs:
         python-version: '3.x'
     - uses: actions/checkout@v1
     - name: Install pip dependencies
-      run: pip install mypy
+      run: pip install mypy pymongo
     - name: Run unittest
       working-directory: ./artifact/
       run: python -m unittest
