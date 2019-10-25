@@ -1,5 +1,7 @@
 # gem5art: Artifact, reproducibility, and testing utilities for gem5
 
+![CI Badge](https://github.com/darchr/gem5art/workflows/CI/badge.svg)
+
 ## Installing gem5art
 
 To install gem5art, simply use pip.
