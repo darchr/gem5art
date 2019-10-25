@@ -14,12 +14,12 @@ jobs:
         python-version: '3.x'
     - name: Install pip dependencies
       run: pip install mypy
-    - name: Run static analyzer
-      working-directory: ./artifact/
-      run: mypy -h
     - name: Run unittest
       working-directory: ./artifact/
       run: python -m unittest
+    - name: Run static analyzer
+      working-directory: ./artifact/
+      run: mypy -h
       
   test_run:
     name: tests for run
