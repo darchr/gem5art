@@ -12,6 +12,7 @@ jobs:
     - uses: actions/setup-python@v1
       with:
         python-version: '3.x'
+    - uses: actions/checkout@v1
     - name: Install pip dependencies
       run: pip install mypy
     - name: Run unittest
@@ -19,32 +20,40 @@ jobs:
       run: python -m unittest
     - name: Run static analyzer
       working-directory: ./artifact/
-      run: mypy -h
+      run: mypy gem5art.artifact
       
   test_run:
     name: tests for run
     runs-on: ubuntu-latest
 
     steps:
-      - name: Install pip dependencies
-        run: pip3 install mypy
-      - name: Run unittest
-        working-directory: ./run/
-        run: python3 -m unittest
-      - name: Run static analyzer
-        working-directory: ./run/
-        run: mypy -p gem5art.run
+    - uses: actions/setup-python@v1
+      with:
+        python-version: '3.x'
+    - uses: actions/checkout@v1
+    - name: Install pip dependencies
+      run: pip3 install mypy
+    - name: Run unittest
+      working-directory: ./run/
+      run: python3 -m unittest
+    - name: Run static analyzer
+      working-directory: ./run/
+      run: mypy -p gem5art.run
       
   test_tasks:
     name: tests for tasks
     runs-on: ubuntu-latest
 
     steps:
-      - name: Install pip dependencies
-        run: pip3 install mypy
-      - name: Run static analyzer
-        working-directory: ./tasks/
-        run: mypy -p gem5art.tasks
-      - name: Run unittest
-        working-directory: ./tasks/
-        run: python3 -m unittest
+    - uses: actions/setup-python@v1
+      with:
+        python-version: '3.x'
+    - uses: actions/checkout@v1
+    - name: Install pip dependencies
+      run: pip3 install mypy
+    - name: Run static analyzer
+      working-directory: ./tasks/
+      run: mypy -p gem5art.tasks
+    - name: Run unittest
+      working-directory: ./tasks/
+      run: python3 -m unittest
