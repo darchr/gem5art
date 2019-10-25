@@ -1,0 +1,51 @@
+name: Publish to PyPI
+
+on: push
+
+jobs:
+
+  build-artifact:
+    name: Build artifact
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/setup-python@v1
+      with:
+        python-version: '3.x'
+    - uses: actions/checkout@v1
+    - name: Build artifact
+      run: python artifact/setup.py sdist
+
+  build-run:
+    name: Build run
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/setup-python@v1
+      with:
+        python-version: '3.x'
+    - uses: actions/checkout@v1
+    - name: Build run
+      run: python run/setup.py sdist
+
+  build-tasks:
+    name: Build tasks
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/setup-python@v1
+      with:
+        python-version: '3.x'
+    - uses: actions/checkout@v1
+    - name: Build tasks
+      run: python tasks/setup.py sdist
+
+  publish:
+    name: Publish all
+    runs-on: ubuntu-18.04
+    needs: [build-artifact, build-run, build-tasks]
+            
+    steps:
+    - name: Publish a Python distribution to PyPI
+      if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
+      uses: pypa/gh-action-pypi-publish@v1.0.0a0
+      with:
+        user: __token__
+        password: ${{ secrets.pypi_password }}
