@@ -12,7 +12,7 @@ jobs:
         run: pip3 install mypy
       - name: Run static analyzer
         working-directory: ./artifact/
-        run: mypy -p gem5art.artifact
+        run: mypy -h
       - name: Run unittest
         working-directory: ./artifact/
         run: python3 -m unittest
@@ -24,12 +24,12 @@ jobs:
     steps:
       - name: Install pip dependencies
         run: pip3 install mypy
-      - name: Run static analyzer
-        working-directory: ./run/
-        run: mypy -p gem5art.run
       - name: Run unittest
         working-directory: ./run/
         run: python3 -m unittest
+      - name: Run static analyzer
+        working-directory: ./run/
+        run: mypy -p gem5art.run
       
   test_tasks:
     name: tests for tasks
