@@ -7,15 +7,19 @@ jobs:
     name: tests for artifact
     runs-on: ubuntu-latest
 
+    
     steps:
-      - name: Install pip dependencies
-        run: pip3 install mypy
-      - name: Run static analyzer
-        working-directory: ./artifact/
-        run: mypy -h
-      - name: Run unittest
-        working-directory: ./artifact/
-        run: python3 -m unittest
+    - uses: actions/setup-python@v1
+      with:
+        python-version: '3.x'
+    - name: Install pip dependencies
+      run: pip install mypy
+    - name: Run static analyzer
+      working-directory: ./artifact/
+      run: mypy -h
+    - name: Run unittest
+      working-directory: ./artifact/
+      run: python -m unittest
       
   test_run:
     name: tests for run
