@@ -2,7 +2,7 @@
 
 from os.path import join
 from pathlib import Path
-from setuptools import setup, find_packages
+from setuptools import setup, find_namespace_packages
 
 
 with open(Path(__file__).parent / 'README.md', encoding='utf-8') as f:
@@ -26,8 +26,8 @@ setup(
         'Programming Language :: Python :: 3',
         ],
     keywords='simulation architecture gem5',
-    packages=find_packages(),
-    install_requires=['pymongo', 'gem5art-artifact'],
+    packages=find_namespace_packages(),
+    install_requires=['gem5art-artifact'],
     python_requires='>=3.6',
     project_urls={
         'Bug Reports':'https://github.com/darchr/gem5art/issues',
