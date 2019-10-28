@@ -1,1 +1,21 @@
 site_name: Zen and the Art of gem5 experiments
+
+docs:
+    index.md
+    artifacts.md
+    run.md
+    tasks.md
+    disks.md
+    tutorial1.md
+    ../disks/boot-exit/
+                      boot-exit.json
+                      exit.sh
+                      post-installation.sh
+
+nav:
+- Home: 'index.md'
+- Artifacts: 'artifacts.md'
+- Run: 'run.md'
+- Tasks: 'tasks.md'
+- Disks: 'disks.md'
+- Tutorial1: 'tutorial1.md'
