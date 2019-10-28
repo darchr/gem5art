@@ -229,7 +229,8 @@ class gem5Run:
         run.command = [
             run.gem5_binary,
             '-re', '--outdir={}'.format(run.outdir),
-            run.run_script]
+            run.run_script, run.linux_binary,
+            run.disk_image]
         run.command += list(params)
 
         run.hash = run._getHash()
