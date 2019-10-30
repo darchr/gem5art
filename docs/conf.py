@@ -12,9 +12,9 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../artifact'))
-sys.path.insert(0, os.path.abspath('../run'))
-sys.path.insert(0, os.path.abspath('../tasks'))
+sys.path.insert(0, os.path.abspath('../../artifact'))
+sys.path.insert(0, os.path.abspath('../../run'))
+sys.path.insert(0, os.path.abspath('../../tasks'))
 
 # -- Project information -----------------------------------------------------
 
