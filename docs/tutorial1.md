@@ -89,7 +89,7 @@ mkdir disk-image
 
 Add a folder named shared for config files which will be shared among all disk images and one folder named boot-exit which is specific to the disk image needed to run experiments of this tutorial.
 
-Add three files [boot-exit.json](../disks/boot-exit/boot-exit.json), [exit.sh](../../disks/boot-exit/exit.sh) and [post-installation.sh](../../disks/boot-exit/post-installation.sh) in boot-exit/ and [preseed.cfg](../../disks/shared/preseed.cfg) and [serial-getty@.service](../../disks/shared/serial-getty@.service) in shared/
+Add three files [boot-exit.json](docs/disks/boot-exit/boot-exit.json), [exit.sh](../../disks/boot-exit/exit.sh) and [post-installation.sh](../../disks/boot-exit/post-installation.sh) in boot-exit/ and [preseed.cfg](../../disks/shared/preseed.cfg) and [serial-getty@.service](../../disks/shared/serial-getty@.service) in shared/
 
 Next, download packer in the disk-image folder:
 
