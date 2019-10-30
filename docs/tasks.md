@@ -1,4 +1,6 @@
-## Tasks
+# Tasks
+
+## Introduction
 
 The actual gem5 experiment is executed with the help of [Celery](http://www.celeryproject.org/).
 Celery server can run many gem5 tasks asynchronously. Once a user creates a gem5Run object (discussed previously) while using gem5art, this object needs to be passed to a method run_gem5_instance() registered with Celery app, which is responsible for starting a Celery task to run gem5.
@@ -14,7 +16,7 @@ It will autoscale from 0 to desired number of workers.
 
 <!--Then, you can write a script (e.g., `launch_tests.py`) which will first create all of the required artifacts and will call the `run` task defined in gem5art.-->
 
-### Monitoring Celery
+## Monitoring Celery
 You can monitor the celery cluster doing the following:
 
 ```sh
@@ -22,13 +24,13 @@ flower -A gem5art --port=5555
 ```
 This will start a webserver on port 5555.
 
-### Removing all tasks
+## Removing all tasks
 
 ```sh
 celery -A gem5art purge
 ```
 
-### Viewing state of all jobs in celery
+## Viewing state of all jobs in celery
 
 ```sh
 celery -A gem5art events

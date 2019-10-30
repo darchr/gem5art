@@ -1,4 +1,6 @@
-## Artifacts
+# Artifacts
+
+## Introduction
 As discussed before, all unique entities used during gem5 experiments are termed as artifacts.
 Examples of artifacts include: gem5 binary, gem5 source code repo, linux kernel source repo,
 linux binary, disk image, and packer binary (used to build the disk image).
@@ -44,7 +46,7 @@ If it does, the artifact is downloaded for use. Otherwise, the newly created art
 The use of database also avoids running identical experiments, by generating an error message if a user tries to run exact same run which
 already exists in the database.
 
-### MongoDB
+## MongoDB
 
 The particular database used in this work is MongoDB.
 
@@ -57,7 +59,7 @@ In case no database exists or a user want their own database, following steps sh
 ```
 
 
-### Searching the Database
+## Searching the Database
 
 You can do the following in order to list the artifacts present in the database:
 
