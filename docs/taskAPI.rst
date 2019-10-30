@@ -1,8 +1,8 @@
 Tasks API Documentation
-==========================
+=======================
 
 Task
------
+----
 
 .. automodule:: gem5art.tasks.tasks
     :members:
