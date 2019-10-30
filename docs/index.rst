@@ -12,8 +12,13 @@ Zen and the art of gem5 experiments
 
    intro.md
    artifacts.md
-   artifacts.rst
-
+   artifactsAPI.rst
+   run.md
+   runAPI.rst
+   tasks.md
+   taskAPI.rst
+   disks.md
+   tutorial1.md
 
 Indices and tables
 ==================
@@ -21,27 +26,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
-
-.. mdinclude:: intro.md
-.. mdinclude:: artifacts.md
-.. rstinclude:: artifacts.rst
-
-
-Run
-=========
-
-.. automodule:: gem5art.run
-    :members:
-    :undoc-members:
-
-Tasks
-======
-
-.. automodule:: gem5art.tasks.tasks
-    :members:
-    :undoc-members:
-
-.. automodule:: gem5art.tasks.celery
-    :members:
-    :undoc-members:

@@ -1,4 +1,6 @@
-## Tutorial: Run Full System Linux Boot Tests
+# Tutorial: Run Full System Linux Boot Tests
+
+## Introduction
 
 This tutorial explains how to use gem5art to run experiments with gem5. The specific experiment we will be doing is to perform linux boot test with gem5.
 The main steps to perform such an experiment using gem5art include: setting up the environment,
@@ -15,7 +17,7 @@ This tutorial follows the following directory structure:
 - launch_boot_tests.py:  gem5 jobs launch script (creates all of the needed artifacts as well)
 
 
-### Setting up the environment
+## Setting up the environment
 
 gem5art relies on Python 3, so we suggest creating a virtual environment before using gem5art.
 
@@ -60,7 +62,7 @@ pip install -e run
 pip install -e tasks
 ```
 
-### Building gem5
+## Building gem5
 
 Clone gem5 and build it:
 
@@ -78,7 +80,7 @@ cd gem5/util/m5/
 make -f Makefile.x86
 ```
 
-### Creating a disk image
+## Creating a disk image
 First create a disk-image folder where we will keep all disk image related files:
 
 ```sh
@@ -87,7 +89,7 @@ mkdir disk-image
 
 Add a folder named shared for config files which will be shared among all disk images and one folder named boot-exit which is specific to the disk image needed to run experiments of this tutorial.
 
-Add three files [boot-exit.json](disks/boot-exit/boot-exit.json), [exit.sh](disks/boot-exit/exit.sh) and [post-installation.sh](disks/boot-exit/post-installation.sh) in boot-exit/ and [preseed.cfg](disks/shared/preseed.cfg) and [serial-getty@.service](disks/shared/serial-getty@.service) in shared/
+Add three files [boot-exit.json](../../disks/boot-exit/boot-exit.json), [exit.sh](../../disks/boot-exit/exit.sh) and [post-installation.sh](../../disks/boot-exit/post-installation.sh) in boot-exit/ and [preseed.cfg](../../disks/shared/preseed.cfg) and [serial-getty@.service](../../disks/shared/serial-getty@.service) in shared/
 
 Next, download packer in the disk-image folder:
 
@@ -104,14 +106,14 @@ packer will be used to build disk image using previously added template file (bo
 ../packer build boot-exit.json
 ```
 
-### Compiling the linux kernel
+## Compiling the linux kernel
 
 Similar to getting gem5, you'll likely want to update the linux kernel.
 The current kernel is a long term support kernel.
 However, there may be bugfixes that need to be applied.
 
 First, add a folder linux-configs to store linux kernel config files.
-We will add [config](linux-configs/config.5.2.3) file for kernel v5.2.3 in this folder.
+We will add [config](../../linux-configs/config.5.2.3) file for kernel v5.2.3 in this folder.
 Then, we will get the linux source and checkout the required linux version (5.2.3 in this case).
 
 ```
@@ -129,16 +131,16 @@ make -j8
 cp vmlinux vmlinux-{version-no: e.g. 5.2.3}
 ```
 
-### gem5 run scripts
+## gem5 run scripts
 
 Next we need to add gem5 run scripts. We will do that in a folder configs-boot-tests.
-Get the run script and config files from [here](configs-boot-tests/run_exit.py), and system files from
-[here](configs-boot-tests/system/).
+Get the run script and config files from [here](../../configs-boot-tests/run_exit.py), and system files from
+[here](../../configs-boot-tests/system/).
 
 
-### Creating a launch script
+## Creating a launch script
 Finally, we will create a launch script, which will be responsible for creating artifacts first and then launching gem5 jobs.
-Add a launch-script [launch_boot_tests.py](launch_boot_tests.py)
+Add a launch-script [launch_boot_tests.py](../../launch_boot_tests.py)
 Make sure you are in python virtual env and then do
 
 ```python
