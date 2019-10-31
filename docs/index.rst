@@ -8,8 +8,7 @@ Zen and the art of gem5 experiments
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
-
+				
    intro.md
    artifacts.md
    artifactsAPI.rst

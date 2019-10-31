@@ -2,8 +2,7 @@
 
 ## Introduction
 
-We provide guide to help you create gem5-compatible disk images with Ubuntu Server installed. We make use of packer to do this which makes use of a .json template files to build and configure a disk image. These template files can be configured to build a disk image with specific benchmarks installed.
-
+This section discusses an automated way of creating gem5-compatible disk images with Ubuntu server installed. We make use of packer to do this which makes use of .json template files to build and configure a disk image. These template files can be configured to build a disk image with specific benchmarks installed.
 
 
 ## Build a Simple Disk Image with Packer
