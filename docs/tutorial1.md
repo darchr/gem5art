@@ -89,7 +89,7 @@ mkdir disk-image
 
 Add a folder named shared for config files which will be shared among all disk images and one folder named boot-exit which is specific to the disk image needed to run experiments of this tutorial.
 
-Add three files [boot-exit.json](../../disks/boot-exit/boot-exit.json), [exit.sh](../../disks/boot-exit/exit.sh) and [post-installation.sh](../../disks/boot-exit/post-installation.sh) in boot-exit/ and [preseed.cfg](../../disks/shared/preseed.cfg) and [serial-getty@.service](../../disks/shared/serial-getty@.service) in shared/
+Add three files [boot-exit.json](https://github.com/darchr/gem5art/blob/master/docs/disks/boot-exit/boot-exit.json), [exit.sh](https://github.com/darchr/gem5art/blob/master/docs/disks/boot-exit/exit.sh) and [post-installation.sh](https://github.com/darchr/gem5art/blob/master/docs/disks/boot-exit/post-installation.sh) in boot-exit/ and [preseed.cfg](https://github.com/darchr/gem5art/blob/master/docs/disks/shared/preseed.cfg) and [serial-getty@.service](https://github.com/darchr/gem5art/blob/master/docs/disks/shared/serial-getty@.service) in shared/
 
 Next, download packer in the disk-image folder:
 
@@ -113,7 +113,7 @@ The current kernel is a long term support kernel.
 However, there may be bugfixes that need to be applied.
 
 First, add a folder linux-configs to store linux kernel config files.
-We will add [config](../../linux-configs/config.5.2.3) file for kernel v5.2.3 in this folder.
+We will add [config](https://github.com/darchr/gem5art/blob/master/docs/linux-configs/config.5.2.3) file for kernel v5.2.3 in this folder.
 Then, we will get the linux source and checkout the required linux version (5.2.3 in this case).
 
 ```
@@ -134,13 +134,13 @@ cp vmlinux vmlinux-{version-no: e.g. 5.2.3}
 ## gem5 run scripts
 
 Next we need to add gem5 run scripts. We will do that in a folder configs-boot-tests.
-Get the run script and config files from [here](../../configs-boot-tests/run_exit.py), and system files from
-[here](../../configs-boot-tests/system/).
+Get the run script and config files from [here](https://github.com/darchr/gem5art/blob/master/docs/configs-boot-tests/run_exit.py), and system files from
+[here](https://github.com/darchr/gem5art/blob/master/docs/configs-boot-tests/system/).
 
 
 ## Creating a launch script
 Finally, we will create a launch script, which will be responsible for creating artifacts first and then launching gem5 jobs.
-Add a launch-script [launch_boot_tests.py](../../launch_boot_tests.py)
+Add a launch-script [launch_boot_tests.py](https://github.com/darchr/gem5art/blob/master/docs/launch_boot_tests.py)
 Make sure you are in python virtual env and then do
 
 ```python
