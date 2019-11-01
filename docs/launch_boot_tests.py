@@ -8,7 +8,7 @@ from uuid import UUID
 
 from gem5art.artifact.artifact import Artifact
 from gem5art.run import gem5Run
-from gem5art import tasks
+from gem5art.tasks.tasks import run_gem5_instance
 
 packer = Artifact.registerArtifact(
     command = '''wget https://releases.hashicorp.com/packer/1.4.3/packer_1.4.3_linux_amd64.zip;
@@ -24,7 +24,7 @@ packer = Artifact.registerArtifact(
 experiments_repo = Artifact.registerArtifact(
     command = 'git clone https://github.com/darchr/fs-x86-test',
     typ = 'git repo',
-    name = 'boot-tests',
+    name = 'Boot_test',
     path =  './',
     cwd = '../',
     documentation = 'main experiments repo to run full system tests with gem5'
@@ -79,7 +79,7 @@ linux_repo = Artifact.registerArtifact(
     documentation = 'linux kernel source code repo from Sep 23rd'
 )
 
-linuxes = ['5.2.3']#, '4.14.134', '4.9.186', '4.4.186']
+linuxes = ['5.2.3', '4.14.134', '4.9.186', '4.4.186']
 linux_binaries = {
     version: Artifact.registerArtifact(
                 name = f'vmlinux-{version}',
@@ -99,10 +99,10 @@ linux_binaries = {
 }
 
 if __name__ == "__main__":
-    boot_types = ['init']#, 'systemd']
-    num_cpus = ['1']#, '2', '4', '8']
-    cpu_types = ['kvm']#, 'atomic', 'simple', 'o3']
-    mem_types = ['classic']#, 'ruby']
+    boot_types = ['init', 'systemd']
+    num_cpus = ['1', '2', '4', '8']
+    cpu_types = ['kvm', 'atomic', 'simple', 'o3']
+    mem_types = ['classic', 'ruby']
 
     for linux in linuxes:
         for boot_type in boot_types:
@@ -118,5 +118,5 @@ if __name__ == "__main__":
                             linux_binaries[linux], disk_image,
                             cpu, mem, num_cpu, boot_type
                             )
-                        run.run()
-                        #run_gem5_instance.apply_async((run,))
+                        #run.run()
+                        run_gem5_instance.apply_async((run,))
