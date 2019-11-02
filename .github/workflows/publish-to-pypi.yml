@@ -50,11 +50,18 @@ jobs:
     - uses: actions/checkout@v1
     
     - name: Build artifact
-      run: python artifact/setup.py sdist
+      working-directory: artifact
+      run: python setup.py sdist
     - name: Build run
-      run: python run/setup.py sdist
+      working-directory: run
+      run: python setup.py sdist
     - name: Build tasks
-      run: python tasks/setup.py sdist
+      working-directory: tasks
+      run: python setup.py sdist
+    - name: Move output
+      run: |
+        mkdir dist
+        mv */dist/* dist/
       
     - name: Publish a Python distribution to PyPI
       uses: pypa/gh-action-pypi-publish@v1.0.0a0
