@@ -1,9 +1,7 @@
 # Tutorial 2: Run NAS Parallel Benchmarks with gem5
 
 ## Introduction
-In this tutorial, we will use gem5art to create a disk image for NAS parallel benchmarks ([NPB](https://www.nas.nasa.gov/)) and then run these benchmarks using gem5.
-
-NPB consist of 5 kernels and 3 pseudo applications. Following are their details:
+In this tutorial, we will use gem5art to create a disk image for NAS parallel benchmarks ([NPB](https://www.nas.nasa.gov/)) and then run these benchmarks using gem5. NPB consist of 5 kernels and 3 pseudo applications. Following are their details:
 
 Kernels:
 - **IS:** Integer Sort, random memory access
@@ -11,13 +9,13 @@ Kernels:
 - **CG:** Conjugate Gradient, irregular memory access and communication
 - **MG:** Multi-Grid on a sequence of meshes, long- and short-distance communication, memory intensive
 - **FT:** discrete 3D fast Fourier Transform, all-to-all communication
+
 Pseudo Applications:
 - **BT:** Block Tri-diagonal solver
 - **SP:** Scalar Penta-diagonal solver
 - **LU:** Lower-Upper Gauss-Seidel solver
 
-There are different classes (A,B,C,D,E and F) of the workloads based on the data size that is used with the benchmarks. Detailed discussion of the data sizes is available here.
-
+There are different classes (A,B,C,D,E and F) of the workloads based on the data size that is used with the benchmarks. Detailed discussion of the data sizes is available [here](https://www.nas.nasa.gov/publications/npb_problem_sizes.html).
 
 This tutorial follows the following directory structure:
 
@@ -40,13 +38,13 @@ virtualenv -p python3 venv
 source venv/bin/activate
 ```
 
-Create the main directory named boot-tests and turn it into a git repo:
+Create the main directory named npb-tests and turn it into a git repo:
 
 ```sh
-mkdir boot-tests
-cd boot-tests
+mkdir npb-tests
+cd npb-tests
 git init
-git remote add origin https://your-remote-add/boot-tests.git
+git remote add origin https://your-remote-add/npb-tests.git
 ```
 
 We also need to add a .gitignore file in our git repo, to not track files we don't care about:
@@ -59,8 +57,8 @@ results
 venv
 disk-image/packer
 ```
-Through the use of boot-tests git repo, we will try to keep track of changes in those files which are not included in any git repo otherwise.
-boot-tests will also serve as the directory from where we will run everything.
+Through the use of npb-tests git repo, we will try to keep track of changes in those files which are not included in any git repo otherwise.
+npb-tests will also serve as the directory from where we will run everything.
 
 gem5art can be installed (if not already) using pip:
 
@@ -68,7 +66,7 @@ gem5art can be installed (if not already) using pip:
 pip install gem5art-artifact gem5art-run gem5art-tasks
 ```
 
-To install gem5art from a local source, first clone the gem5art repo in boot_tests and then do:
+To install gem5art from a local source, first clone the gem5art repo in npb_tests and then do:
 
 ```sh
 pip install -e artifact run tasks
@@ -86,7 +84,6 @@ cd gem5
 scons build/X86/gem5.opt -j8
 ```
 You can also add your changes to gem5 source before building it. Make sure to commit any changes you make to gem5 repo.
-
 Also make sure to build the m5 utility which will be needed during disk image creation (specifically for post installation stuff) later on:
 
 ```sh
@@ -102,10 +99,381 @@ mkdir disk-image
 ```
 
 We will follow the similar directory structure as discussed in [Disk Images](disks.md) section.
-Add a folder named shared for config files which will be shared among all disk images (and will be kept to their defaults) and one folder named boot-exit which is specific to the disk image needed to run experiments of this tutorial.
-Add three files [boot-exit.json](https://github.com/darchr/gem5art/blob/master/docs/disks/boot-exit/boot-exit.json), [exit.sh](https://github.com/darchr/gem5art/blob/master/docs/disks/boot-exit/exit.sh) and [post-installation.sh](https://github.com/darchr/gem5art/blob/master/docs/disks/boot-exit/post-installation.sh) in boot-exit/ and [preseed.cfg](https://github.com/darchr/gem5art/blob/master/docs/disks/shared/preseed.cfg) and [serial-getty@.service](https://github.com/darchr/gem5art/blob/master/docs/disks/shared/serial-getty@.service) in shared/
+Add a folder named shared for config files which will be shared among all disk images (and will be kept to their defaults) and one folder named npb which will contain files configured for NPB disk image. Add [preseed.cfg](https://github.com/darchr/gem5art/blob/master/docs/disks/shared/preseed.cfg) and [serial-getty@.service](https://github.com/darchr/gem5art/blob/master/docs/disks/shared/serial-getty@.service) in shared/.
 
-boot-exit.json is our primary .json configuration file. The provisioners and variables section of this file configure the files that need to be transferred to the disk and other things like disk image's name. post-installation.sh (which is a script to run after Ubuntu is installed on the disk image) makes sure that the m5 binary is installed on the system and also moves the content of our other script (exit.sh, which should be already transferred inside the disk image as configured in boot-exit.json) to .bashrc as exit.sh contains the stuff that we want to be executed as soon as the system boots. exit.sh just contains one command `m5 exit`, which will eventually terminate the simulation.
+In npb/ we will add the benchmark source first, which will eventually be transferred to the disk image through our npb.json file.
+
+```sh
+wget https://www.nas.nasa.gov/assets/npb/NPB3.3.1.tar.gz
+tar xvzf  NPB3.3.1.tar.gz
+```
+
+Next, we will add few other files in npb/ which will be used for compilation of NPB inside the disk image and eventually running of these benchmarks with gem5.
+These files will be moved from host to the disk image using npb.json file as we will soon seee.
+
+First, create a file npb-install.sh, which will install NPB on the disk image:
+
+```sh
+# install build-essential (gcc and g++ included) and gfortran
+
+#Compile NPB
+
+echo "12345" | sudo apt-get install build-essential gfortran
+
+cp /home/gem5/NPB3.3-OMP/config/suite.def_C /home/gem5/NPB3.3-OMP/config/suite.def
+
+cd /home/gem5/NPB3.3-OMP/
+make suite
+```
+
+We are specifically compiling OMP version of class C NPB workloads. To configure the benchmark build process, we will use modified make.def and suite.def files. Look [here]() in order to understand the build process of NAS parallel benchmarks.
+
+Create suite.def_C in npb/ and add:
+
+```
+# config/suite.def
+# This file is used to build several benchmarks with a single command.
+# Typing "make suite" in the main directory will build all the benchmarks
+# specified in this file.
+# Each line of this file contains a benchmark name and the class.
+# The name is one of "cg", "is", "dc", "ep", mg", "ft", "sp",
+#  "bt", "lu", and "ua".
+# The class is one of "S", "W", "A" through "E"
+# (except that no classes C,D,E for DC and no class E for IS and UA).
+# No blank lines.
+# The following example builds sample sizes of all benchmarks.
+ft      C
+mg      C
+sp      C
+lu      C
+bt      C
+is      C
+ep      C
+cg      C
+ua      C
+```
+
+Next, create make.def in npb/ and add:
+
+
+```
+#---------------------------------------------------------------------------
+#
+#                SITE- AND/OR PLATFORM-SPECIFIC DEFINITIONS.
+#
+#---------------------------------------------------------------------------
+
+#---------------------------------------------------------------------------
+# Items in this file will need to be changed for each platform.
+#---------------------------------------------------------------------------
+
+#---------------------------------------------------------------------------
+# Parallel Fortran:
+#
+# For CG, EP, FT, MG, LU, SP, BT and UA, which are in Fortran, the following
+# must be defined:
+#
+# F77        - Fortran compiler
+# FFLAGS     - Fortran compilation arguments
+# F_INC      - any -I arguments required for compiling Fortran
+# FLINK      - Fortran linker
+# FLINKFLAGS - Fortran linker arguments
+# F_LIB      - any -L and -l arguments required for linking Fortran
+#
+# compilations are done with $(F77) $(F_INC) $(FFLAGS) or
+#                            $(F77) $(FFLAGS)
+# linking is done with       $(FLINK) $(F_LIB) $(FLINKFLAGS)
+#---------------------------------------------------------------------------
+
+#---------------------------------------------------------------------------
+# This is the fortran compiler used for Fortran programs
+#---------------------------------------------------------------------------
+F77 = f77
+# This links fortran programs; usually the same as ${F77}
+FLINK	= $(F77)
+
+#---------------------------------------------------------------------------
+# These macros are passed to the linker
+#---------------------------------------------------------------------------
+F_LIB  =
+
+#---------------------------------------------------------------------------
+# These macros are passed to the compiler
+#---------------------------------------------------------------------------
+F_INC =
+
+#---------------------------------------------------------------------------
+# Global *compile time* flags for Fortran programs
+#---------------------------------------------------------------------------
+FFLAGS	= -O3 -fopenmp
+
+#---------------------------------------------------------------------------
+# Global *link time* flags. Flags for increasing maximum executable
+# size usually go here.
+#---------------------------------------------------------------------------
+FLINKFLAGS = -O3 -fopenmp
+
+
+#---------------------------------------------------------------------------
+# Parallel C:
+#
+# For IS and DC, which are in C, the following must be defined:
+#
+# CC         - C compiler
+# CFLAGS     - C compilation arguments
+# C_INC      - any -I arguments required for compiling C
+# CLINK      - C linker
+# CLINKFLAGS - C linker flags
+# C_LIB      - any -L and -l arguments required for linking C
+#
+# compilations are done with $(CC) $(C_INC) $(CFLAGS) or
+#                            $(CC) $(CFLAGS)
+# linking is done with       $(CLINK) $(C_LIB) $(CLINKFLAGS)
+#---------------------------------------------------------------------------
+
+#---------------------------------------------------------------------------
+# This is the C compiler used for C programs
+#---------------------------------------------------------------------------
+CC = cc
+# This links C programs; usually the same as ${CC}
+CLINK	= $(CC)
+
+#---------------------------------------------------------------------------
+# These macros are passed to the linker
+#---------------------------------------------------------------------------
+C_LIB  = -lm
+
+#---------------------------------------------------------------------------
+# These macros are passed to the compiler
+#---------------------------------------------------------------------------
+C_INC =
+
+#---------------------------------------------------------------------------
+# Global *compile time* flags for C programs
+# DC inspects the following flags (preceded by "-D"):
+#
+# IN_CORE - computes all views and checksums in main memory (if there is
+# enough memory)
+#
+# VIEW_FILE_OUTPUT - forces DC to write the generated views to disk
+#
+# OPTIMIZATION - turns on some nonstandard DC optimizations
+#
+# _FILE_OFFSET_BITS=64
+# _LARGEFILE64_SOURCE - are standard compiler flags which allow to work with
+# files larger than 2GB.
+#---------------------------------------------------------------------------
+CFLAGS	= -O3 -fopenmp
+
+#---------------------------------------------------------------------------
+# Global *link time* flags. Flags for increasing maximum executable
+# size usually go here.
+#---------------------------------------------------------------------------
+CLINKFLAGS = -O3 -fopenmp
+
+
+#---------------------------------------------------------------------------
+# Utilities C:
+#
+# This is the C compiler used to compile C utilities.  Flags required by
+# this compiler go here also; typically there are few flags required; hence
+# there are no separate macros provided for such flags.
+#---------------------------------------------------------------------------
+UCC	= cc
+
+
+#---------------------------------------------------------------------------
+# Destination of executables, relative to subdirs of the main directory. .
+#---------------------------------------------------------------------------
+BINDIR	= ../bin
+
+
+#---------------------------------------------------------------------------
+# The variable RAND controls which random number generator
+# is used. It is described in detail in README.install.
+# Use "randi8" unless there is a reason to use another one.
+# Other allowed values are "randi8_safe", "randdp" and "randdpvec"
+#---------------------------------------------------------------------------
+RAND   = randi8
+# The following is highly reliable but may be slow:
+# RAND   = randdp
+
+
+#---------------------------------------------------------------------------
+# The variable WTIME is the name of the wtime source code module in the
+# common directory.
+# For most machines,       use wtime.c
+# For SGI power challenge: use wtime_sgi64.c
+#---------------------------------------------------------------------------
+WTIME  = wtime.c
+
+
+#---------------------------------------------------------------------------
+# Enable if either Cray (not Cray-X1) or IBM:
+# (no such flag for most machines: see common/wtime.h)
+# This is used by the C compiler to pass the machine name to common/wtime.h,
+# where the C/Fortran binding interface format is determined
+#---------------------------------------------------------------------------
+# MACHINE	=	-DCRAY
+# MACHINE	=	-DIBM
+```
+
+In npb/, create a file post-installation.sh and add following lines to it:
+
+```sh
+#!/bin/bash
+echo 'Post Installation Started'
+
+mv /home/gem5/serial-getty@.service /lib/systemd/system/
+
+mv /home/gem5/m5 /sbin
+ln -s /sbin/m5 /sbin/gem5
+
+# copy and run outside (host) script after booting
+cat /home/gem5/runscript.sh >> /root/.bashrc
+
+echo 'Post Installation Done'
+```
+
+This post-installation.sh script (which is a script to run after Ubuntu is installed on the disk image) installs m5 and copies the contents of runscript.sh to .bashrc. Therefore, we need
+to add those things in runscript.sh which we want to execute as soon as the sytem boots up. Create runscript.sh in npb/ and add following
+lines to it:
+
+```sh
+#!/bin/sh
+
+m5 readfile > script.sh
+if [ -s script.sh ]; then
+    # if the file is not empty, execute it
+    chmod +x script.shm5 re
+    ./script.sh
+    m5 exit
+fi
+# otherwise, drop to the terminal
+```
+runscript.sh uses m5 readfile to read the contents of a script which is how gem5 passes scripts to the simulated system from the host system.
+The passed script will then be executed and will be responsible for running benchmark/s which we will look into more later.
+
+Finally, create npb.json and add following contents:
+
+```json
+{
+    "builders":
+    [
+        {
+            "type": "qemu",
+            "format": "raw",
+            "accelerator": "kvm",
+            "boot_command":
+            [
+                "{{ user `boot_command_prefix` }}",
+                "debian-installer={{ user `locale` }} auto locale={{ user `locale` }} kbd-chooser/method=us ",
+                "file=/floppy/{{ user `preseed` }} ",
+                "fb=false debconf/frontend=noninteractive ",
+                "hostname={{ user `hostname` }} ",
+                "/install/vmlinuz noapic ",
+                "initrd=/install/initrd.gz ",
+                "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA ",
+                "keyboard-configuration/variant=USA console-setup/ask_detect=false ",
+                "passwd/user-fullname={{ user `ssh_fullname` }} ",
+                "passwd/user-password={{ user `ssh_password` }} ",
+                "passwd/user-password-again={{ user `ssh_password` }} ",
+                "passwd/username={{ user `ssh_username` }} ",
+                "-- <enter>"
+            ],
+            "cpus": "{{ user `vm_cpus`}}",
+            "disk_size": "{{ user `image_size` }}",
+            "floppy_files":
+            [
+                "shared/{{ user `preseed` }}"
+            ],
+            "headless": "{{ user `headless` }}",
+            "http_directory": "shared/",
+            "iso_checksum": "{{ user `iso_checksum` }}",
+            "iso_checksum_type": "{{ user `iso_checksum_type` }}",
+            "iso_urls": [ "{{ user `iso_url` }}" ],
+            "memory": "{{ user `vm_memory`}}",
+            "output_directory": "npb/{{ user `image_name` }}-image",
+            "qemuargs":
+            [
+                [ "-cpu", "host" ],
+                [ "-display", "none" ]
+            ],
+            "qemu_binary":"/usr/bin/qemu-system-x86_64",
+            "shutdown_command": "echo '{{ user `ssh_password` }}'|sudo -S shutdown -P now",
+            "ssh_password": "{{ user `ssh_password` }}",
+            "ssh_username": "{{ user `ssh_username` }}",
+            "ssh_wait_timeout": "60m",
+            "vm_name": "{{ user `image_name` }}"
+        }
+    ],
+    "provisioners":
+    [
+        {
+            "type": "file",
+            "source": "../gem5/util/m5/m5",
+            "destination": "/home/gem5/"
+        },
+        {
+            "type": "file",
+            "source": "shared/serial-getty@.service",
+            "destination": "/home/gem5/"
+        },
+        {
+            "type": "file",
+            "source": "npb/runscript.sh",
+            "destination": "/home/gem5/"
+        },
+        {
+            "type": "file",
+            "source": "npb/NPB3.3.1/NPB3.3-OMP",
+            "destination": "/home/gem5/"
+        },
+        {
+            "type": "file",
+            "source": "npb/make.def",
+            "destination": "/home/gem5/NPB3.3-OMP/config/make.def"
+        },
+        {
+            "type": "file",
+            "source": "npb/suite.def_C",
+            "destination": "/home/gem5/NPB3.3-OMP/config/suite.def_C"
+        },
+        {
+            "type": "shell",
+            "execute_command": "echo '{{ user `ssh_password` }}' | {{.Vars}} sudo -E -S bash '{{.Path}}'",
+            "scripts":
+            [
+                "npb/post-installation.sh",
+                "npb/npb-install.sh"
+            ]
+        }
+    ],
+    "variables":
+    {
+        "boot_command_prefix": "<enter><wait><f6><esc><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "desktop": "false",
+        "image_size": "12000",
+        "headless": "true",
+        "iso_checksum": "34416ff83179728d54583bf3f18d42d2",
+        "iso_checksum_type": "md5",
+        "iso_name": "ubuntu-18.04.2-server-amd64.iso",
+        "iso_url": "http://old-releases.ubuntu.com/releases/18.04.2/ubuntu-18.04.2-server-amd64.iso",
+        "locale": "en_US",
+        "preseed" : "preseed.cfg",
+        "hostname": "gem5",
+        "ssh_fullname": "gem5",
+        "ssh_password": "12345",
+        "ssh_username": "gem5",
+        "vm_cpus": "16",
+        "vm_memory": "8192",
+        "image_name": "npb"
+  }
+
+}
+```
+
+npb.json is our primary .json configuration file. The provisioners and variables section of this file configure the files that need to be transferred to the disk and other things like disk image's name.
 
 Next, download packer (if not already downloaded) in the disk-image folder:
 
@@ -114,12 +482,12 @@ cd disk-image/
 wget https://releases.hashicorp.com/packer/1.4.3/packer_1.4.3_linux_amd64.zip
 unzip packer_1.4.3_linux_amd64.zip
 ```
-Now, to build the disk image, inside boot-exit folder, run:
+Now, to build the disk image, inside disk-image folder, run:
 
 ```
-../packer validate boot-exit.json
+./packer validate npb/npb.json
 
-../packer build boot-exit.json
+./packer build npb/npb.json
 ```
 
 ## Compiling the linux kernel
@@ -298,7 +666,7 @@ linux_binaries = {
 
 Once, all the artifacts are registered the next step is to launch all gem5 jobs. To do that, add the following lines in your script:
 
-```ptyhon
+```python
 if __name__ == "__main__":
     boot_types = ['init', 'systemd']
     num_cpus = ['1', '2', '4', '8']
