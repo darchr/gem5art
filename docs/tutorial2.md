@@ -492,13 +492,7 @@ Now, to build the disk image, inside disk-image folder, run:
 
 ## Compiling the linux kernel
 
-Similar to getting gem5, you'll likely want to update the linux kernel.
-The current kernel is a long term support kernel.
-However, there may be bugfixes that need to be applied.
-
-In this tutorial, we want to experiment with different linux kernels to examine the state of gem5's ability to boot different linux kernels. The specific kernel versions we picked include: v5.2.3, v4.14.134, v4.9.186, and v4.4.186.
-
-Let's use an example of kernel v5.2.3 to see how to compile the kernel.
+In this tutorial, we will use linux kernel v5.2.3 with gem5 to run NAS parallel benchmarks.
 First, add a folder linux-configs to store linux kernel config files. The configuration files of interest are available [here](https://github.com/darchr/gem5art/blob/master/docs/linux-configs/).
 Then, we will get the linux source and checkout the required linux version (e.g. 5.2.3 in this case).
 
@@ -515,8 +509,6 @@ cp ../linux-configs/config.{version-no: e.g. 5.2.3} .config
 make -j8
 cp vmlinux vmlinux-{version-no: e.g. 5.2.3}
 ```
-
-Repeat the above process for other kernel versions that we want to use in this experiment.
 
 ## gem5 run scripts
 
@@ -547,7 +539,7 @@ celery -E -A gem5art.tasks.celery worker --autoscale=[number of workers],0
 
 
 ## Creating a launch script
-Finally, we will create a launch script with the name launch_boot_tests.py, which will be responsible for registering the artifacts to be used and then launching gem5 jobs.
+Finally, we will create a launch script with the name launch_npb_tests.py, which will be responsible for registering the artifacts to be used and then launching gem5 jobs.
 
 The first thing to do in the launch script is to import required modules and classes:
 

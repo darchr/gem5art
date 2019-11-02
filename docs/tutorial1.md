@@ -110,10 +110,6 @@ Now, to build the disk image, inside boot-exit folder, run:
 
 ## Compiling the linux kernel
 
-Similar to getting gem5, you'll likely want to update the linux kernel.
-The current kernel is a long term support kernel.
-However, there may be bugfixes that need to be applied.
-
 In this tutorial, we want to experiment with different linux kernels to examine the state of gem5's ability to boot different linux kernels. The specific kernel versions we picked include: v5.2.3, v4.14.134, v4.9.186, and v4.4.186.
 
 Let's use an example of kernel v5.2.3 to see how to compile the kernel.
