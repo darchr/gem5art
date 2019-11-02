@@ -284,7 +284,7 @@ linux_binaries = {
 
 Once, all the artifacts are registered the next step is to launch all gem5 jobs. To do that, add the following lines in your script:
 
-```ptyhon
+```python
 if __name__ == "__main__":
     boot_types = ['init', 'systemd']
     num_cpus = ['1', '2', '4', '8']
