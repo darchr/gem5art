@@ -40,6 +40,7 @@
 
 import sys
 import time
+#import filelock
 
 import m5
 import m5.ticks
@@ -57,10 +58,10 @@ SimpleOpts.add_option("--benchmark_inputs", default='',
 
 if __name__ == "__m5_main__":
     (opts, args) = SimpleOpts.parse_args()
-    kernel, disk = args
+    kernel, disk, benchmark, num_cpus = args
     # create the system we are going to simulate
     #system = MySystem(opts, no_kvm=False)
-    system = MySystem(kernel, disk, opts, no_kvm=False)
+    system = MySystem(kernel, disk, int(num_cpus), opts, no_kvm=False)
 
 
 
@@ -76,15 +77,19 @@ if __name__ == "__m5_main__":
     # Note: The disk image needs to be configured to do this.
 
 
-    if not(os.path.isfile('run_{}{}'.format(opts.benchmark,opts.cpus))):
-        bench_file = open('run_{}{}'.format(opts.benchmark,opts.cpus),"w+")
-        bench_file.write('/home/gem5/NPB3.3-OMP/bin/{} \n'.format(opts.benchmark))
-        bench_file.write('m5 exit \n')
-        file_name = bench_file.name
-    else:
-        file_name = 'run_{}{}'.format(opts.benchmark,opts.cpus)
+    #if not(os.path.isfile('run_{}{}'.format(opts.benchmark,opts.cpus))):
+    #lock =  filelock.FileLock("run_{}.lock".format(opts.benchmark))
+    #with lock:
+    bench_file = open('run_{}{}'.format(benchmark,num_cpus),"w+")
+    bench_file.write('/home/gem5/NPB3.3-OMP/bin/{} \n'.format(benchmark))
+    bench_file.write('m5 exit \n')
+    bench_file.close()
+   
+    #file_name = bench_file.name
+    #else:
+    #    file_name = 'run_{}{}'.format(opts.benchmark,opts.cpus)
 
-    system.readfile = file_name
+    system.readfile = bench_file.name
 
     # set up the root SimObject and start the simulation
     root = Root(full_system = True, system = system)

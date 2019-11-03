@@ -39,14 +39,11 @@ class MySystem(LinuxX86System):
     SimpleOpts.add_option("--no_host_parallel", default=False,
                 action="store_true",
                 help="Do NOT run gem5 on multiple host threads (kvm only)")
-
-    SimpleOpts.add_option("--cpus", default=6, type="int",   
-                          help="Number of CPUs in the system") 
-
+ 
     SimpleOpts.add_option("--second_disk", default='',
                           help="The second disk image to mount (/dev/hdb)")
 
-    def __init__(self, kernel, disk, opts, no_kvm=False):
+    def __init__(self, kernel, disk, num_cpus, opts, no_kvm=False):
         super(MySystem, self).__init__()
         self._opts = opts
         self._no_kvm = no_kvm
@@ -73,10 +70,9 @@ class MySystem(LinuxX86System):
         # Set up the system port for functional access from the simulator
         self.system_port = self.membus.slave
 
-        self.initFS(self.membus, self._opts.cpus)
+        self.initFS(self.membus, num_cpus)
 
         
-
         # Replace these paths with the path to your disk images.
         # The first disk is the root disk. The second could be used for swap
         # or anything else.
@@ -97,7 +93,7 @@ class MySystem(LinuxX86System):
         self.boot_osflags = ' '.join(boot_options)
 
         # Create the CPUs for our system.
-        self.createCPU()
+        self.createCPU(num_cpus)
 
         # Create the cache heirarchy for the system.
         self.createCacheHierarchy()
@@ -121,29 +117,29 @@ class MySystem(LinuxX86System):
     def totalInsts(self):
         return sum([cpu.totalInsts() for cpu in self.cpu])
 
-    def createCPU(self):
+    def createCPU(self, num_cpus):
         if self._no_kvm:
             self.cpu = [AtomicSimpleCPU(cpu_id = i, switched_out = False)
-                              for i in range(self._opts.cpus)]
+                              for i in range(num_cpus)]
             map(lambda c: c.createThreads(), self.cpu)
             self.mem_mode = 'timing'
 
         else:
             # Note KVM needs a VM and atomic_noncaching
             self.cpu = [X86KvmCPU(cpu_id = i)
-                        for i in range(self._opts.cpus)]
+                        for i in range(num_cpus)]
             map(lambda c: c.createThreads(), self.cpu)
             self.kvm_vm = KvmVM()
             self.mem_mode = 'atomic_noncaching'
 
             self.atomicCpu = [AtomicSimpleCPU(cpu_id = i,
                                               switched_out = True)
-                              for i in range(self._opts.cpus)]
+                              for i in range(num_cpus)]
             map(lambda c: c.createThreads(), self.atomicCpu)
 
         self.timingCpu = [DerivO3CPU(cpu_id = i,
                                      switched_out = True)
-				   for i in range(self._opts.cpus)]
+				   for i in range(num_cpus)]
 				   
         map(lambda c: c.createThreads(), self.timingCpu)
 
