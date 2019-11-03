@@ -512,17 +512,14 @@ cp vmlinux vmlinux-{version-no: e.g. 5.2.3}
 
 ## gem5 run scripts
 
-Next, we need to add gem5 run scripts. We will do that in a folder named configs-boot-tests.
-Get the run script named run_exit.py from [here](https://github.com/darchr/gem5art/blob/master/docs/configs-boot-tests/run_exit.py), and other system configuration files from
-[here](https://github.com/darchr/gem5art/blob/master/docs/configs-boot-tests/system/).
-The run script (run_exit.py) takes the following arguments:
+Next, we need to add gem5 run scripts. We will do that in a folder named configs-npb-tests.
+Get the run script named run_npb.py from [here](https://github.com/darchr/gem5art/blob/master/docs/configs-npb-tests/run_npb.py), and other system configuration files from
+[here](https://github.com/darchr/gem5art/blob/master/docs/configs-npb-tests/system/).
+The run script (run_npb.py) takes the following arguments:
 - kernel: compiled kernel to be used for simulation
 - disk: built disk image to be used for simulation
-- cpu_type: gem5 cpu model (KVM, atomic, timing or O3)
-- mem_sys: gem5 memory system (classic or ruby)
+- benchmark: NPB workload to run (e.g. is.C.x, ep.C.x, bt.C.x)
 - num_cpus: number of parallel cpus to be simulated
-- boot_type: linux kernel boot type (with init or systemd)
-
 
 ## Database and Celery Server
 
@@ -574,17 +571,17 @@ For our boot-tests repo,
 experiments_repo = Artifact.registerArtifact(
     command = 'git clone https://github.com/darchr/fs-x86-test',
     typ = 'git repo',
-    name = 'Boot_test',
+    name = 'npb_tests',
     path =  './',
     cwd = '../',
-    documentation = 'main experiments repo to run full system tests with gem5'
+    documentation = 'main repo to run npb with gem5'
 )
 ```
 
 Note that the name of the artifact (returned by the registerArtifact method) is totally up to the user as well as
 all most of the other attributes of these artifacts.
 
-For all other artifacts, add following lines in launch_boot_tests.py:
+For all other artifacts, add following lines in launch_npb_tests.py:
 
 ```python
 gem5_repo = Artifact.registerArtifact(
@@ -609,11 +606,11 @@ m5_binary = Artifact.registerArtifact(
 disk_image = Artifact.registerArtifact(
     command = 'packer build template.json',
     typ = 'disk image',
-    name = 'boot-disk',
-    cwd = 'disk-image',
-    path = 'disk-image/boot-exit/boot-exit-image/boot-exit',
+    name = 'npb',
+    cwd = 'disk-image/npb',
+    path = 'disk-image/npb/npb-image/npb',
     inputs = [packer, experiments_repo, m5_binary,],
-    documentation = 'Ubuntu with m5 binary installed and root auto login'
+    documentation = 'Ubuntu with m5 binary installed and root auto login' 
 )
 
 gem5_binary = Artifact.registerArtifact(
@@ -636,7 +633,7 @@ linux_repo = Artifact.registerArtifact(
     documentation = 'linux kernel source code repo from Sep 23rd'
 )
 
-linuxes = ['5.2.3', '4.14.134', '4.9.186', '4.4.186']
+linuxes = ['5.2.3']
 linux_binaries = {
     version: Artifact.registerArtifact(
                 name = f'vmlinux-{version}',
@@ -656,36 +653,32 @@ linux_binaries = {
 }
 ```
 
-Once, all the artifacts are registered the next step is to launch all gem5 jobs. To do that, add the following lines in your script:
+Once, all of the artifacts are registered, the next step is to launch all gem5 jobs. To do that, add the following lines in your script:
 
 ```python
 if __name__ == "__main__":
-    boot_types = ['init', 'systemd']
-    num_cpus = ['1', '2', '4', '8']
-    cpu_types = ['kvm', 'atomic', 'simple', 'o3']
-    mem_types = ['classic', 'ruby']
+    num_cpus = ['1', '4']
+    benchmarks = ['is.C.x', 'ep.C.x', 'cg.C.x', 'mg.C.x',
+				'ft.C.x', 'bt.C.x', 'sp.C.x', 'lu.C.x']
 
-    for linux in linuxes:
-        for boot_type in boot_types:
-            for cpu in cpu_types:
-                for num_cpu in num_cpus:
-                    for mem in mem_types:
-                        run = gem5Run.createFSRun(
-                            'gem5/build/X86/gem5.opt',
-                            'configs-boot-tests/run_exit.py',
-                            gem5_binary, gem5_repo, experiments_repo,
-                            os.path.join('linux-stable', 'vmlinux'+'-'+linux),
-                            'disk-image/boot-exit/boot-exit-image/boot-exit',
-                            linux_binaries[linux], disk_image,
-                            cpu, mem, num_cpu, boot_type
-                            )
-                        run_gem5_instance.apply_async((run,))
+for num_cpu in num_cpus:
+	for bm in benchmarks:
+		run = gem5Run.createFSRun(
+			'gem5/build/X86/gem5.opt',
+			'configs-npb-tests/run_npb.py',
+			gem5_binary, gem5_repo, experiments_repo,
+			'linux-stable/vmlinux-5.2.3',
+			'disk-image/npb/npb-image/npb',
+			linux_binary, disk_image,
+			bm, num_cpu
+			)
+		run_gem5_instance.apply_async((run,))
 ```
 The above lines are responsible for looping through all possible combinations of variables involved in this experiment.
 For each combination, a gem5Run object is created and eventually passed to run_gem5_instance to be
 executed asynchronously using Celery.
 
-The complete launch script is available [here:](https://github.com/darchr/gem5art/blob/master/docs/launch_boot_tests.py).
+The complete launch script is available [here:](https://github.com/darchr/gem5art/blob/master/docs/launch_npb_tests.py).
 Finally, make sure you are in python virtual env and then run the script:
 
 ```python
