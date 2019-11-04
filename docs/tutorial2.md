@@ -565,13 +565,13 @@ packer = Artifact.registerArtifact(
 )
 ```
 
-For our boot-tests repo,
+For our npb-tests repo,
 
 ```python
 experiments_repo = Artifact.registerArtifact(
-    command = 'git clone https://github.com/darchr/fs-x86-test',
+    command = 'git clone https://your-remote-add/npb-tests.git',
     typ = 'git repo',
-    name = 'npb_tests',
+    name = 'npb',
     path =  './',
     cwd = '../',
     documentation = 'main repo to run npb with gem5'
@@ -604,7 +604,7 @@ m5_binary = Artifact.registerArtifact(
 )
 
 disk_image = Artifact.registerArtifact(
-    command = 'packer build template.json',
+    command = 'packer build npb.json',
     typ = 'disk image',
     name = 'npb',
     cwd = 'disk-image/npb',
@@ -633,24 +633,19 @@ linux_repo = Artifact.registerArtifact(
     documentation = 'linux kernel source code repo from Sep 23rd'
 )
 
-linuxes = ['5.2.3']
-linux_binaries = {
-    version: Artifact.registerArtifact(
-                name = f'vmlinux-{version}',
-                typ = 'kernel',
-                path = f'linux-stable/vmlinux-{version}',
-                cwd = 'linux-stable/',
-                command = f'''git checkout v{version};
-                cp ../linux-configs/config.{version} .config;
-                make -j8;
-                cp vmlinux vmlinux-{version};
-                '''.format(v='5.2.3'),
-                inputs = [experiments_repo, linux_repo,],
-                documentation = f"Kernel binary for {version} with simple "
-                                 "config file",
-            )
-    for version in linuxes
-}
+linux_binary = Artifact.registerArtifact(
+    name = 'vmlinux-5.2.3',
+    typ = 'kernel',
+    path = 'linux-stable/vmlinux-5.2.3',
+    cwd = 'linux-stable/',
+    command = '''git checkout v{version};
+    cp ../linux-configs/config.5.2.3 .config;
+    make -j8;
+    cp vmlinux vmlinux-5.2.3;
+    ''',
+    inputs = [experiments_repo, linux_repo,],
+    documentation = "kernel binary for v5.2.3",
+)
 ```
 
 Once, all of the artifacts are registered, the next step is to launch all gem5 jobs. To do that, add the following lines in your script:
@@ -659,10 +654,10 @@ Once, all of the artifacts are registered, the next step is to launch all gem5 j
 if __name__ == "__main__":
     num_cpus = ['1', '4']
     benchmarks = ['is.C.x', 'ep.C.x', 'cg.C.x', 'mg.C.x',
-				'ft.C.x', 'bt.C.x', 'sp.C.x', 'lu.C.x']
+            'ft.C.x', 'bt.C.x', 'sp.C.x', 'lu.C.x']
 
 for num_cpu in num_cpus:
-	for bm in benchmarks:
+	for bm in benchmarks:	
 		run = gem5Run.createFSRun(
 			'gem5/build/X86/gem5.opt',
 			'configs-npb-tests/run_npb.py',
@@ -672,6 +667,7 @@ for num_cpu in num_cpus:
 			linux_binary, disk_image,
 			bm, num_cpu
 			)
+		#run.run()
 		run_gem5_instance.apply_async((run,))
 ```
 The above lines are responsible for looping through all possible combinations of variables involved in this experiment.
@@ -682,5 +678,5 @@ The complete launch script is available [here:](https://github.com/darchr/gem5ar
 Finally, make sure you are in python virtual env and then run the script:
 
 ```python
-python launch_boot_tests.py
+python launch_npb_tests.py
 ```
