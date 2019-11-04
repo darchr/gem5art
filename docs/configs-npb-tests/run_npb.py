@@ -77,15 +77,22 @@ if __name__ == "__m5_main__":
     # This file gets read and executed by the simulated system after boot.
     # Note: The disk image needs to be configured to do this.
 
+    relative_outdir = os.path.join('results',
+                                   'X86',
+                                   os.path.basename(__file__).split('.py')[0],
+                                   os.path.split(kernel)[1],
+                                   os.path.split(disk)[1],
+                                   benchmark,
+                                   num_cpus)
 
     #if not(os.path.isfile('run_{}{}'.format(opts.benchmark,opts.cpus))):
     #lock =  filelock.FileLock("run_{}.lock".format(opts.benchmark))
     #with lock:
-    bench_file = open('run_{}{}'.format(benchmark,num_cpus),"w+")
+    bench_file = open('{}/run_{}{}'.format(relative_outdir,benchmark,num_cpus),"w+")
     bench_file.write('/home/gem5/NPB3.3-OMP/bin/{} \n'.format(benchmark))
     bench_file.write('m5 exit \n')
     bench_file.close()
-   
+
     #file_name = bench_file.name
     #else:
     #    file_name = 'run_{}{}'.format(opts.benchmark,opts.cpus)
