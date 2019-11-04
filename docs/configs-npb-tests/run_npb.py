@@ -38,6 +38,7 @@
     wallclock and simulated time.
 """
 
+import os
 import sys
 import time
 #import filelock
@@ -46,7 +47,7 @@ import m5
 import m5.ticks
 from m5.objects import *
 
-sys.path.append('configs/common/') # For the next line...
+sys.path.append('gem5/configs/common/') # For the next line...
 import SimpleOpts
 
 from system import MySystem
