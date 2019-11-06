@@ -22,12 +22,12 @@ sudo apt-get install qemu
 Download the Packer binary from [the official website](https://www.packer.io/downloads.html).
 <a name="customizing"></a>
 ### c. Customize the Packer Script
-The packer script (default:template.json) should be modified and adapted according to the required disk image and the avaiable resources for the build proces. The variables that should be modified appear at the end of `template.json` file, in `variables` section.
+The default packer script `template.json` should be modified and adapted according to the required disk image and the avaiable resources for the build proces. We will rename the default template to `[disk-name].json`. The variables that should be modified appear at the end of `[disk-name].json` file, in `variables` section.
 The configuration files that we use to build the disk image, and the directory structure is shown below:
 ```shell
 disk-image/
   experiment-specific-folder/
-    template.json: packer script
+    [disk-name].json: packer script
     Any experiment-specific post installation script
 
   shared/
@@ -37,7 +37,7 @@ disk-image/
 
 <a name="customizingVM"></a>
 #### i. Customizing the VM (Virtual Machine)
-In `template.json`, following variables are available to customize the VM:
+In `[disk-name].json`, following variables are available to customize the VM:
 
 | Variable         | Purpose     | Example  |
 | ---------------- |-------------|----------|
@@ -47,7 +47,7 @@ In `template.json`, following variables are available to customize the VM:
 
 <a name="customizingscripts"></a>
 #### ii. Customizing the Disk Image
-In `template.json`, disk image size can be customized using following variable:
+In `[disk-name].json`, disk image size can be customized using following variable:
 
 | Variable        | Purpose     | Example  |
 | ---------------- |-------------|----------|
@@ -60,17 +60,17 @@ In `template.json`, disk image size can be customized using following variable:
 <a name="customizingscripts2"></a>
 #### iii. File Transfer
 While building a disk image, users would need to move their files (benchmarks, data sets etc.) to
-the disk image. In order to do this file transfer, in `template.json` under `provisioners`, you could add the following:
+the disk image. In order to do this file transfer, in `[disk-name].json` under `provisioners`, you could add the following:
 
 ```shell
 {
     "type": "file",
-    "source": "examples/helloworld.sh",
+    "source": "shared/post_installation.sh",
     "destination": "/home/gem5/",
     "direction": "upload"
 }
 ```
-The above example copies the file `example/helloworld.sh` from the host to `/home/gem5/` in the disk image.
+The above example copies the file `shared/post_installation.sh` from the host to `/home/gem5/` in the disk image.
 This method is also capable of copying a folder from host to the disk image and vice versa.
 It is important to note that the trailing slash affects the copying process [(more details)](https://www.packer.io/docs/provisioners/file.html#directory-uploads).
 The following are some notable examples of the effect of using slash at the end of the paths.
@@ -96,17 +96,16 @@ In the above example, we assume that the user password is `12345`.
 This is essentially a bash script that is executed on the VM after the file copying is done, you could modify the script as a bash script to fit any purpose.
 <a name="customizingscripts4"></a>
 #### v. Running Other Scripts on Disk Image
-In `template.json`, we could add more scripts to `provisioners`.
+In `[disk-name].json`, we could add more scripts to `provisioners`.
 Note that the files are on the host, but the effects are on the disk image.
-For example, the following example runs `shared/post_installation.sh` and `example/helloworld.sh` after Ubuntu is installed,
+For example, the following example runs `shared/post_installation.sh` after Ubuntu is installed,
 ```shell
 {
     "type": "shell",
     "execute_command": "echo '{{ user `ssh_password` }}' | {{.Vars}} sudo -E -S bash '{{.Path}}'",
     "scripts":
     [
-        "scripts/post-installation.sh",
-        "examples/helloworld.sh"
+        "scripts/post-installation.sh"
     ]
 }
 ```
@@ -116,11 +115,11 @@ For example, the following example runs `shared/post_installation.sh` and `examp
 #### i. Build
 In order to build a disk image, the template file is first validated using:
 ```sh
-./packer validate template.json
+./packer validate [disk-name].json
 ```
 Then, the template file can be used to build the disk image:
 ```sh
-./packer build template.json
+./packer build [disk-name].json
 ```
 
 On a fairly recent machine, the building process should not take more than 15 minutes to complete.
@@ -135,7 +134,6 @@ If you need port forwarding to forward the VNC port from a remote machine to you
 ssh -L 5932:127.0.0.1:5932 <username>@<host>
 ```
 This command will forward port 5932 from the host machine to your machine, and then you will be able to connect to the VNC server using the address `127.0.0.1:5932` from your VNC viewer.
-More details could be found [here](https://www.cl.cam.ac.uk/research/dtg/attarchive/vnc/sshvnc.html).
 
 **Note**: While Packer is installing Ubuntu, the terminal screen will display "waiting for SSH" without any update for a long time.
 This is not an indicator of whether the Ubuntu installation produces any errors.
