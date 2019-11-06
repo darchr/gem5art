@@ -1,4 +1,4 @@
-# Tutorial 2: Run NAS Parallel Benchmarks with gem5
+# Tutorial: Run NAS Parallel Benchmarks with gem5
 
 ## Introduction
 In this tutorial, we will use gem5art to create a disk image for NAS parallel benchmarks ([NPB](https://www.nas.nasa.gov/)) and then run these benchmarks using gem5. NPB belongs to the category of high performance computing (HPC) workloads and consist of 5 kernels and 3 pseudo applications.

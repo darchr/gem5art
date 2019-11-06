@@ -1,4 +1,4 @@
-# Tutorial 1: Run Full System Linux Boot Tests
+# Tutorial: Run Full System Linux Boot Tests
 
 ## Introduction
 
