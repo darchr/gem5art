@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-#This is a job launch script
+#This is a job launch script for boot tests
 
 import os
 import sys
@@ -118,5 +118,4 @@ if __name__ == "__main__":
                             linux_binaries[linux], disk_image,
                             cpu, mem, num_cpu, boot_type
                             )
-                        #run.run()
                         run_gem5_instance.apply_async((run,))
