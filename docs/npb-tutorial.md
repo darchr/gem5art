@@ -1,7 +1,8 @@
 # Tutorial 2: Run NAS Parallel Benchmarks with gem5
 
 ## Introduction
-In this tutorial, we will use gem5art to create a disk image for NAS parallel benchmarks ([NPB](https://www.nas.nasa.gov/)) and then run these benchmarks using gem5. NPB consist of 5 kernels and 3 pseudo applications. Following are their details:
+In this tutorial, we will use gem5art to create a disk image for NAS parallel benchmarks ([NPB](https://www.nas.nasa.gov/)) and then run these benchmarks using gem5. NPB belongs to the category of high performance computing (HPC) workloads and consist of 5 kernels and 3 pseudo applications.
+Following are their details:
 
 Kernels:
 - **IS:** Integer Sort, random memory access
@@ -20,23 +21,15 @@ There are different classes (A,B,C,D,E and F) of the workloads based on the data
 This tutorial follows the following directory structure:
 
 - configs-npb-tests: the base gem5 configuration to be used to run full-system simulations
-- disk-image: contains packer script and template files used to build a disk image. The built disk image will be stored in the
-  same folder
-- gem5: gem5 source code. This points to darchr/gem5 repo
-- linux-configs: different linux kernel configurations
-- linux-stable: linux kernel source code used for full-system experiments
+- disk-image: contains packer script and template files used to build a disk image.
+The built disk image will be stored in the same folder
+- gem5: gem5 [source code](https://gem5.googlesource.com/public/gem5) and the compiled binary
+- linux-stable: linux kernel [source code](https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git)  used for full-system experiments
 - results: directory to store the results of the experiments (generated once gem5 jobs are executed)
 - launch_npb_tests.py:  gem5 jobs launch script (creates all of the needed artifacts as well)
 
 
 ## Setting up the environment
-
-gem5art relies on Python 3, so we suggest creating a virtual environment before using gem5art.
-
-```sh
-virtualenv -p python3 venv
-source venv/bin/activate
-```
 
 Create the main directory named npb-tests and turn it into a git repo:
 
@@ -60,18 +53,17 @@ disk-image/packer
 Through the use of npb-tests git repo, we will try to keep track of changes in those files which are not included in any git repo otherwise.
 npb-tests will also serve as the directory from where we will run everything.
 
+gem5art relies on Python 3, so we suggest creating a virtual environment before using gem5art.
+
+```sh
+virtualenv -p python3 venv
+source venv/bin/activate
+```
+
 gem5art can be installed (if not already) using pip:
 
 ```sh
 pip install gem5art-artifact gem5art-run gem5art-tasks
-```
-
-To install gem5art from a local source, first clone the gem5art repo in npb_tests and then do:
-
-```sh
-pip install -e artifact run tasks
-pip install -e run
-pip install -e tasks
 ```
 
 ## Building gem5
@@ -493,21 +485,21 @@ Now, to build the disk image, inside disk-image folder, run:
 ## Compiling the linux kernel
 
 In this tutorial, we will use linux kernel v5.2.3 with gem5 to run NAS parallel benchmarks.
-First, add a folder linux-configs to store linux kernel config files. The configuration files of interest are available [here](https://github.com/darchr/gem5art/blob/master/docs/linux-configs/).
-Then, we will get the linux source and checkout the required linux version (e.g. 5.2.3 in this case).
+First, get the linux kernel config file from [here](https://github.com/darchr/gem5art/blob/master/docs/linux-configs/config.5.2.3), and place it in npb-tests folder.
+Then, we will get the linux source and checkout linux v5.2.3.
 
 ```
 git clone https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
 mv linux linux-stable
 cd linux-stable
-git checkout v{version-no: e.g. 5.2.3}
+git checkout v5.2.3
 ```
-Compile the linux kernel from its source (and an appropriate config file from linux-configs/):
+Compile the linux kernel from its source (using already downloaded config file config.5.2.3):
 
 ```
-cp ../linux-configs/config.{version-no: e.g. 5.2.3} .config
+cp ../config.5.2.3 .config
 make -j8
-cp vmlinux vmlinux-{version-no: e.g. 5.2.3}
+cp vmlinux vmlinux-5.2.3
 ```
 
 ## gem5 run scripts
@@ -610,7 +602,7 @@ disk_image = Artifact.registerArtifact(
     cwd = 'disk-image/npb',
     path = 'disk-image/npb/npb-image/npb',
     inputs = [packer, experiments_repo, m5_binary,],
-    documentation = 'Ubuntu with m5 binary installed and root auto login' 
+    documentation = 'Ubuntu with m5 binary installed and root auto login'
 )
 
 gem5_binary = Artifact.registerArtifact(
@@ -639,7 +631,7 @@ linux_binary = Artifact.registerArtifact(
     path = 'linux-stable/vmlinux-5.2.3',
     cwd = 'linux-stable/',
     command = '''git checkout v{version};
-    cp ../linux-configs/config.5.2.3 .config;
+    cp ../config.5.2.3 .config;
     make -j8;
     cp vmlinux vmlinux-5.2.3;
     ''',
@@ -657,7 +649,7 @@ if __name__ == "__main__":
             'ft.C.x', 'bt.C.x', 'sp.C.x', 'lu.C.x']
 
 for num_cpu in num_cpus:
-	for bm in benchmarks:	
+	for bm in benchmarks:
 		run = gem5Run.createFSRun(
 			'gem5/build/X86/gem5.opt',
 			'configs-npb-tests/run_npb.py',
