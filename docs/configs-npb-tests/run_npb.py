@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2016 Jason Lowe-Power
+# Copyright (c) 2019 The Regents of the University of California.
 # All rights reserved.
-#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
 # met: redistributions of source code must retain the above copyright
@@ -27,11 +26,9 @@
 #
 # Authors: Jason Lowe-Power, Ayaz Akram
 
-""" Script to run a workload in KVM with gem5
-    When this script is run without the --script parameter, gem5 will boot
-    Linux and sit at the command line, assuming this is how your disk is
-    configured. With the script parameter, the script will be executed on the
-    guest system.
+""" Script to run NAS parallel benchmarks with gem5.
+    The script expects kernel, diskimage, benchmark to run
+    and number of cpus as arguments.
 
     If your application has ROI annotations, this script will count the total
     number of instructions executed in the ROI. It also tracks how much
@@ -41,8 +38,6 @@
 import os
 import sys
 import time
-#import filelock
-
 import m5
 import m5.ticks
 from m5.objects import *
@@ -52,19 +47,23 @@ import SimpleOpts
 
 from system import MySystem
 
-SimpleOpts.add_option("--benchmark", default='',
-                      help="Script to execute in the simulated system")
-SimpleOpts.add_option("--benchmark_inputs", default='',
-                      help="Script to execute in the simulated system")
+def writeBenchScript(dir, bench):
+    """
+    This method creates a script in dir which will be eventually
+    passed to the simulated system (to run a specific benchmark
+    at bootup).
+    """
+    bench_file = open('{}/run_{}'.format(dir, bench),"w+")
+    bench_file.write('/home/gem5/NPB3.3-OMP/bin/{} \n'.format(bench))
+    bench_file.write('m5 exit \n')
+    bench_file.close()
+    return bench_file.name
 
 if __name__ == "__m5_main__":
     (opts, args) = SimpleOpts.parse_args()
     kernel, disk, benchmark, num_cpus = args
     # create the system we are going to simulate
-    #system = MySystem(opts, no_kvm=False)
     system = MySystem(kernel, disk, int(num_cpus), opts, no_kvm=False)
-
-
 
     # For workitems to work correctly
     # This will cause the simulator to exit simulation when the first work
@@ -72,32 +71,9 @@ if __name__ == "__m5_main__":
     system.work_begin_exit_count = 1
     system.work_end_exit_count = 1
 
-    # Read in the benchmark to run for simualtion. Dynamically, a boot script file is
-    # then generated to pass to the readfile.
-    # This file gets read and executed by the simulated system after boot.
-    # Note: The disk image needs to be configured to do this.
-
-    relative_outdir = os.path.join('results',
-                                   'X86',
-                                   os.path.basename(__file__).split('.py')[0],
-                                   os.path.split(kernel)[1],
-                                   os.path.split(disk)[1],
-                                   benchmark,
-                                   num_cpus)
-
-    #if not(os.path.isfile('run_{}{}'.format(opts.benchmark,opts.cpus))):
-    #lock =  filelock.FileLock("run_{}.lock".format(opts.benchmark))
-    #with lock:
-    bench_file = open('{}/run_{}{}'.format(relative_outdir,benchmark,num_cpus),"w+")
-    bench_file.write('/home/gem5/NPB3.3-OMP/bin/{} \n'.format(benchmark))
-    bench_file.write('m5 exit \n')
-    bench_file.close()
-
-    #file_name = bench_file.name
-    #else:
-    #    file_name = 'run_{}{}'.format(opts.benchmark,opts.cpus)
-
-    system.readfile = bench_file.name
+    # Create and pass a script to the simulated system to run the reuired
+    # benchmark
+    system.readfile = writeBenchScript(m5.options.outdir, benchmark)
 
     # set up the root SimObject and start the simulation
     root = Root(full_system = True, system = system)
@@ -107,6 +83,9 @@ if __name__ == "__m5_main__":
         # Uses gem5's parallel event queue feature
         # Note: The simulator is quite picky about this number!
         root.sim_quantum = int(1e9) # 1 ms
+
+    #needed for long running jobs
+    m5.disableAllListeners()
 
     # instantiate all of the objects we've created above
     m5.instantiate()
