@@ -31,7 +31,14 @@ The built disk image will be stored in the same folder
 
 ## Setting up the environment
 
-Create the main directory named npb-tests and turn it into a git repo:
+
+First, we need to create the main directory named npb-tests (from where we will run everything) and turn it into a git repository.
+Through the use of npb-tests git repo, we will try to keep track of changes in those files which are not included in any git repo otherwise.
+An example of such files is gem5 run and config scripts (config-npb-tests).
+We want to make sure that we can keep record of any changes in these scripts, so that a particular run of NPB benchmarks can be associated with a particular snapshot of these files.
+All such files, which are not part of other artifacts, will be a part fo the experiments repo artifact (which we will create later in this tutorial).
+We also need to add a git remote to this repo pointing to a remote location where we want this repo to be hosted.
+
 
 ```sh
 mkdir npb-tests
@@ -50,8 +57,6 @@ results
 venv
 disk-image/packer
 ```
-Through the use of npb-tests git repo, we will try to keep track of changes in those files which are not included in any git repo otherwise.
-npb-tests will also serve as the directory from where we will run everything.
 
 gem5art relies on Python 3, so we suggest creating a virtual environment before using gem5art.
 
@@ -71,12 +76,15 @@ pip install gem5art-artifact gem5art-run gem5art-tasks
 Clone gem5 and build it:
 
 ```sh
-git clone https://github.com/darchr/gem5
+git clone https://gem5.googlesource.com/public/gem5
 cd gem5
 scons build/X86/gem5.opt -j8
 ```
 You can also add your changes to gem5 source before building it. Make sure to commit any changes you make to gem5 repo.
-Also make sure to build the m5 utility which will be needed during disk image creation (specifically for post installation stuff) later on:
+Also make sure to build the m5 utility which will be moved to the disk image eventually.
+m5 utility allows to trigger simulation tasks from inside the simulated system.
+For example, it can be used dump simuation statistics when the simulated system triggers to do so.
+We will need m5 mainly to exit the simulation when the simulated system will be done with the execution of a particular NPB benchmark.
 
 ```sh
 cd gem5/util/m5/
@@ -577,7 +585,7 @@ For all other artifacts, add following lines in launch_npb_tests.py:
 
 ```python
 gem5_repo = Artifact.registerArtifact(
-    command = 'git clone https://github.com/darchr/gem5',
+    command = 'git clone https://gem5.googlesource.com/public/gem5',
     typ = 'git repo',
     name = 'gem5',
     path =  'gem5/',
@@ -659,7 +667,6 @@ for num_cpu in num_cpus:
 			linux_binary, disk_image,
 			bm, num_cpu
 			)
-		#run.run()
 		run_gem5_instance.apply_async((run,))
 ```
 The above lines are responsible for looping through all possible combinations of variables involved in this experiment.
