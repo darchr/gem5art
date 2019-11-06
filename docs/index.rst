@@ -17,8 +17,8 @@ Zen and the art of gem5 experiments
    tasks.md
    taskAPI.rst
    disks.md
-   tutorial1.md
-   tutorial2.md
+   boot-tutorial.md
+   npb-tutorial.md
 
 Indices and tables
 ==================
