@@ -46,7 +46,7 @@ from uuid import UUID, uuid4
 import zipfile
 
 from gem5art import artifact
-from gem5art.artifact.artifact import Artifact
+from gem5art.artifact import Artifact
 
 _db: artifact.ArtifactDB = artifact.getDBConnection()
 
