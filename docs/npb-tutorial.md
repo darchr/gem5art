@@ -418,8 +418,7 @@ experiments_repo = Artifact.registerArtifact(
 )
 ```
 
-Note that the name of the artifact (returned by the registerArtifact method) is totally up to the user as well as
-all most of the other attributes of these artifacts.
+Note that the name of the artifact (returned by the registerArtifact method) is totally up to the user as well as most of the other attributes of these artifacts.
 
 For all other artifacts, add following lines in launch_npb_tests.py:
 
@@ -455,7 +454,7 @@ disk_image = Artifact.registerArtifact(
 
 gem5_binary = Artifact.registerArtifact(
     command = 'scons build/X86/gem5.opt',
-    typ = 'binary',
+    typ = 'gem5 binary',
     name = 'gem5',
     cwd = 'gem5/',
     path =  'gem5/build/X86/gem5.opt',
