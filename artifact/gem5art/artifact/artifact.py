@@ -38,8 +38,7 @@ import time
 from typing import Any, Dict, Iterator, List, Union
 from uuid import UUID, uuid4
 
-from . import getDBConnection
-
+from ._artifactdb import getDBConnection
 
 _db = getDBConnection()
 

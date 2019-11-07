@@ -34,16 +34,16 @@ from os.path import exists
 import unittest
 from uuid import uuid4
 
-from gem5art.artifact import artifact
+from gem5art import artifact
 
 class TestGit(unittest.TestCase):
     def test_keys(self):
-        git = artifact.getGit('.')
+        git = artifact.artifact.getGit('.')
         self.assertSetEqual(set(git.keys()), set(['origin', 'hash', 'name']),
                             "git keys wrong")
 
     def test_origin(self):
-        git = artifact.getGit('.')
+        git = artifact.artifact.getGit('.')
         self.assertTrue(git['origin'].endswith('gem5art'),
                         "Origin should end with gem5art")
 
@@ -58,7 +58,7 @@ class TestArtifact(unittest.TestCase):
             'command': ['ls', '-l'],
             'path': '/',
             'hash': hashlib.md5().hexdigest(),
-            'git': artifact.getGit('.'),
+            'git': artifact.artifact.getGit('.'),
             'cwd': '/',
             'inputs': [],
         })
