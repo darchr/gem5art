@@ -8,8 +8,7 @@ The main steps to perform such an experiment using gem5art include: setting up t
 This tutorial follows the following directory structure:
 
 - configs-boot-tests: the base gem5 configuration to be used to run full-system simulations
-- disk-image: contains packer script and template files used to build a disk image. The built disk image will be stored in the
-  same folder
+- disk-image: contains packer script and template files used to build a disk image. The built disk image will be stored in the same folder
 - gem5: gem5 source code. This points to darchr/gem5 repo
 - linux-configs: different linux kernel configurations
 - linux-stable: linux kernel source code used for full-system experiments
@@ -19,12 +18,12 @@ This tutorial follows the following directory structure:
 
 ## Setting up the environment
 
-gem5art relies on Python 3, so we suggest creating a virtual environment before using gem5art.
-
-```sh
-virtualenv -p python3 venv
-source venv/bin/activate
-```
+First, we need to create the main directory named boot-tests (from where we will run everything) and turn it into a git repository.
+Through the use of boot-tests git repo, we will try to keep track of changes in those files which are not included in any git repo otherwise.
+An example of such files is gem5 run and config scripts (config-boot-tests).
+We want to make sure that we can keep record of any changes in these scripts, so that a particular run of gem5 can be associated with a particular snapshot of these files.
+All such files, which are not part of other artifacts, will be a part fo the experiments repo artifact (which we will create later in this tutorial).
+We also need to add a git remote to this repo pointing to a remote location where we want this repo to be hosted.
 
 Create the main directory named boot-tests and turn it into a git repo:
 
@@ -48,18 +47,17 @@ disk-image/packer
 Through the use of boot-tests git repo, we will try to keep track of changes in those files which are not included in any git repo otherwise.
 boot-tests will also serve as the directory from where we will run everything.
 
+gem5art relies on Python 3, so we suggest creating a virtual environment before using gem5art.
+
+```sh
+virtualenv -p python3 venv
+source venv/bin/activate
+```
+
 gem5art can be installed (if not already) using pip:
 
 ```sh
 pip install gem5art-artifact gem5art-run gem5art-tasks
-```
-
-To install gem5art from a local source, first clone the gem5art repo in boot_tests and then do:
-
-```sh
-pip install -e artifact run tasks
-pip install -e run
-pip install -e tasks
 ```
 
 ## Building gem5
@@ -67,13 +65,15 @@ pip install -e tasks
 Clone gem5 and build it:
 
 ```sh
-git clone https://github.com/darchr/gem5
+git clone https://gem5.googlesource.com/public/gem5
 cd gem5
 scons build/X86/gem5.opt -j8
 ```
 You can also add your changes to gem5 source before building it. Make sure to commit any changes you make to gem5 repo.
-
-Also make sure to build the m5 utility which will be needed during disk image creation (specifically for post installation stuff) later on:
+Also make sure to build the m5 utility which will be moved to the disk image eventually.
+m5 utility allows to trigger simulation tasks from inside the simulated system.
+For example, it can be used dump simuation statistics when the simulated system triggers to do so.
+We will need m5 mainly to exit the simulation when the simulated system boots linux.
 
 ```sh
 cd gem5/util/m5/
@@ -91,7 +91,7 @@ We will follow the similar directory structure as discussed in [Disk Images](dis
 Add a folder named shared for config files which will be shared among all disk images (and will be kept to their defaults) and one folder named boot-exit which is specific to the disk image needed to run experiments of this tutorial.
 Add three files [boot-exit.json](https://github.com/darchr/gem5art/blob/master/docs/disks/boot-exit/boot-exit.json), [exit.sh](https://github.com/darchr/gem5art/blob/master/docs/disks/boot-exit/exit.sh) and [post-installation.sh](https://github.com/darchr/gem5art/blob/master/docs/disks/boot-exit/post-installation.sh) in boot-exit/ and [preseed.cfg](https://github.com/darchr/gem5art/blob/master/docs/disks/shared/preseed.cfg) and [serial-getty@.service](https://github.com/darchr/gem5art/blob/master/docs/disks/shared/serial-getty@.service) in shared/
 
-boot-exit.json is our primary .json configuration file. The provisioners and variables section of this file configure the files that need to be transferred to the disk and other things like disk image's name. post-installation.sh (which is a script to run after Ubuntu is installed on the disk image) makes sure that the m5 binary is installed on the system and also moves the content of our other script (exit.sh, which should be already transferred inside the disk image as configured in boot-exit.json) to .bashrc as exit.sh contains the stuff that we want to be executed as soon as the system boots. exit.sh just contains one command `m5 exit`, which will eventually terminate the simulation.
+boot-exit.json is our primary .json configuration file. The provisioners and variables section of this file configure the files that need to be transferred to the disk and other things like disk image's name. post-installation.sh (which is a script to run after Ubuntu is installed on the disk image) makes sure that the m5 binary is installed on the system and also moves the contents of our other script (exit.sh, which should be already transferred inside the disk image as configured in boot-exit.json) to .bashrc as exit.sh contains the stuff that we want to be executed as soon as the system boots. exit.sh just contains one command `m5 exit`, which will eventually terminate the simulation.
 
 Next, download packer (if not already downloaded) in the disk-image folder:
 
@@ -194,23 +194,22 @@ For our boot-tests repo,
 
 ```python
 experiments_repo = Artifact.registerArtifact(
-    command = 'git clone https://github.com/darchr/fs-x86-test',
+    command = 'git clone https://your-remote-add/boot-tests.git',
     typ = 'git repo',
-    name = 'Boot_test',
+    name = 'boot_tests',
     path =  './',
     cwd = '../',
-    documentation = 'main experiments repo to run full system tests with gem5'
+    documentation = 'main experiments repo to run full system boot tests with gem5'
 )
 ```
 
-Note that the name of the artifact (returned by the registerArtifact method) is totally up to the user as well as
-all most of the other attributes of these artifacts.
+Note that the name of the artifact (returned by the registerArtifact method) is totally up to the user as well as most of the other attributes of these artifacts.
 
 For all other artifacts, add following lines in launch_boot_tests.py:
 
 ```python
 gem5_repo = Artifact.registerArtifact(
-    command = 'git clone https://github.com/darchr/gem5',
+    command = 'git clone https://gem5.googlesource.com/public/gem5',
     typ = 'git repo',
     name = 'gem5',
     path =  'gem5/',
