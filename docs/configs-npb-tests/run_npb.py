@@ -53,11 +53,12 @@ def writeBenchScript(dir, bench):
     passed to the simulated system (to run a specific benchmark
     at bootup).
     """
-    bench_file = open('{}/run_{}'.format(dir, bench),"w+")
+    file_name = '{}/run_{}'.format(dir, bench)
+    bench_file = open(file_name,"w+")
     bench_file.write('/home/gem5/NPB3.3-OMP/bin/{} \n'.format(bench))
     bench_file.write('m5 exit \n')
     bench_file.close()
-    return bench_file.name
+    return file_name
 
 if __name__ == "__m5_main__":
     (opts, args) = SimpleOpts.parse_args()
