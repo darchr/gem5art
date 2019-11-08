@@ -487,7 +487,7 @@ linux_binary = Artifact.registerArtifact(
 )
 ```
 
-Once, all of the artifacts are registered, the next step is to launch all gem5 jobs. To do that, add the following lines in your script:
+Once, all of the artifacts are registered, the next step is to launch all gem5 jobs. To do that, add the following lines in your script (complete launch script is available [here](https://github.com/darchr/gem5art/blob/master/docs/launch_npb_tests.py)):
 
 ```python
 if __name__ == "__main__":
@@ -518,3 +518,9 @@ Finally, make sure you are in python virtual env and then run the script:
 ```python
 python launch_npb_tests.py
 ```
+
+Once you run the launch script, the declared artifacts will be registered by gem5art and stored in the database.
+Celery will run as many jobs in parallel as allowed by the user (at the time of starting the server).
+As soon as a gem5 job finishes, a compressed version of the results will be stored in the database as well.
+User can also query the database using the methods discussed in the [Artifacts](artifacts.md) section previously.
+
