@@ -113,6 +113,7 @@ class Artifact:
     command: str
     path: str
     hash: str
+    time: float
     git: Dict[str,str]
     cwd: str
     inputs: List['Artifact']
@@ -145,6 +146,8 @@ class Artifact:
                 this artifact is and how it was created."""))
 
         data['command'] = cleandoc(command)
+
+        data['time'] = time.time()
 
         data['path'] = path
         if os.path.isfile(path):
