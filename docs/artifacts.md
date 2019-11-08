@@ -16,7 +16,7 @@ the set of used artifacts when the same experiment needs to be performed in the 
 - documentation: a docstring explaining the purpose of the artifact
 - hash: an MD5 hash for a binary artifact/git hash for a git artifact
 - id: a UUID associated with the artifact
-- git: a dictionary containing the origin, current commit and the repo name for a git   artifact (will be an empty dictionary for other type of artifacts)
+- git: a dictionary containing the origin, current commit and the repo name for a git artifact (will be an empty dictionary for other types of artifacts)
 
 An example of how a user would create a gem5 binary artifact using gem5art is following:
 
@@ -43,8 +43,8 @@ Note: While creating new artifacts, warning messages showing that certain attrib
 Another goal of gem5art is to enable sharing of artifacts among multiple users, which is achieved through the use of the centralized
 database. Basically, whenever a user tries to create a new artifact, the database is searched to find if the same artifact exists there.
 If it does, the artifact is downloaded for use. Otherwise, the newly created artifact is uploaded to the database for later use.
-The use of database also avoids running identical experiments, by generating an error message if a user tries to run exact same run which
-already exists in the database.
+The use of database also avoids running identical experiments (by generating an error message if a user tries to execute exact run which
+already exists in the database).
 
 ## MongoDB
 

@@ -31,11 +31,15 @@ gem5art is mainly composed of the following components:
 - python objects to wrap gem5 experiments (gem5Run)
 - a celery worker to manage gem5 jobs (Tasks)
 
-The following diagram shows the interaction among different components (artifacts) involved during full-system experiments with gem5.
+The process of performing experiments (starting from scratch) can quickly become complicated due to involvement of multiple components.
+As an example, following is a diagram which shows the interaction that takes place among different components (artifacts) while running 
+full-system experiments with gem5.
 
 ![](art.png)
 
-Everything is contained in a base git repository (base repo) artifact which can keep track of changes in files not tracked by other repositories.
-packer is a tool to generate disk images and serves as an input to the disk image artifact. gem5 source code repo artifacts serves as input to other two artifacts (gem5 binary and m5 utility).
-linux source repository and base repository (specifically kernel config files from there) are used to build the disk image and multiple artifacts then generate the results artifact.
+Everything, in this example, is contained in a base git repository (base repo) artifact which can keep track of changes in files not tracked by other repositories.
+packer is a tool to generate disk images and serves as an input to the disk image artifact. gem5 source code repo artifacts serves as an input to two other artifacts (gem5 binary and m5 utility).
+linux source repository and base repository (specifically kernel config files) are used to build the disk image and multiple artifacts then generate the final results artifact.
 
+gem5art serves as a tool/infrastructure to streamline this entire process and keeps a track of things as they change thus leading to reproducible runs. Moreover, it allows to share the 
+artifacts, used in above example, among multiple users.

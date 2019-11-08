@@ -8,7 +8,6 @@ Zen and the art of gem5 experiments
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
 
    intro.md
    artifacts.md
@@ -18,7 +17,8 @@ Zen and the art of gem5 experiments
    tasks.md
    taskAPI.rst
    disks.md
-   tutorial1.md
+   boot-tutorial.md
+   npb-tutorial.md
 
 Indices and tables
 ==================
