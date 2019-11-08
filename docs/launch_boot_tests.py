@@ -61,7 +61,7 @@ disk_image = Artifact.registerArtifact(
 
 gem5_binary = Artifact.registerArtifact(
     command = 'scons build/X86/gem5.opt',
-    typ = 'binary',
+    typ = 'gem5 binary',
     name = 'gem5',
     cwd = 'gem5/',
     path =  'gem5/build/X86/gem5.opt',
