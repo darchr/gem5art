@@ -67,6 +67,42 @@ class TestArtifact(unittest.TestCase):
         self.assertTrue(exists(self.artifact.cwd))
         self.assertTrue(exists(self.artifact.path))
 
+class TestArtifactSimilarity(unittest.TestCase):
+
+    def setUp(self):
+        self.artifactA = artifact.Artifact({
+            '_id': uuid4(),
+            'name': 'artifact-A',
+            'type': 'type-A',
+            'documentation': "This is a description of artifact A",
+            'command': ['ls', '-l'],
+            'path': '/',
+            'hash': hashlib.md5().hexdigest(),
+            'git': artifact.getGit('.'),
+            'cwd': '/',
+            'inputs': [],
+        })
+
+        self.artifactB = artifact.Artifact({
+            '_id': uuid4(),
+            'name': 'artifact-B',
+            'type': 'type-B',
+            'documentation': "This is a description of artifact B",
+            'command': ['ls', '-l'],
+            'path': '/',
+            'hash': hashlib.md5().hexdigest(),
+            'git': artifact.getGit('.'),
+            'cwd': '/',
+            'inputs': [],
+        })
+
+        self.artifactC = self.artifactA
+
+    def test_not_same(self):
+        self.assertTrue(self.artifactA != self.artifactB)
+    def test_same(self):
+        self.assertTrue(self.artifactA == self.artifactC)
+
 
 if __name__ == '__main__':
     unittest.main()
