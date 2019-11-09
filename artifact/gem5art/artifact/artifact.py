@@ -171,11 +171,8 @@ class Artifact:
 
             # Now that we have a complete object, construct it
             self = cls(data)
-            if old_artifact != self:
-                print(f"Current: {vars(self)}")
-                print(f"From DB: {vars(old_artifact)}")
-                raise Exception("Found matching hash in DB, but object "
-                    "doesn't match. Use the UUID constructor instead.")
+            self._checkSimilar(old_artifact)
+
         else:
             data['_id'] = uuid4()
 
@@ -240,9 +237,17 @@ class Artifact:
         if not isinstance(other, Artifact):
             return NotImplemented
 
-        if self.hash != other.hash or self._id != other._id:
+        if self.hash == other.hash and self._id == other._id:
+            self._checkSimilar(other)
+            return True
+        else:
             return False
 
+    def _checkSimilar(self, other: 'Artifact'):
+        """Prints warnings if other is simlar, but not the same as self.
+        These mismatches may or may not be a problem. It's up to the user to
+        make this decision.
+        """
         if self.name != other.name:
             print(f"WARNING: name mismatch for {self.name}! "
                   f"{self.name} != {other.name}")
@@ -264,8 +269,6 @@ class Artifact:
         mismatch = set(self.inputs).symmetric_difference(other.inputs)
         if mismatch:
             print(f"WARNING: input mismatch for {self.name}! {mismatch}")
-
-        return True
 
     def __hash__(self) -> int:
         return self._id.int
