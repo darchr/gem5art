@@ -181,7 +181,7 @@ class gem5Run:
                                            run.script_name,
                                            *run.params)
 
-        run.outdir = os.path.abspath(run.outdir)
+        run.outdir = os.path.abspath(run.relative_outdir)
         # Make the directory if it doesn't exist
         os.makedirs(run.outdir, exist_ok=True)
 
