@@ -1,0 +1,81 @@
+#!/bin/bash
+#
+# gcc.bldconf - file containing global information necessary to build
+#               PARSEC with gcc
+#
+# Copyright (C) 2006-2009 Princeton University
+# Written by Christian Bienia (Initial version)
+#            Christian Fensch (Sparc/Solaris port)
+
+export CC_HOME="/usr"
+export BINUTIL_HOME="/usr"
+export GNUTOOL_HOME="/usr"
+export BINARY_PREFIX=""
+
+if [ -z "$HOSTCC" ]; then
+  export HOSTCC=gcc
+fi
+if [ -z "$M4" ]; then
+  export M4=m4
+fi
+if [ -z "$MAKE" ]; then
+  export MAKE=make
+fi
+if [ -z "$TARGET_CROSS" ]; then
+  export TARGET_CROSS=/usr/bin/
+fi
+
+# Compilers and preprocessors
+export CC="${TARGET_CROSS}gcc"
+export CXX="${TARGET_CROSS}g++"
+export CPP="${TARGET_CROSS}cpp"
+export CXXCPP=""
+
+# GNU Binutils
+export LD="${TARGET_CROSS}ld"
+export AS="${TARGET_CROSS}as"
+export AR="${TARGET_CROSS}ar"
+export RANLIB="${TARGET_CROSS}ranlib"
+export STRIP="${TARGET_CROSS}strip"
+
+# Arguments to use
+export CFLAGS=" $CFLAGS"
+export CXXFLAGS="$CXXFLAGS -fpermissive -fno-exceptions"
+export CPPFLAGS=""
+export CXXCPPFLAGS=""
+export LIBS=""
+export EXTRA_LIBS=""
+export PARMACS_MACRO_FILE="pthreads"
+
+# Add PARSEC version to compiler flags
+if [ -f "${PARSECDIR}/version" ]; then
+  CFLAGS="${CFLAGS} -DPARSEC_VERSION=$(${CAT} ${PARSECDIR}/version)"
+  CXXFLAGS="${CXXFLAGS} -DPARSEC_VERSION=$(${CAT} ${PARSECDIR}/version)"
+fi
+
+# Java
+export JAVA_HOME="/usr"
+export JAVAC="${JAVA_HOME}/bin/javac"
+
+# Version numbers
+if [ -x ${CC} ]; then
+  CC_ver=$(${CC} --version)
+else
+  CC_ver=""
+fi
+if [ -x ${CXX} ]; then
+  CXX_ver=$(${CXX} --version)
+else
+  CXX_ver=""
+fi
+if [ -x ${LD} ]; then
+  LD_ver=$(${LD} --version)
+else
+  LD_ver=""
+fi
+if [ -x ${JAVAC} ]; then
+  JAVAC_ver=$(${JAVAC} -version 2>&1)
+else
+  JAVAC_ver=""
+fi
+
