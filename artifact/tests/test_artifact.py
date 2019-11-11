@@ -78,7 +78,7 @@ class TestArtifactSimilarity(unittest.TestCase):
             'command': ['ls', '-l'],
             'path': '/',
             'hash': hashlib.md5().hexdigest(),
-            'git': artifact.getGit('.'),
+            'git': artifact.artifact.getGit('.'),
             'cwd': '/',
             'inputs': [],
         })
@@ -91,7 +91,7 @@ class TestArtifactSimilarity(unittest.TestCase):
             'command': ['ls', '-l'],
             'path': '/',
             'hash': hashlib.md5().hexdigest(),
-            'git': artifact.getGit('.'),
+            'git': artifact.artifact.getGit('.'),
             'cwd': '/',
             'inputs': [],
         })
