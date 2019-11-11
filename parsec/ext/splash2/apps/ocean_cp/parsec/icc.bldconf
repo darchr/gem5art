@@ -1,4 +1,0 @@
-#!/bin/bash
-
-source ${PARSECDIR}/ext/splash2/apps/ocean_cp/parsec/gcc.bldconf
-

@@ -1,3 +1,0 @@
-
-# comment some *.h file
-sed -i "s/#include <sys\/kernel\.h>/\/\/#include <sys\/kernel\.h>/g"  `grep kernel.h * -l`

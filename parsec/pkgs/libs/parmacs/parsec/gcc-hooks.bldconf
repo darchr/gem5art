@@ -1,6 +1,0 @@
-#!/bin/bash
-
-# gcc-parmacs.bldconf - configuration file for PARSEC
-
-source ${PARSECDIR}/pkgs/libs/parmacs/parsec/gcc.bldconf
-

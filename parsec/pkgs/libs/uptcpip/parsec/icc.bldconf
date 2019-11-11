@@ -1,7 +1,0 @@
-#!/bin/bash
-
-source ${PARSECDIR}/pkgs/libs/uptcpip/parsec/gcc.bldconf
-
-# Select TBB's icc configuration
-build_env=""
-

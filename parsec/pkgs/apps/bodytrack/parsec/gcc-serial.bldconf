@@ -1,7 +1,0 @@
-#!/bin/bash
-
-source ${PARSECDIR}/pkgs/apps/bodytrack/parsec/gcc.bldconf
-
-# Override build environment
-build_conf="--disable-threads"
-

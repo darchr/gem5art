@@ -1,7 +1,0 @@
-#!/bin/bash
-
-# gcc.bldconf - configuration file for PARSEC
-
-# Default parallelization is pthreads
-source ${PARSECDIR}/pkgs/netapps/netdedup/parsec/gcc-pthreads.bldconf
-

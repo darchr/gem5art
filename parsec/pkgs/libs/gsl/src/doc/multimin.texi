@@ -1,1 +1,0 @@
-@cindex minimization, multidimensional

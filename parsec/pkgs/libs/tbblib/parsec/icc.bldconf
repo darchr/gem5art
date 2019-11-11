@@ -1,7 +1,0 @@
-#!/bin/bash
-
-source ${PARSECDIR}/pkgs/libs/tbblib/parsec/gcc.bldconf
-
-# Select TBB's icc configuration
-build_env="compiler=icc PATH=\"${CC_HOME}/bin:${PATH}\" CXXFLAGS=\"${CXXFLAGS} -fexceptions\""
-

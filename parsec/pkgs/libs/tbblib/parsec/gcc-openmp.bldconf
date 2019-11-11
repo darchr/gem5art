@@ -1,6 +1,0 @@
-#!/bin/bash
-
-# gcc-openmp.bldconf - configuration file for PARSEC
-
-source ${PARSECDIR}/pkgs/libs/tbblib/parsec/gcc.bldconf
-
