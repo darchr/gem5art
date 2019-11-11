@@ -31,7 +31,7 @@ jobs:
         python-version: '3.x'
     - uses: actions/checkout@v1
     - name: Install pip dependencies
-      run: pip3 install mypy
+      run: pip3 install mypy gem5art-artifact
     - name: Run unittest
       working-directory: ./run/
       run: python3 -m unittest
@@ -49,7 +49,7 @@ jobs:
         python-version: '3.x'
     - uses: actions/checkout@v1
     - name: Install pip dependencies
-      run: pip3 install mypy
+      run: pip3 install mypy gem5art-run
     - name: Run static analyzer
       working-directory: ./tasks/
       run: mypy -p gem5art.tasks
