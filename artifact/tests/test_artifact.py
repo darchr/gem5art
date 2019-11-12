@@ -109,7 +109,7 @@ class TestArtifactSimilarity(unittest.TestCase):
             'git': artifact.artifact.getGit('.'),
             'cwd': '/',
             'inputs': [],
-        }) 
+        })
 
         self.artifactD = artifact.Artifact({
             '_id': uuid4(),
@@ -127,22 +127,22 @@ class TestArtifactSimilarity(unittest.TestCase):
 
     def test_not_equal(self):
         self.assertTrue(self.artifactA != self.artifactB)
-    
+
     def test_equal(self):
         self.assertTrue(self.artifactA == self.artifactC)
-    
+
     def test_not_similar(self):
         capturedOutput = io.StringIO()
         sys.stdout = capturedOutput
         self.artifactA._checkSimilar(self.artifactB)
         sys.stdout = sys.__stdout__
         self.assertTrue("WARNING:" in capturedOutput.getvalue())
-    
+
     def test_similar(self):
         capturedOutput = io.StringIO()
         sys.stdout = capturedOutput
         self.artifactA._checkSimilar(self.artifactD)
-        sys.stdout = sys.__stdout__ 
+        sys.stdout = sys.__stdout__
         self.assertFalse("WARNING:" in capturedOutput.getvalue())
 
 if __name__ == '__main__':
