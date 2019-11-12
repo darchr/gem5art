@@ -6,3 +6,5 @@ dist/
 *.egg-info/
 .vscode/
 .mypy_cache/
+docs/gem5/
+docs/disks/packer_cache
