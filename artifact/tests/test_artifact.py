@@ -25,7 +25,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-# Authors: Jason Lowe-Power
+# Authors: Jason Lowe-Power, Ayaz Akram
 
 """Tests for the Artifact object and associated functions"""
 
@@ -33,6 +33,8 @@ import hashlib
 from os.path import exists
 import unittest
 from uuid import uuid4
+import sys
+import io
 
 from gem5art import artifact
 
@@ -67,6 +69,81 @@ class TestArtifact(unittest.TestCase):
         self.assertTrue(exists(self.artifact.cwd))
         self.assertTrue(exists(self.artifact.path))
 
+class TestArtifactSimilarity(unittest.TestCase):
+
+    def setUp(self):
+        self.artifactA = artifact.Artifact({
+            '_id': uuid4(),
+            'name': 'artifact-A',
+            'type': 'type-A',
+            'documentation': "This is a description of artifact A",
+            'command': ['ls', '-l'],
+            'path': '/',
+            'hash': hashlib.md5().hexdigest(),
+            'git': artifact.artifact.getGit('.'),
+            'cwd': '/',
+            'inputs': [],
+        })
+
+        self.artifactB = artifact.Artifact({
+            '_id': uuid4(),
+            'name': 'artifact-B',
+            'type': 'type-B',
+            'documentation': "This is a description of artifact B",
+            'command': ['ls', '-l'],
+            'path': '/',
+            'hash': hashlib.md5().hexdigest(),
+            'git': artifact.artifact.getGit('.'),
+            'cwd': '/',
+            'inputs': [],
+        })
+
+        self.artifactC = artifact.Artifact({
+            '_id': self.artifactA._id,
+            'name': 'artifact-A',
+            'type': 'type-A',
+            'documentation': "This is a description of artifact A",
+            'command': ['ls', '-l'],
+            'path': '/',
+            'hash': self.artifactA.hash,
+            'git': artifact.artifact.getGit('.'),
+            'cwd': '/',
+            'inputs': [],
+        })
+
+        self.artifactD = artifact.Artifact({
+            '_id': uuid4(),
+            'name': 'artifact-A',
+            'type': 'type-A',
+            'documentation': "This is a description of artifact A",
+            'command': ['ls', '-l'],
+            'path': '/',
+            'hash': hashlib.md5().hexdigest(),
+            'git': artifact.artifact.getGit('.'),
+            'cwd': '/',
+            'inputs': [],
+        })
+
+
+    def test_not_equal(self):
+        self.assertTrue(self.artifactA != self.artifactB)
+
+    def test_equal(self):
+        self.assertTrue(self.artifactA == self.artifactC)
+
+    def test_not_similar(self):
+        capturedOutput = io.StringIO()
+        sys.stdout = capturedOutput
+        self.artifactA._checkSimilar(self.artifactB)
+        sys.stdout = sys.__stdout__
+        self.assertTrue("WARNING:" in capturedOutput.getvalue())
+
+    def test_similar(self):
+        capturedOutput = io.StringIO()
+        sys.stdout = capturedOutput
+        self.artifactA._checkSimilar(self.artifactD)
+        sys.stdout = sys.__stdout__
+        self.assertFalse("WARNING:" in capturedOutput.getvalue())
 
 if __name__ == '__main__':
     unittest.main()
