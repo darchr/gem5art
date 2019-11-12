@@ -31,6 +31,7 @@
 
 import hashlib
 from os.path import exists
+import os
 import unittest
 from uuid import uuid4
 
@@ -38,7 +39,7 @@ from gem5art.artifact import artifact
 from gem5art.run import gem5Run
 
 class TestSERun(unittest.TestCase):
-    
+
     def setUp(self):
         self.gem5art = artifact.Artifact({
             '_id': uuid4(),
@@ -52,7 +53,7 @@ class TestSERun(unittest.TestCase):
             'cwd': '/',
             'inputs': [],
             })
-        
+
         self.gem5gitart = artifact.Artifact({
 	    '_id': uuid4(),
             'name': 'test-gem5-git',
@@ -78,20 +79,28 @@ class TestSERun(unittest.TestCase):
             'cwd': '/',
             'inputs': [],
             })
-        
+
         self.run = gem5Run.createSERun(
 		'gem5/build/X86/gem5.opt',
 		'configs-tests/run_test.py',
-		self.gem5art, 
+		self.gem5art,
 		self.gem5gitart,
 		self.runscptart,
 		'extra','params'
 		)
-       
+
     def test_out_dir(self):
-        print('running test')
         self.assertEqual(self.run.relative_outdir,
                 'results/X86/run_test/extra/params')
+
+    def test_command(self):
+        self.assertEqual(self.run.command,
+        ['gem5/build/X86/gem5.opt', '-re',
+        '--outdir={}'.format(os.path.abspath(
+        'results/X86/run_test/extra/params')),
+        'configs-tests/run_test.py',
+        'extra', 'params']
+        )
 
 if __name__ == '__main__':
     unittest.main()
