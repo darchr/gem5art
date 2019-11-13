@@ -174,8 +174,7 @@ class MySystem(LinuxX86System):
     def _createMemoryControllers(self, num, cls):
         self.mem_cntrls = [
             cls(range = self.mem_ranges[0],
-                port = self.membus.master,
-                channels = num)
+                port = self.membus.master)
             for i in range(num)
         ]
 
