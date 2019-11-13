@@ -76,8 +76,8 @@ for i in db.artifacts.find():print(i)
 gem5art also provides a few methods to search the database for artifacts of a particular type or name. For example, to find all disk images in a database you can do the following:
 
 ```python
-import gem5art.artifact.artifact
-for i in gem5art.artifact.artifact.getDiskImages():print(i)
+import gem5art.artifact
+for i in gem5art.artifact.getDiskImages():print(i)
 ```
 
 Other similar methods include: getLinuxBinaries(), getgem5Binaries()
@@ -85,6 +85,6 @@ Other similar methods include: getLinuxBinaries(), getgem5Binaries()
 You can use getByName() method to search database for artifacts using the name attribute. For example, to search for gem5 named artifacts:
 
 ```python
-import gem5art.artifact.artifact
-for i in gem5art.artifact.artifact.getByName("gem5"):print(i)
+import gem5art.artifact
+for i in gem5art.artifact.getByName("gem5"):print(i)
 ```
