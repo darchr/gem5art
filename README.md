@@ -1,3 +1,5 @@
+<img alt="gem5art logo" src="/gem5art.svg" width=150>
+
 # gem5art: Artifact, reproducibility, and testing utilities for gem5
 
 ![CI Badge](https://github.com/darchr/gem5art/workflows/CI/badge.svg)
