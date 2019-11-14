@@ -212,15 +212,13 @@ class MySystem(LinuxX86System):
 
         self.mem_cntrls = [
             cls(range = ranges[i],
-                port = self.membus.master,
-                channels = num)
+                port = self.membus.master)
             for i in range(num)
         ] + [kernel_controller]
 
     def _createKernelMemoryController(self, cls):
         return cls(range = self.mem_ranges[0],
-                   port = self.membus.master,
-                   channels = 1)
+                   port = self.membus.master)
 
     def _getInterleaveRanges(self, rng, num, intlv_low_bit, xor_low_bit):
         from math import log
