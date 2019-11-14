@@ -1,7 +1,8 @@
-.. gem5art documentation master file, created by
-   sphinx-quickstart on Mon Oct 28 14:35:02 2019.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+.. gem5art documentation master file
+
+.. todo: Add authors to each file.
+
+.. todo: Convert this file to markdown and the API files as well
 
 Zen and the art of gem5 experiments
 ===================================
