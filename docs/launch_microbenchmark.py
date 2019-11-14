@@ -22,12 +22,12 @@ from gem5art.tasks.tasks import run_gem5_instance
 )"""
 
 experiments_repo = Artifact.registerArtifact(
-    command = 'git clone https://github.com/darchr/fs-x86-test',
+    command = 'git clone https://github.com/darchr/microbenchmark-experiments.git',
     typ = 'git repo',
-    name = 'Boot_test',
+    name = 'microbenchmark-tests',
     path =  './',
     cwd = '../',
-    documentation = 'main experiments repo to run full system tests with gem5'
+    documentation = 'main experiments repo to run microbenchmarks with gem5'
 )
 
 gem5_repo = Artifact.registerArtifact(
@@ -101,8 +101,9 @@ linux_binaries = {
 if __name__ == "__main__":
     boot_types = ['init', 'systemd']
     num_cpus = ['1', '2', '4', '8']
-    cpu_types = ['kvm', 'atomic', 'simple', 'o3']
-    mem_types = ['Simple', 'Realistic']
+    cpu_types = ['simple'] 
+    #mem_types = ['classic']#, 'ruby']
+    mem_types = ['Realistic']
     bm_list =['MC','MCS','CCa','CCe','CCh','CCh_st']
 
     #Architecture to run with.
@@ -111,15 +112,15 @@ if __name__ == "__main__":
         bm='bench.X86'
     elif arch =='ARM':
         bm='bench.ARM'
+    path = '../microbench'
 
     for bms in bm_list:
         for cpu in cpu_types:
             for mem in mem_types:
-                run = gem5Run.createFSRun(
+                run = gem5Run.createSERun(
                     'gem5/build/X86/gem5.opt',
-                    'configs-boot-tests/run_exit.py',
+                    'configs-boot-tests/run_config1.py',
                     gem5_binary, gem5_repo, experiments_repo,
-                    cpu, mem, '../benchmarks/microbench/bms/bm'
-                                )
+                    cpu, mem, os.path.join(path,bms,bm))
                 run_gem5_instance.apply_async((run,))
                     
