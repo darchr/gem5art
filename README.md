@@ -3,6 +3,7 @@
 # gem5art: Artifact, reproducibility, and testing utilities for gem5
 
 ![CI Badge](https://github.com/darchr/gem5art/workflows/CI/badge.svg)
+[![Documentation Status](https://readthedocs.org/projects/gem5art/badge/?version=latest)](https://gem5art.readthedocs.io/en/latest/?badge=latest)
 
 ## Installing gem5art
 
