@@ -170,7 +170,7 @@ import os
 import sys
 from uuid import UUID
 
-from gem5art.artifact.artifact import Artifact
+from gem5art.artifact import Artifact
 from gem5art.run import gem5Run
 from gem5art.tasks.tasks import run_gem5_instance
 ```
