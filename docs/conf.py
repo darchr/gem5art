@@ -57,5 +57,12 @@ html_theme = 'alabaster'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
+
+html_theme_options = {
+    'logo_only': True
+}
+html_logo = "../gem5art.svg"
+
+
 # We need to set this to override the default primary doc: contents.rst
 master_doc = 'index'
