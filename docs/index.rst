@@ -8,7 +8,7 @@ Zen and the art of gem5 experiments
 
 The gem5art project is a set of Python modules to help make it easier to run experiments with the gem5 simulator.
 gem5art contains libraries for *Artifacts, Reproducibility, and Testing.*
-You can think of gem5art as a structured [protocol](https://en.wikipedia.com/Protocol) for running gem5 experiments
+You can think of gem5art as a structured [protocol](https://en.wikipedia.com/Protocol_(science\)) for running gem5 experiments
 
 When running an experiment, there are inputs, steps to run the experiment, and outputs.
 gem5art tracks all of these through [Artifacts](artifacts).
