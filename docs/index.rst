@@ -8,23 +8,23 @@ Zen and the art of gem5 experiments
 
 The gem5art project is a set of Python modules to help make it easier to run experiments with the gem5 simulator.
 gem5art contains libraries for *Artifacts, Reproducibility, and Testing.*
-You can think of gem5art as a structured [protocol](https://en.wikipedia.com/Protocol) for running gem5 experiments
+You can think of gem5art as a structured `protocol <https://en.wikipedia.com/Protocol>`_ for running gem5 experiments
 
 When running an experiment, there are inputs, steps to run the experiment, and outputs.
-gem5art tracks all of these through [Artifacts](artifacts).
+gem5art tracks all of these through `Artifacts <artifacts.html>`_.
 An artifact is a some object, usually a file, which is used as part of the experiment.
 
-The gem5art project contains an interface to store all of these artifacts in a [database](artifacts#mongodb).
+The gem5art project contains an interface to store all of these artifacts in a `database <artifacts.html#mongodb>`_.
 This database is mainly used to aid reproducibility, for instance, when you want to go back and re-run an experiment.
 However, it can also be used to share artifacts with others doing similar experiments (e.g., a disk image with a shared workload).
 
-The database is also used to store results from [gem5 runs](run).
-Given all of the input artifacts, these [runs](runAPI) have enough information to reproduce exactly the same experimental output.
+The database is also used to store results from `gem5 runs <run.html>`_.
+Given all of the input artifacts, these `runs <runAPI.html>`_ have enough information to reproduce exactly the same experimental output.
 Additionally, there is metadata associated with each gem5 run (e.g., the script name, script parameters, gem5 binary name, etc.) which are useful for aggregating results from many experiments.
 
 These experimental aggregates are useful for testing gem5 as well as conducting research.
 We will be using this data by aggregating the data from 100s or 1000s of gem5 experiments to determine the state of gem5's codebase at any particular time.
-For instance, as discussed in the [Linux boot tutorial](boot-tutorial), we can use this data to determine which Linux kernels, Ubuntu versions, and boot types are currently functional in gem5.
+For instance, as discussed in the `Linux boot tutorial <boot-tutorial.html>`_, we can use this data to determine which Linux kernels, Ubuntu versions, and boot types are currently functional in gem5.
 
 ----
 
