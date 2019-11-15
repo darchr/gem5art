@@ -198,7 +198,7 @@ args  = parser.parse_args()
 
     #parser.add_argument('binary_input', type = str, help = "Inputs to the binary")
 
-command_line_args(args.l1i_size,args.l1d_size,args.l2_size, args.bp)
+command_line_args(args.l1i_size,args.l1d_size,args.l2_size)
 
 class MySystem(BaseTestSystem):
     _CPUModel = valid_cpus[args.cpu]

@@ -41,11 +41,11 @@ from m5.objects import *
 from optparse import OptionParser
 from argparse import Namespace
 results  = Namespace(l1d_size= '32kB', l1i_size='32kB',l2_size='1MB')
-def command_line_args(l1d_size, l1i_size,l2_size,bp):
+def command_line_args(l1d_size, l1i_size,l2_size):
     results.l1d_size = l1d_size
     results.l1i_size=l1i_size
     results.l2_size=l2_size
-    branchpred = bp
+    
 #args = parse_command_line()
 class L1Cache(Cache):
     """Simple L1 Cache with default values"""
@@ -159,7 +159,7 @@ class BaseTestSystem(System):
             self.mem_ctrl = DDR4_2400_16x4()
             self.mem_ctrl.range = self.mem_ranges[0]
             self.mem_ctrl.port = self.membus.master
-            self.mem_ctrl.channels = 2
+            #self.mem_ctrl.channels = 2
 
             self.cpu.createInterruptController()
             if m5.defines.buildEnv['TARGET_ISA'] == "x86":

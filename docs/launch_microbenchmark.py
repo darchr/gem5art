@@ -101,9 +101,9 @@ linux_binaries = {
 if __name__ == "__main__":
     boot_types = ['init', 'systemd']
     num_cpus = ['1', '2', '4', '8']
-    cpu_types = ['simple'] 
+    cpu_types = ['Simple'] 
     #mem_types = ['classic']#, 'ruby']
-    mem_types = ['Realistic']
+    mem_types = ['Slow']# [SingleCycle][Inf]
     bm_list =['MC','MCS','CCa','CCe','CCh','CCh_st']
 
     #Architecture to run with.
@@ -112,7 +112,7 @@ if __name__ == "__main__":
         bm='bench.X86'
     elif arch =='ARM':
         bm='bench.ARM'
-    path = '../microbench'
+    path = 'microbench'
 
     for bms in bm_list:
         for cpu in cpu_types:
@@ -122,5 +122,5 @@ if __name__ == "__main__":
                     'configs-boot-tests/run_config1.py',
                     gem5_binary, gem5_repo, experiments_repo,
                     cpu, mem, os.path.join(path,bms,bm))
-                run_gem5_instance.apply_async((run,))
-                    
+                #run_gem5_instance.apply_async((run,))
+                run.run()   
