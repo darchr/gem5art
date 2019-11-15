@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2019 The Regents of the University of California
-# All Rights Reserved.
+# Copyright (c) 2016 Jason Lowe-Power
+# All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -27,8 +27,4 @@
 #
 # Authors: Jason Lowe-Power
 
-"""This is the gem5 artifact package"""
-
-from .artifact import Artifact
-from .artifact import getByName, getDiskImages, getLinuxBinaries, getgem5Binaries
-from ._artifactdb import ArtifactDB, getDBConnection
+from system import MySystem

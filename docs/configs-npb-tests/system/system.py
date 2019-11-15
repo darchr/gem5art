@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2016 Jason Lowe-Power
-# All rights reserved.
+# Copyright (c) 2018 The Regents of the University of California
+# All Rights Reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -33,21 +33,32 @@ from m5.util import convert
 from fs_tools import *
 from caches import *
 
+
 class MySystem(LinuxX86System):
 
-    def __init__(self, kernel, disk, cpu_type, num_cpus, opts):
+    SimpleOpts.add_option("--no_host_parallel", default=False,
+                action="store_true",
+                help="Do NOT run gem5 on multiple host threads (kvm only)")
+ 
+    SimpleOpts.add_option("--second_disk", default='',
+                          help="The second disk image to mount (/dev/hdb)")
+
+    def __init__(self, kernel, disk, num_cpus, opts, no_kvm=False):
         super(MySystem, self).__init__()
         self._opts = opts
+        self._no_kvm = no_kvm
 
-        self._host_parallel = cpu_type == "kvm"
+        self._host_parallel = not self._opts.no_host_parallel
 
         # Set up the clock domain and the voltage domain
         self.clk_domain = SrcClockDomain()
-        self.clk_domain.clock = '3GHz'
+        self.clk_domain.clock = '2.3GHz'
         self.clk_domain.voltage_domain = VoltageDomain()
 
-        self.mem_ranges = [AddrRange(Addr('3GB')), # All data
+        mem_size = '32GB'
+        self.mem_ranges = [AddrRange('100MB'), # For kernel
                            AddrRange(0xC0000000, size=0x100000), # For I/0
+                           AddrRange(Addr('4GB'), size = mem_size) # All data
                            ]
 
         # Create the main memory bus
@@ -61,10 +72,17 @@ class MySystem(LinuxX86System):
 
         self.initFS(self.membus, num_cpus)
 
+        
         # Replace these paths with the path to your disk images.
         # The first disk is the root disk. The second could be used for swap
         # or anything else.
+        
         self.setDiskImages(disk, disk)
+        
+	if opts.second_disk:
+            self.setDiskImages(disk, opts.second_disk)
+        else:
+            self.setDiskImages(disk, disk)
 
         # Change this path to point to the kernel you want to use
         self.kernel = kernel
@@ -75,7 +93,7 @@ class MySystem(LinuxX86System):
         self.boot_osflags = ' '.join(boot_options)
 
         # Create the CPUs for our system.
-        self.createCPU(cpu_type, num_cpus)
+        self.createCPU(num_cpus)
 
         # Create the cache heirarchy for the system.
         self.createCacheHierarchy()
@@ -83,7 +101,7 @@ class MySystem(LinuxX86System):
         # Set up the interrupt controllers for the system (x86 specific)
         self.setupInterrupts()
 
-        self.createMemoryControllersDDR3()
+        self.createMemoryControllersDDR4()
 
         if self._host_parallel:
             # To get the KVM CPUs to run on different host CPUs
@@ -99,29 +117,35 @@ class MySystem(LinuxX86System):
     def totalInsts(self):
         return sum([cpu.totalInsts() for cpu in self.cpu])
 
-    def createCPU(self, cpu_type, num_cpus):
-        if cpu_type == "atomic":
-            self.cpu = [AtomicSimpleCPU(cpu_id = i)
+    def createCPU(self, num_cpus):
+        if self._no_kvm:
+            self.cpu = [AtomicSimpleCPU(cpu_id = i, switched_out = False)
                               for i in range(num_cpus)]
-            self.mem_mode = 'atomic'
-        elif cpu_type == "kvm":
+            map(lambda c: c.createThreads(), self.cpu)
+            self.mem_mode = 'timing'
+
+        else:
             # Note KVM needs a VM and atomic_noncaching
             self.cpu = [X86KvmCPU(cpu_id = i)
                         for i in range(num_cpus)]
+            map(lambda c: c.createThreads(), self.cpu)
             self.kvm_vm = KvmVM()
             self.mem_mode = 'atomic_noncaching'
-        elif cpu_type == "o3":
-            self.cpu = [DerivO3CPU(cpu_id = i)
-                        for i in range(num_cpus)]
-            self.mem_mode = 'timing'
-        elif cpu_type == "simple":
-            self.cpu = [TimingSimpleCPU(cpu_id = i)
-                        for i in range(num_cpus)]
-            self.mem_mode = 'timing'
-        else:
-            m5.fatal("No CPU type {}".format(cpu_type))
 
-        map(lambda c: c.createThreads(), self.cpu)
+            self.atomicCpu = [AtomicSimpleCPU(cpu_id = i,
+                                              switched_out = True)
+                              for i in range(num_cpus)]
+            map(lambda c: c.createThreads(), self.atomicCpu)
+
+        self.timingCpu = [DerivO3CPU(cpu_id = i,
+                                     switched_out = True)
+				   for i in range(num_cpus)]
+				   
+        map(lambda c: c.createThreads(), self.timingCpu)
+
+    def switchCpus(self, old, new):
+        assert(new[0].switchedOut())
+        m5.switchCpus(self, zip(old, new))
 
     def setDiskImages(self, img_path_1, img_path_2):
         disk0 = CowDisk(img_path_1)
@@ -129,6 +153,10 @@ class MySystem(LinuxX86System):
         self.pc.south_bridge.ide.disks = [disk0, disk2]
 
     def createCacheHierarchy(self):
+        # Create an L3 cache (with crossbar)
+        self.l3bus = L2XBar(width = 64,
+                            snoop_filter = SnoopFilter(max_capacity='32MB'))
+
         for cpu in self.cpu:
             # Create a memory bus, a coherent crossbar, in this case
             cpu.l2bus = L2XBar()
@@ -153,7 +181,13 @@ class MySystem(LinuxX86System):
             cpu.l2cache.connectCPUSideBus(cpu.l2bus)
 
             # Connect the L2 cache to the L3 bus
-            cpu.l2cache.connectMemSideBus(self.membus)
+            cpu.l2cache.connectMemSideBus(self.l3bus)
+
+        self.l3cache = L3Cache(self._opts)
+        self.l3cache.connectCPUSideBus(self.l3bus)
+
+        # Connect the L3 cache to the membus
+        self.l3cache.connectMemSideBus(self.membus)
 
     def setupInterrupts(self):
         for cpu in self.cpu:
@@ -167,16 +201,43 @@ class MySystem(LinuxX86System):
             cpu.interrupts[0].int_master = self.membus.slave
             cpu.interrupts[0].int_slave = self.membus.master
 
-
-    def createMemoryControllersDDR3(self):
-        self._createMemoryControllers(1, DDR3_1600_8x8)
+    # Memory latency: Using the smaller number from [3]: 96ns
+    def createMemoryControllersDDR4(self):
+        self._createMemoryControllers(8, DDR4_2400_16x4)
 
     def _createMemoryControllers(self, num, cls):
+        kernel_controller = self._createKernelMemoryController(cls)
+
+        ranges = self._getInterleaveRanges(self.mem_ranges[-1], num, 7, 20)
+
         self.mem_cntrls = [
-            cls(range = self.mem_ranges[0],
+            cls(range = ranges[i],
                 port = self.membus.master)
             for i in range(num)
-        ]
+        ] + [kernel_controller]
+
+    def _createKernelMemoryController(self, cls):
+        return cls(range = self.mem_ranges[0],
+                   port = self.membus.master)
+
+    def _getInterleaveRanges(self, rng, num, intlv_low_bit, xor_low_bit):
+        from math import log
+        bits = int(log(num, 2))
+        if 2**bits != num:
+            m5.fatal("Non-power of two number of memory controllers")
+
+        intlv_bits = bits
+        ranges = [
+            AddrRange(start=rng.start,
+                      end=rng.end,
+                      intlvHighBit = intlv_low_bit + intlv_bits - 1,
+                      xorHighBit = xor_low_bit + intlv_bits - 1,
+                      intlvBits = intlv_bits,
+                      intlvMatch = i)
+                for i in range(num)
+            ]
+
+        return ranges
 
     def initFS(self, membus, cpus):
         self.pc = Pc()
@@ -310,9 +371,21 @@ class MySystem(LinuxX86System):
                     size = '%dB' % (self.mem_ranges[0].size() - 0x100000),
                     range_type = 1),
             ]
+        # Mark [mem_size, 3GB) as reserved if memory less than 3GB, which
+        # force IO devices to be mapped to [0xC0000000, 0xFFFF0000). Requests
+        # to this specific range can pass though bridge to iobus.
+        entries.append(X86E820Entry(addr = self.mem_ranges[0].size(),
+            size='%dB' % (0xC0000000 - self.mem_ranges[0].size()),
+            range_type=2))
 
         # Reserve the last 16kB of the 32-bit address space for m5ops
         entries.append(X86E820Entry(addr = 0xFFFF0000, size = '64kB',
                                     range_type=2))
 
+        # Add the rest of memory. This is where all the actual data is
+        entries.append(X86E820Entry(addr = self.mem_ranges[-1].start,
+            size='%dB' % (self.mem_ranges[-1].size()),
+            range_type=1))
+
         self.e820_table.entries = entries
+        

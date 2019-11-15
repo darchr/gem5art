@@ -1,3 +1,32 @@
+# -*- coding: utf-8 -*-
+# Copyright (c) 2019 The Regents of the University of California
+# All Rights Reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are
+# met: redistributions of source code must retain the above copyright
+# notice, this list of conditions and the following disclaimer;
+# redistributions in binary form must reproduce the above copyright
+# notice, this list of conditions and the following disclaimer in the
+# documentation and/or other materials provided with the distribution;
+# neither the name of the copyright holders nor the names of its
+# contributors may be used to endorse or promote products derived from
+# this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+# Authors: Jason Lowe-Power
+
 """File contains the Artifact class and helper functions
 """
 
@@ -6,12 +35,10 @@ from inspect import cleandoc
 import os
 import subprocess
 import time
-import typing
 from typing import Any, Dict, Iterator, List, Union
 from uuid import UUID, uuid4
 
-from . import getDBConnection
-
+from ._artifactdb import getDBConnection
 
 _db = getDBConnection()
 
@@ -85,6 +112,7 @@ class Artifact:
     command: str
     path: str
     hash: str
+    time: float
     git: Dict[str,str]
     cwd: str
     inputs: List['Artifact']
@@ -118,6 +146,8 @@ class Artifact:
 
         data['command'] = cleandoc(command)
 
+        data['time'] = time.time()
+
         data['path'] = path
         if os.path.isfile(path):
             data['hash'] = getHash(path)
@@ -140,11 +170,8 @@ class Artifact:
 
             # Now that we have a complete object, construct it
             self = cls(data)
-            if old_artifact != self:
-                print(f"Current: {vars(self)}")
-                print(f"From DB: {vars(old_artifact)}")
-                raise Exception("Found matching hash in DB, but object "
-                    "doesn't match. Use the UUID constructor instead.")
+            self._checkSimilar(old_artifact)
+
         else:
             data['_id'] = uuid4()
 
@@ -209,9 +236,17 @@ class Artifact:
         if not isinstance(other, Artifact):
             return NotImplemented
 
-        if self.hash != other.hash or self._id != other._id:
+        if self.hash == other.hash and self._id == other._id:
+            self._checkSimilar(other)
+            return True
+        else:
             return False
 
+    def _checkSimilar(self, other: 'Artifact'):
+        """Prints warnings if other is simlar, but not the same as self.
+        These mismatches may or may not be a problem. It's up to the user to
+        make this decision.
+        """
         if self.name != other.name:
             print(f"WARNING: name mismatch for {self.name}! "
                   f"{self.name} != {other.name}")
@@ -233,8 +268,6 @@ class Artifact:
         mismatch = set(self.inputs).symmetric_difference(other.inputs)
         if mismatch:
             print(f"WARNING: input mismatch for {self.name}! {mismatch}")
-
-        return True
 
     def __hash__(self) -> int:
         return self._id.int

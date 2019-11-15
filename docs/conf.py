@@ -33,6 +33,7 @@ release = '0.2.1'
 # ones.
 extensions = ['recommonmark',
               'sphinx.ext.autodoc',
+              'sphinx_markdown_tables',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -55,6 +56,13 @@ html_theme = 'alabaster'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+
+html_theme_options = {
+    'logo_only': True
+}
+html_logo = "../gem5art.svg"
+
 
 # We need to set this to override the default primary doc: contents.rst
 master_doc = 'index'

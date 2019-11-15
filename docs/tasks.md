@@ -8,7 +8,7 @@ Celery server can run many gem5 tasks asynchronously. Once a user creates a gem5
 Celery server can be started with the following command:
 
 ```sh
-celery -E -A gem5art worker --autoscale=[number of workers],0
+celery -E -A gem5art.tasks.celery worker --autoscale=[number of workers],0
 ```
 
 This will start a server with events enabled that will accept gem5 tasks as defined in gem5art.
@@ -20,18 +20,18 @@ It will autoscale from 0 to desired number of workers.
 You can monitor the celery cluster doing the following:
 
 ```sh
-flower -A gem5art --port=5555
+flower -A gem5art.tasks.celery --port=5555
 ```
 This will start a webserver on port 5555.
 
 ## Removing all tasks
 
 ```sh
-celery -A gem5art purge
+celery -A gem5art.tasks.celery purge
 ```
 
 ## Viewing state of all jobs in celery
 
 ```sh
-celery -A gem5art events
+celery -A gem5art.tasks.celery events
 ```
