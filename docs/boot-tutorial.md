@@ -1,7 +1,6 @@
 # Tutorial: Run Full System Linux Boot Tests
 
 ## Introduction
-
 This tutorial explains how to use gem5art to run experiments with gem5. The specific experiment we will be doing is to test the linux kernel boot for various kernel versions and simulator configurations.
 The main steps to perform such an experiment using gem5art include: setting up the environment, building gem5, creating a disk image, compiling linux kernels, preparing gem5 run script, creating a job launch script (which will also register all of the required artifacts) and finally running this script.
 

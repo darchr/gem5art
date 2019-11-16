@@ -1,7 +1,6 @@
 # Run
 
 ## Introduction
-
 Each gem5 experiment is wrapped inside a run object which eventually is executed using Celery scheduler(discussed in the next section). gem5art uses a class gem5Run which contains all information required to run a gem5 experiment. gem5Run interacts with the Artifact class of gem5art to ensure reproducibility of gem5 experiments and also stores the current gem5Run object and the output results in the database for later analysis.
 
 ## SE and FS mode runs
@@ -55,3 +54,13 @@ Apart from the above mentioned parameters, gem5Run class also keeps track of oth
 current status of gem5 run, kill_reason (if the run is finished) etc.
 
 While the user can write their own run_script to use with gem5 (with any command line arguments), currently when gem5Run object is created for a full-system experiment using createFSRun method, it is assumed that the path to the linunx_binary and disk_image is passed to the run_script on the command line (as arguments of the createFSRun method),
+
+## Runs API Documentation
+```eval_rst
+Run
+---
+
+.. automodule:: gem5art.run
+    :members:
+    :undoc-members:
+```

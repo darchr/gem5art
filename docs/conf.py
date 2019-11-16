@@ -15,6 +15,7 @@ import sys
 sys.path.insert(0, os.path.abspath('../../artifact'))
 sys.path.insert(0, os.path.abspath('../../run'))
 sys.path.insert(0, os.path.abspath('../../tasks'))
+from recommonmark.transform import AutoStructify
 
 # -- Project information -----------------------------------------------------
 
@@ -25,6 +26,11 @@ author = 'Ayaz Akram, Hoa Nguyen, Jason Lowe-Power'
 # The full version, including alpha/beta/rc tags
 release = '0.2.1'
 
+def setup(app):
+    app.add_config_value('recommonmark_config', {
+            'auto_toc_tree_section': 'Contents',
+            }, True)
+    app.add_transform(AutoStructify)
 
 # -- General configuration ---------------------------------------------------
 
