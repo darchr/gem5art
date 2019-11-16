@@ -1,7 +1,6 @@
 # Run
 
 ## Introduction
-
 Each gem5 experiment is wrapped inside a run object which eventually is executed using Celery scheduler(discussed in the next section). gem5art uses a class gem5Run which contains all information required to run a gem5 experiment. gem5Run interacts with the Artifact class of gem5art to ensure reproducibility of gem5 experiments and also stores the current gem5Run object and the output results in the database for later analysis.
 
 ## SE and FS mode runs

@@ -10,18 +10,18 @@ Zen and the art of gem5 experiments
 
 The gem5art project is a set of Python modules to help make it easier to run experiments with the gem5 simulator.
 gem5art contains libraries for *Artifacts, Reproducibility, and Testing.*
-You can think of gem5art as a structured [protocol](https://en.wikipedia.com/Protocol_(science\)) for running gem5 experiments
+You can think of gem5art as a structured [protocol](https://en.wikipedia.org/wiki/Protocol_(science)) for running gem5 experiments
 
 When running an experiment, there are inputs, steps to run the experiment, and outputs.
 gem5art tracks all of these through [Artifacts](artifacts).
 An artifact is a some object, usually a file, which is used as part of the experiment.
 
-The gem5art project contains an interface to store all of these artifacts in a [database](artifacts#mongodb).
+The gem5art project contains an interface to store all of these artifacts in a [database](artifacts.html#artifactdb).
 This database is mainly used to aid reproducibility, for instance, when you want to go back and re-run an experiment.
 However, it can also be used to share artifacts with others doing similar experiments (e.g., a disk image with a shared workload).
 
 The database is also used to store results from [gem5 runs](run).
-Given all of the input artifacts, these [runs](runAPI) have enough information to reproduce exactly the same experimental output.
+Given all of the input artifacts, these [runs](run.html#runs-api-documentation) have enough information to reproduce exactly the same experimental output.
 Additionally, there is metadata associated with each gem5 run (e.g., the script name, script parameters, gem5 binary name, etc.) which are useful for aggregating results from many experiments.
 
 These experimental aggregates are useful for testing gem5 as well as conducting research.

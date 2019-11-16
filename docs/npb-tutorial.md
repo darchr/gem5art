@@ -30,8 +30,6 @@ The built disk image will be stored in the same folder
 
 
 ## Setting up the environment
-
-
 First, we need to create the main directory named npb-tests (from where we will run everything) and turn it into a git repository.
 Through the use of npb-tests git repo, we will try to keep track of changes in those files which are not included in any git repo otherwise.
 An example of such files is gem5 run and config scripts (config-npb-tests).

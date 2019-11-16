@@ -64,7 +64,7 @@ The use of database also avoids running identical experiments (by generating an 
 
 ### Creating artifacts
 
-To create an `Artifact`, you must use [`registerArtifact`](artifactAPI#registerArtifact).
+To create an `Artifact`, you must use [`registerArtifact`](artifacts.html#gem5art.artifact.artifact.Artifact.registerArtifact).
 This is a factory method which will initially create the artifact.
 
 ```
@@ -77,10 +77,11 @@ Note: While creating new artifacts, warning messages showing that certain attrib
 
 You can create an artifact with just a UUID if it is already stored in the database.
 
+
 ## ArtifactDB
 
-The particular database used in this work is [MongoDB](https://).
-We use MongoDB since it can easily store large files (e.g., disk images), is tightly integrated with Python through [pymongo](), and has an interface that is flexible as the needs of gem5art changes.
+The particular database used in this work is [MongoDB](https://www.mongodb.com/).
+We use MongoDB since it can easily store large files (e.g., disk images), is tightly integrated with Python through [pymongo](https://api.mongodb.com/python/current/), and has an interface that is flexible as the needs of gem5art changes.
 
 Currently, it's required to run a database to use gem5.
 However, we are planning on changing this default to allow gem5art to be used standalone as well.
@@ -96,16 +97,16 @@ In case no database exists or a user want their own database, following steps sh
 `docker run -p 27017:27017 -v <absolute path to the created directory>:/data/db --name mongo-<some tag> -d mongo`
 ```
 
-This uses the official [MongoDB Docker image]() to run the database at the default port on the localhost.
+This uses the official [MongoDB Docker image](https://hub.docker.com/_/mongo) to run the database at the default port on the localhost.
 If the Docker container is killed, it can be restarted with the same command line and the database should be consistent.
 
 ## Searching the Database
 
 You use the pymongo Python module or the mongodb command line interface to interact with the database.
-See the [MongoDB documentation]() for more information on how to query the MongoDB database.
+See the [MongoDB documentation](https://docs.mongodb.com/) for more information on how to query the MongoDB database.
 
 gem5art has two collections.
-`artifact_database.artifacts` stores all of the metadata for the artifacts and `artifact_database.fs` is a [GridFS]() store for all of the files.
+`artifact_database.artifacts` stores all of the metadata for the artifacts and `artifact_database.fs` is a [GridFS](https://docs.mongodb.com/manual/core/gridfs/) store for all of the files.
 The files in the GridFS use the same UUIDs as the Artifacts as their primary keys.
 
 You can list all of the details of all of the artifacts by running the following in Python.
@@ -137,7 +138,6 @@ for i in gem5art.artifact.getByName("gem5"):print(i)
 
 ```eval_rst
 Artifacts API Documentation
-======
 
 Artifact
 --------

@@ -1,7 +1,5 @@
+# Introduction
 
-# Zen and the art of gem5 experiments
-
-## Introduction
 The primary motivation behind gem5art is to provide an infrastructure to use a structured approach to run experiments with gem5. Particular goals of gem5art include:
 
 - structured gem5 experiments
