@@ -136,9 +136,8 @@ import gem5art.artifact
 for i in gem5art.artifact.getByName("gem5"):print(i)
 ```
 
+## Artifacts API Documentation
 ```eval_rst
-Artifacts API Documentation
-
 Artifact
 --------
 .. automodule:: gem5art.artifact

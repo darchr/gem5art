@@ -35,10 +35,8 @@ celery -A gem5art.tasks.celery purge
 celery -A gem5art.tasks.celery events
 ```
 
+## Tasks API Documentation
 ```eval_rst
-Tasks API Documentation
-=======================
-
 Task
 ----
 
