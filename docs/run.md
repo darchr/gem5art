@@ -55,3 +55,15 @@ Apart from the above mentioned parameters, gem5Run class also keeps track of oth
 current status of gem5 run, kill_reason (if the run is finished) etc.
 
 While the user can write their own run_script to use with gem5 (with any command line arguments), currently when gem5Run object is created for a full-system experiment using createFSRun method, it is assumed that the path to the linunx_binary and disk_image is passed to the run_script on the command line (as arguments of the createFSRun method),
+
+```eval_rst
+Runs API Documentation
+==========================
+
+Run
+---
+
+.. automodule:: gem5art.run
+    :members:
+    :undoc-members:
+```

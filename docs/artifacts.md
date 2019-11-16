@@ -134,3 +134,33 @@ You can use getByName() method to search database for artifacts using the name a
 import gem5art.artifact
 for i in gem5art.artifact.getByName("gem5"):print(i)
 ```
+
+```eval_rst
+Artifacts API Documentation
+======
+
+Artifact
+--------
+.. automodule:: gem5art.artifact
+    :members:
+
+Artifact
+--------
+.. automodule:: gem5art.artifact.artifact
+    :members:
+    :undoc-members:
+
+Artifact
+--------
+.. automodule:: gem5art.artifact.artifact.Artifact
+    :members:
+    :undoc-members:
+
+AritifactDB
+-----------
+This is mostly internal.
+
+.. automodule:: gem5art.artifact._artifactdb
+    :members:
+    :undoc-members:
+```

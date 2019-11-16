@@ -35,3 +35,19 @@ celery -A gem5art.tasks.celery purge
 ```sh
 celery -A gem5art.tasks.celery events
 ```
+
+```eval_rst
+Tasks API Documentation
+=======================
+
+Task
+----
+
+.. automodule:: gem5art.tasks.tasks
+    :members:
+    :undoc-members:
+
+.. automodule:: gem5art.tasks.celery
+    :members:
+    :undoc-members:
+```
