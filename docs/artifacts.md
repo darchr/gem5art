@@ -138,7 +138,7 @@ for i in gem5art.artifact.getByName("gem5"):print(i)
 
 ## Artifacts API Documentation
 ```eval_rst
-Artifact
+Artifact Module
 --------
 .. automodule:: gem5art.artifact
     :members:
