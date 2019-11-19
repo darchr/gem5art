@@ -142,6 +142,7 @@ class gem5Run:
     def createSERun(cls,
                     gem5_binary: str,
                     run_script: str,
+                    relative_outdir: str,
                     gem5_artifact: Artifact,
                     gem5_git_artifact: Artifact,
                     run_script_git_artifact: Artifact,
@@ -172,14 +173,8 @@ class gem5Run:
 
         run.string = f"{run.gem5_name} {run.script_name}"
         run.string += ' '.join(run.params)
-
-        # Constructs the output directory from the gem5 build opts (e.g., X86,
-        # ARM, MOESI_hammer), the gem5 run script, and the extra parameters.
-        # The relative path is useful for printing
-        run.relative_outdir = os.path.join('results',
-                                           run.gem5_name,
-                                           run.script_name,
-                                           *run.params)
+        
+        run.relative_outdir = relative_outdir
 
         run.outdir = os.path.abspath(run.relative_outdir)
         # Make the directory if it doesn't exist
@@ -202,6 +197,7 @@ class gem5Run:
     def createFSRun(cls,
                     gem5_binary: str,
                     run_script: str,
+                    relative_outdir: str,
                     gem5_artifact: Artifact,
                     gem5_git_artifact: Artifact,
                     run_script_git_artifact: Artifact,
@@ -240,16 +236,8 @@ class gem5Run:
         run.string = f"{run.gem5_name} {run.script_name} "
         run.string += f"{run.linux_name} {run.disk_name} "
         run.string += ' '.join(run.params)
-
-        # Constructs the output directory from the gem5 build opts (e.g., X86,
-        # ARM, MOESI_hammer), the gem5 run script, and the extra parameters.
-        # The relative path is useful for printing
-        run.relative_outdir = os.path.join('results',
-                                           run.gem5_name,
-                                           run.script_name,
-                                           run.linux_name,
-                                           run.disk_name,
-                                           *run.params)
+        
+        run.relative_outdir = relative_outdir
 
         run.outdir = os.path.abspath(run.relative_outdir)
         # Make the directory if it doesn't exist

@@ -83,7 +83,8 @@ class TestSERun(unittest.TestCase):
         self.run = gem5Run.createSERun(
 		'gem5/build/X86/gem5.opt',
 		'configs-tests/run_test.py',
-		self.gem5art,
+		'results/run_test/out',
+                self.gem5art,
 		self.gem5gitart,
 		self.runscptart,
 		'extra','params'
@@ -91,13 +92,13 @@ class TestSERun(unittest.TestCase):
 
     def test_out_dir(self):
         self.assertEqual(self.run.relative_outdir,
-                'results/X86/run_test/extra/params')
+                'results/run_test/out')
 
     def test_command(self):
         self.assertEqual(self.run.command,
         ['gem5/build/X86/gem5.opt', '-re',
         '--outdir={}'.format(os.path.abspath(
-        'results/X86/run_test/extra/params')),
+        'results/run_test/out')),
         'configs-tests/run_test.py',
         'extra', 'params']
         )
