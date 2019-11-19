@@ -33,7 +33,7 @@ git remote add origin https://your-remote-add/micro-tests.git
 
 We also need to add a .gitignore file in our git repo, to not track files we don't care about:
 
-```sh
+```
 *.pyc
 m5out
 .vscode
@@ -87,7 +87,13 @@ make
 ```
 
 By default, these microbenchmarks are compiled for x86 ISA (which will be our focus in this tutorial).
-You can add ARM or RISCV to the make command to compile these benchmarks for ARM and RISC V ISAs.
+You can add ARM or RISCV to the make command (as shown below) to compile these benchmarks for ARM and RISC V ISAs.
+
+```sh
+make ARM
+
+make RISCV
+```
 
 ## gem5 run scripts
 
