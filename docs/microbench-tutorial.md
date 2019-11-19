@@ -19,8 +19,6 @@ This tutorial follows the following directory structure:
 
 
 ## Setting up the environment
-
-
 First, we need to create the main directory named micro-tests (from where we will run everything) and turn it into a git repository we did in the previous tutorials.
 Next, add a git remote to this repo pointing to a remote location where we want this repo to be hosted.
 
@@ -55,7 +53,6 @@ pip install gem5art-artifact gem5art-run gem5art-tasks
 ```
 
 ## Build gem5
-
 Clone gem5 and build it (optionally, after making your changes):
 
 ```sh
@@ -65,7 +62,6 @@ scons build/X86/gem5.opt -j8
 ```
 
 ## Download and compile the microbenchmarks
-
 Download the microbenchmarks:
 
 ```sh
@@ -96,7 +92,6 @@ make RISCV
 ```
 
 ## gem5 run scripts
-
 
 ## Database and Celery Server
 
