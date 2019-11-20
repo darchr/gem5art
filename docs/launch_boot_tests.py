@@ -112,6 +112,9 @@ if __name__ == "__main__":
                         run = gem5Run.createFSRun(
                             'gem5/build/X86/gem5.opt',
                             'configs-boot-tests/run_exit.py',
+                            '''results/X86/run_exit/vmlinux-5.2.3/
+                            boot-exit/{}/{}/{}/{}
+                            '''.format(cpu, mem, num_cpu, boot_type),
                             gem5_binary, gem5_repo, experiments_repo,
                             os.path.join('linux-stable', 'vmlinux'+'-'+linux),
                             'disk-image/boot-exit/boot-exit-image/boot-exit',
