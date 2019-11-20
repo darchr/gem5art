@@ -1,0 +1,60 @@
+#!/usr/bin/env python3
+
+#This is a job launch script for boot tests
+
+import os
+import sys
+from uuid import UUID
+
+from gem5art.artifact.artifact import Artifact
+from gem5art.run import gem5Run
+from gem5art.tasks.tasks import run_gem5_instance
+
+experiments_repo = Artifact.registerArtifact(
+    command = 'git clone https://your-remote-add/micro-tests.git',
+    typ = 'git repo',
+    name = 'micro-tests',
+    path =  './',
+    cwd = '../',
+    documentation = 'main experiments repo to run microbenchmarks with gem5'
+)
+
+gem5_repo = Artifact.registerArtifact(
+    command = 'git clone https://gem5.googlesource.com/public/gem5',
+    typ = 'git repo',
+    name = 'gem5',
+    path =  'gem5/',
+    cwd = './',
+    documentation = 'git repo with gem5 master branch on Nov 20'
+)
+
+gem5_binary = Artifact.registerArtifact(
+    command = 'scons build/X86/gem5.opt',
+    typ = 'gem5 binary',
+    name = 'gem5',
+    cwd = 'gem5/',
+    path =  'gem5/build/X86/gem5.opt',
+    inputs = [gem5_repo,],
+    documentation = 'default gem5 x86'
+)
+
+if __name__ == "__main__":
+
+    cpu_types = ['TimingSimple', 'DerivO3']
+    mem_types = ['Inf', 'SingleCycle', 'Slow']
+
+    # randomly picked 2 benchmarks from each category
+    # list can be modified according to requirements
+    bm_list =['CCa', 'CCe', 'MC', 'M_Dyn', 'EF', 'EM1'
+            'STc', 'STL2']
+
+    for bm in bm_list:
+        for cpu in cpu_types:
+            for mem in mem_types:
+                run = gem5Run.createSERun(
+                    'gem5/build/X86/gem5.opt',
+                    'configs-micro-tests/run_micro.py',
+                    'results/X86/run_micro/{}/{}/{}'.format(bm,cpu,mem),
+                    gem5_binary, gem5_repo, experiments_repo,
+                    cpu, mem, os.path.join('microbench',bm,'bench.X86'))
+                run_gem5_instance.apply_async((run,))
