@@ -57,6 +57,11 @@
         },
         {
             "type": "file",
+            "source": "parsec/parsec-benchmark.zip",
+            "destination": "/home/gem5/parsec-benchmark.zip"
+        },
+        {
+            "type": "file",
             "source": "shared/serial-getty@.service",
             "destination": "/home/gem5/"
         },
@@ -79,7 +84,7 @@
     {
         "boot_command_prefix": "<enter><wait><f6><esc><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
         "desktop": "false",
-        "image_size": "12000",
+        "image_size": "40960",
         "headless": "true",
         "iso_checksum": "34416ff83179728d54583bf3f18d42d2",
         "iso_checksum_type": "md5",

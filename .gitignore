@@ -7,4 +7,9 @@ dist/
 .vscode/
 .mypy_cache/
 docs/gem5/
-docs/disks/packer_cache
+packer_cache/
+parsec-benchmark/
+parsec-benchmark.zip
+parsec-image/ 
+packer
+bzImage
