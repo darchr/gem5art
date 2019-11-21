@@ -332,13 +332,12 @@ Now, to build the disk image, inside disk-image folder, run:
 
 In this tutorial, we will use linux kernel v5.2.3 with gem5 to run NAS parallel benchmarks.
 First, get the linux kernel config file from [here](https://github.com/darchr/gem5art/blob/master/docs/linux-configs/config.5.2.3), and place it in npb-tests folder.
-Then, we will get the linux source and checkout linux v5.2.3.
+Then, we will get the linux source of version 5.2.3:
 
 ```
-git clone https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
+git clone --branch v5.2.3 --depth 1 https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
 mv linux linux-stable
 cd linux-stable
-git checkout v5.2.3
 ```
 Compile the linux kernel from its source (using already downloaded config file config.5.2.3):
 
@@ -461,7 +460,7 @@ gem5_binary = Artifact.registerArtifact(
 )
 
 linux_repo = Artifact.registerArtifact(
-    command = '''git clone https://github.com/torvalds/linux.git;
+    command = '''git clone --branch v5.2.3 --depth 1 https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git;
     mv linux linux-stable''',
     typ = 'git repo',
     name = 'linux-stable',
@@ -475,7 +474,7 @@ linux_binary = Artifact.registerArtifact(
     typ = 'kernel',
     path = 'linux-stable/vmlinux-5.2.3',
     cwd = 'linux-stable/',
-    command = '''git checkout v{version};
+    command = '''
     cp ../config.5.2.3 .config;
     make -j8;
     cp vmlinux vmlinux-5.2.3;
