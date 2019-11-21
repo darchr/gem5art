@@ -66,7 +66,7 @@ gem5_binary = Artifact.registerArtifact(
 )
 
 linux_repo = Artifact.registerArtifact(
-    command = '''git clone https://github.com/torvalds/linux.git;
+    command = '''git clone --branch v5.2.3 --depth 1 https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git;
     mv linux linux-stable''',
     typ = 'git repo',
     name = 'linux-stable',
@@ -80,7 +80,7 @@ linux_binary = Artifact.registerArtifact(
     typ = 'kernel',
     path = 'linux-stable/vmlinux-5.2.3',
     cwd = 'linux-stable/',
-    command = '''git checkout v{version};
+    command = '''
     cp ../config.5.2.3 .config;
     make -j8;
     cp vmlinux vmlinux-5.2.3;
