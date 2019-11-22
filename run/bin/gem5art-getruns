@@ -39,13 +39,6 @@ from uuid import UUID
 
 from gem5art.run import getRuns
 
-def _convertForJson(d):
-    if isinstance(d, UUID):
-        d = str(d)
-    if isinstance(d, list):
-        d = [str(s) for s in d if isinstance(s, UUID)]
-    return d
-
 def parseArgs():
     parser = ArgumentParser(
         description = "Dump all runs from the database into a json file"
