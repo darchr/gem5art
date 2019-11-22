@@ -100,6 +100,8 @@ for num_cpu in num_cpus:
 		run = gem5Run.createFSRun(
 			'gem5/build/X86/gem5.opt',
 			'configs-npb-tests/run_npb.py',
+                       '/results/X86/run_npb/vmlinux-5.2.3/npb/{}/{}'
+                       .format(bm, num_cpu),
 			gem5_binary, gem5_repo, experiments_repo,
 			'linux-stable/vmlinux-5.2.3',
 			'disk-image/npb/npb-image/npb',
