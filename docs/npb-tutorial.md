@@ -54,6 +54,12 @@ m5out
 results
 venv
 disk-image/packer
+disk-image/packer_1.4.3_linux_amd64.zip
+disk-image/npb/npb-image/npb
+disk-image/npb/NPB3.3.1
+disk-image/packer_cache
+gem5
+linux-stable/
 ```
 
 gem5art relies on Python 3, so we suggest creating a virtual environment before using gem5art.

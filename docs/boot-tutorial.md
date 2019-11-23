@@ -42,7 +42,13 @@ m5out
 results
 venv
 disk-image/packer
+disk-image/packer_1.4.3_linux_amd64.zip
+disk-image/boot-exit/boot-exit-image/boot-exit
+disk-image/packer_cache
+gem5
+linux-stable/
 ```
+
 Through the use of boot-tests git repo, we will try to keep track of changes in those files which are not included in any git repo otherwise.
 boot-tests will also serve as the directory from where we will run everything.
 
