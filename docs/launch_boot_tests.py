@@ -79,7 +79,7 @@ linux_repo = Artifact.registerArtifact(
     documentation = 'linux kernel source code repo from Sep 23rd'
 )
 
-linuxes = ['5.2.3', '4.14.134', '4.9.186', '4.4.186']
+linuxes = ['5.3.12', '4.19.83', '4.14.134', '4.9.186', '4.4.186']
 linux_binaries = {
     version: Artifact.registerArtifact(
                 name = f'vmlinux-{version}',
@@ -90,7 +90,7 @@ linux_binaries = {
                 cp ../linux-configs/config.{version} .config;
                 make -j8;
                 cp vmlinux vmlinux-{version};
-                '''.format(v='5.2.3'),
+                ''',
                 inputs = [experiments_repo, linux_repo,],
                 documentation = f"Kernel binary for {version} with simple "
                                  "config file",
