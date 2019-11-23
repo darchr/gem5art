@@ -181,7 +181,7 @@ gem5_binary = Artifact.registerArtifact(
 )
 ```
 
-The number of artifacts is less than what we had to use in previous (full-system) tutorials, as expected.
+The number of artifacts is less than what we had to use in previous (full-system) tutorials ([boot](boot-tutorial.md), [npb](npb-tutorial.md)), as expected.
 
 Now to run the benchmarks, we will iterate through possible cpu types, memory types and a randomly selected list of some microbenchmarks:
 
