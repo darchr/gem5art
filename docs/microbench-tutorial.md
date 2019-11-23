@@ -53,11 +53,29 @@ pip install gem5art-artifact gem5art-run gem5art-tasks
 ```
 
 ## Build gem5
-Clone gem5 and build it (optionally, after making your changes):
+
+First clone gem5:
 
 ```sh
 git clone https://gem5.googlesource.com/public/gem5
 cd gem5
+```
+
+Before building gem5, we need to apply a [patch](https://github.com/darchr/gem5/commit/38d07ab0251ea8f5181abc97a534bb60157b2b5d) to the source repo.
+Basically, (as you will later see), we will run gem5 with various memory configs.
+**Inf** (SimpleMemory with 0ns latency) and **SingleCycle** (SimpleMemory with 1ns latency) do not use any caches.
+Therefore, to implement cacheless SimpleMemory we need to add support of vector port in SimpleMemory.
+This becomes necessary as we need to connect cpu's icache and dcache ports to mem_ctrl port (a vector port).
+You can download and apply the patch as follows:
+
+```sh
+wget https://github.com/darchr/gem5/commit/38d07ab0251ea8f5181abc97a534bb60157b2b5d.patch
+git am 38d07ab0251ea8f5181abc97a534bb60157b2b5d.patch --reject
+```
+
+Now, to build gem5:
+
+```sh
 scons build/X86/gem5.opt -j8
 ```
 
@@ -98,8 +116,10 @@ Get the run script named run_micro.py from [here](https://github.com/darchr/gem5
 [here](https://github.com/darchr/gem5art/blob/master/docs/configs-micro-tests/system.py).
 The run script (run_micro.py) takes the following arguments:
 - **cpu:** cpu type [**TimingSimple:** timing simple cpu model, **DerivO3:** O3 cpu model]
-- **memory:** memory type [**Inf:** 0ns latency memory, **SingleCycle:** 1ns latency memory, **SlowMemory:** 100ns latency memory. All types have infinite bandwidth]
+- **memory:** memory type [**Inf:** 0ns latency memory, **SingleCycle:** 1ns latency memory, **SlowMemory:** 100ns latency memory. All types have infinite bandwidth. Caches are only enabled for SlowMemory.]
 - **benchmark:** benchmark binary to run with gem5
+
+
 
 ## Database and Celery Server
 
@@ -174,8 +194,7 @@ if __name__ == "__main__":
 
     # randomly picked 2 benchmarks from each category
     # list can be modified according to requirements
-    bm_list =['CCa', 'CCe', 'MC', 'M_Dyn', 'EF', 'EM1'
-            'STc', 'STL2']
+    bm_list =['CCa','CCe','MC','M_Dyn','EF','EM1','STc','STL2']
 
     for bm in bm_list:
         for cpu in cpu_types:
@@ -184,13 +203,13 @@ if __name__ == "__main__":
                     'gem5/build/X86/gem5.opt',
                     'configs-micro-tests/run_micro.py',
                     'results/X86/run_micro/{}/{}/{}'.format(bm,cpu,mem),
-                    gem5_binary, gem5_repo, experiments_repo,
-                    cpu, mem, os.path.join('microbench',bm,'bench.X86'))
+                    gem5_binary,gem5_repo,experiments_repo,
+                    cpu,mem,os.path.join('microbench',bm,'bench.X86'))
                 run_gem5_instance.apply_async((run,))
 
 ```
 
-Note that, in contrast to previous tutorials, we are using createSERun here as we want to run gem5 in SE mode.
+Note that, in contrast to previous tutorials ([boot](boot-tutorial.md), [npb](npb-tutorial.md)), we are using createSERun here as we want to run gem5 in SE mode.
 Full launch script is available [here](https://github.com/darchr/gem5art/blob/master/docs/launch_micro_tests.py).
 
 Once you run this launch script (as shown below), your gem5 experiments to simulate execution of microbenchmarks on different cpu and memory types will start running.
