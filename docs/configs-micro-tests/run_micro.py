@@ -27,31 +27,30 @@
 #
 # Authors: Jason Lowe-Power
 
+'''
+This run script takes the following inputs
+cpu: cpu model to simulate (TimingSimple, DerivO3)
+memmory: type of memory to simulate (Inf: 0ns latency memory,
+SingleCyle: 1ns latency memory, SlowMemory: 100ns latency memory)
+benchmark: benchmark binary to use
+
+Note: Inf and Single Cycle memory configs do not use any caches
+while SlowMemory does
+'''
+
+
 from __future__ import print_function
 
 import argparse
 import m5
 from m5.objects import TimingSimpleCPU, DerivO3CPU
-from m5.objects import LTAGE, SimpleMemory
 from m5.objects import Root
-from m5.objects import *
 
 from system import BaseTestSystem
+from system import InfMemory, SingleCycleMemory, SlowMemory
 
 valid_cpus = [TimingSimpleCPU, DerivO3CPU]
 valid_cpus = {cls.__name__[:-3]:cls for cls in valid_cpus}
-
-class InfMemory(SimpleMemory):
-    latency = '0ns'
-    bandwidth = '0B/s'
-
-class SingleCycleMemory(SimpleMemory):
-    latency = '1ns'
-    bandwidth = '0B/s'
-
-class SlowMemory(SimpleMemory):
-    latency = '100ns'
-    bandwidth = '0B/s'
 
 valid_memories = [InfMemory, SingleCycleMemory, SlowMemory]
 valid_memories = {cls.__name__[:-6]:cls for cls in valid_memories}
@@ -64,7 +63,7 @@ args  = parser.parse_args()
 
 class MySystem(BaseTestSystem):
     _CPUModel = valid_cpus[args.cpu]
-    _MemoryModel = None
+    _MemoryModel = valid_memories[args.memory_model]
 
 system = MySystem()
 system.setTestBinary(args.binary)

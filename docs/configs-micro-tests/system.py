@@ -38,7 +38,18 @@ The system does not have a CPU model, this must be specified by a subclass.
 
 import m5
 from m5.objects import *
-from optparse import OptionParser
+
+class InfMemory(SimpleMemory):
+    latency = '0ns'
+    bandwidth = '0B/s'
+
+class SingleCycleMemory(SimpleMemory):
+    latency = '1ns'
+    bandwidth = '0B/s'
+
+class SlowMemory(SimpleMemory):
+    latency = '100ns'
+    bandwidth = '0B/s'
 
 class L1Cache(Cache):
     """Simple L1 Cache with default values"""
@@ -118,9 +129,9 @@ class BaseTestSystem(System):
     def __init__(self):
 
         super(BaseTestSystem,self).__init__()
-        if self._MemoryModel is None:
-            self.clk_domain = SrcClockDomain(clock = "3GHz",
-                                                             voltage_domain = VoltageDomain())
+        if self._MemoryModel is SlowMemory:
+            self.clk_domain = SrcClockDomain(clock = "1GHz",
+                                             voltage_domain = VoltageDomain())
 
             self.mem_mode = 'timing'
             self.mem_ranges = [AddrRange('2GB')]
@@ -180,10 +191,6 @@ class BaseTestSystem(System):
         from m5 import options
         output = os.path.join(options.outdir, 'stdout')
 
-        self.cpu.workload = Process(
-                                    cmd = [binary_path])
+        self.cpu.workload = Process(cmd = [binary_path])
         self.cpu.createThreads()
 
-    def setTestProcess(self, process):
-        self.cpu.workload = process
-        self.cpu.createThreads()
