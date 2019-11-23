@@ -36,6 +36,7 @@ We also need to add a .gitignore file in our git repo, to not track files we don
 m5out
 .vscode
 results
+gem5
 venv
 ```
 
