@@ -6,7 +6,7 @@ import os
 import sys
 from uuid import UUID
 
-from gem5art.artifact.artifact import Artifact
+from gem5art.artifact import Artifact
 from gem5art.run import gem5Run
 from gem5art.tasks.tasks import run_gem5_instance
 
@@ -45,8 +45,7 @@ if __name__ == "__main__":
 
     # randomly picked 2 benchmarks from each category
     # list can be modified according to requirements
-    bm_list =['CCa', 'CCe', 'MC', 'M_Dyn', 'EF', 'EM1'
-            'STc', 'STL2']
+    bm_list =['CCa','CCe','MC','M_Dyn','EF','EM1','STc','STL2']
 
     for bm in bm_list:
         for cpu in cpu_types:
@@ -55,6 +54,6 @@ if __name__ == "__main__":
                     'gem5/build/X86/gem5.opt',
                     'configs-micro-tests/run_micro.py',
                     'results/X86/run_micro/{}/{}/{}'.format(bm,cpu,mem),
-                    gem5_binary, gem5_repo, experiments_repo,
-                    cpu, mem, os.path.join('microbench',bm,'bench.X86'))
+                    gem5_binary,gem5_repo,experiments_repo,
+                    cpu,mem,os.path.join('microbench',bm,'bench.X86'))
                 run_gem5_instance.apply_async((run,))
