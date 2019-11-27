@@ -121,11 +121,12 @@ class L2Cache(Cache):
 class BaseTestSystem(System):
     """Base class for all test systems.
 
-    Each test system must set its own CPU model by setting the CPUModel
-    attribute.
+    Each test system must set its own CPU model and the memory system
+    by setting the _CPUModel and _MemoryModel attributes.
     """
     _CPUModel = BaseCPU
-    _MemoryModel = SimpleMemory
+    _MemoryModel = AbstractMemory
+
     def __init__(self):
 
         super(BaseTestSystem,self).__init__()
