@@ -378,7 +378,7 @@ Now, in launch_spec_experiments.py, we make an Artifact object of the Linux kern
 linux_binary = Artifact.registerArtifact(
     name = 'vmlinux-4.19.83',
     typ = 'kernel',
-    path = 'linux/vmlinux-4.19.83',
+    path = 'linux-4.19.83/vmlinux-4.19.83',
     cwd = './',
     command = '''
         cp linux-configs/config.4.19.83 linux-4.19.83/.config
@@ -549,7 +549,7 @@ if __name__ == "__main__":
     # unavailable benchmarks: 400.perlbench,447.dealII,450.soplex,483.xalancbmk
 
     for cpu in cpus:
-        for size in sizes[cpu]:
+        for size in benchmark_sizes[cpu]:
             for benchmark in benchmarks:
                 run = gem5Run.createFSRun(
                     'gem5/build/X86/gem5.opt', # gem5_binary
@@ -562,10 +562,10 @@ if __name__ == "__main__":
                     'disk-image/spec2006/spec2006-image/spec2006', # disk_image
                     linux_binary, # linux_binary_artifact
                     disk_image, # disk_image_artifact
-                    cpu, benchmark, "test" , # params
+                    cpu, benchmark, size, # params
                     timeout = 5*24*60*60 # 5 days
                 )
-            run_gem5_instance.apply_async((run,))
+                run_gem5_instance.apply_async((run,))
 
 ```
 The above launch function will run the all the available benchmarks with kvm, atomic, timing, and o3 cpus. 
