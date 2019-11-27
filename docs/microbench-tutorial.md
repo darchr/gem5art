@@ -188,7 +188,7 @@ gem5_binary = Artifact.registerArtifact(
 
 The number of artifacts is less than what we had to use in previous (full-system) tutorials ([boot](boot-tutorial.md), [npb](npb-tutorial.md)), as expected.
 
-Now to run the benchmarks, we will iterate through possible cpu types, memory types and a randomly selected list of some microbenchmarks:
+Now to run the benchmarks, we will iterate through possible cpu types, memory types and all of the microbenchmarks from microbench/ folder:
 
 ```python
 
@@ -197,9 +197,14 @@ if __name__ == "__main__":
     cpu_types = ['TimingSimple', 'DerivO3']
     mem_types = ['Inf', 'SingleCycle', 'Slow']
 
-    # randomly picked 2 benchmarks from each category
-    # list can be modified according to requirements
-    bm_list =['CCa','CCe','MC','M_Dyn','EF','EM1','STc','STL2']
+    bm_list = []
+
+    # iterate through files in microbench dir to
+    # create a list of all microbenchmarks
+
+    for filename in os.listdir('microbench'):
+        if os.path.isdir(f'microbench/{filename}') and filename != '.git':
+            bm_list.append(filename)
 
     for bm in bm_list:
         for cpu in cpu_types:
