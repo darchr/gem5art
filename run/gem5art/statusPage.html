@@ -1,0 +1,132 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<style>
+header
+{
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 10vh;
+	display: flex;
+	flex-direction: row;
+	background-color: black;
+}
+	    main
+	    {
+		    margin-top: 35vh;
+		    margin-bottom: 0vh;
+		    width: 100vw;
+		    display: flex;
+		    height: 70vh;
+		    width: 100vw;
+		    background-color: white;
+		    display: flex;
+		    flex-direction: column;
+		    align-items: center;
+	    }
+	    p, ol{
+		    font-family: sans-serif;
+		    font-size: 3vmin;
+		    color: dimgray;
+		    margin-left: 5vw;
+		    margin-right: 5vw;
+	    }
+	    h1
+	    {
+		    font-family: "Righteous", sans-serif;
+		    font-size: 4vmin;
+		    color: white;
+		    margin-left: 5vw;
+		    margin-top: auto;
+		    margin-bottom: auto;
+	    }
+
+	    #header-img
+	    {
+		    height: 8vh;
+		    width: auto;
+		    padding: 1vmin;
+		    border-radius: 50%;
+	    }
+	    form
+	    {
+		    position: fixed;
+		    top: 10vh;
+		    left: 0;
+		    width: 100vw;
+		    height: 25vh;
+		    background-color: #CFFFFD;
+		    vertical-align: top;
+	    }
+	    ul
+	    {
+		    display: inline-block;
+		    text-align: left;
+		    text-align: top;
+		    font-family: "Iceland", display;
+		    font-size: 3vmin;
+	    }
+		</style>
+		<link href="https://fonts.googleapis.com/css?family=Iceland" rel="stylesheet">
+
+		<title>
+			Gem5 Status
+		</title>
+	</head>
+	<body>
+		<header>
+			<img id = "header-img" src="https://avatars3.githubusercontent.com/u/32246645?s=200&v=4" alt="DarchR-logo">
+			<h1>
+				UC Davis Computer Architecture Research Group <i>Status Page</i>
+			</h1>
+		</header>
+		<main>
+		<form action="/url-where-you-want-to-submit-form-data">
+			<ul>
+				<label>Gem5 Name</label>
+				<li><label><input type="checkbox" name="gem5-name" value= "X86">X86</label></li>
+				<li><label><input type="checkbox" name="gem5-name" value= "ARM">ARM</label></li>
+				<li><label><input type="checkbox" name="gem5-name" value= "X86.MESI">X86.MESI</label></li>
+			</ul>
+			<ul>
+				<label>Linux Name</label>	
+				<li><label><input type="checkbox" name="linux-name" value="5.2.3">5.2.3</label></li>
+				<li><label><input type="checkbox" name="linux-name" value="4.9.81">4.9.81</label></li>
+				<li><label><input type="checkbox" name="linux-name" value="4.20.20">4.20.20</label></li>
+
+			</ul>
+			<ul>
+				<label>Disk Name</label>
+				<li><label><input type="checkbox" name="disk-name" value="ubuntu">Ubuntu</label></li>
+				<li><label><input type="checkbox" name="disk-name" value="spec">spec</label></li>
+				<li><label><input type="checkbox" name="disk-name" value="opensource">opensource</label></li>
+
+			</ul>
+			<ul>
+				<label>Number of Cores</label>
+				<li><label><input type="checkbox" name="cpu" value="1">1</label></li>
+				<li><label><input type="checkbox" name="cpu" value="2">2</label></li>
+				<li><label><input type="checkbox" name="cpu" value="4">4</label></li>
+				<li><label><input type="checkbox" name="cpu" value="8">8</label></li>
+
+			</ul>
+			<ul>
+				<label>Script Name</label>
+				<li><label><input type="checkbox" name="script-name" value="scripto1">scripto1</label></li>
+				<li><label><input type="checkbox" name="script-name" value="scriptoface">scriptoface</label></li>
+			</ul>
+			<ul>
+				<label>Workload</label>
+				<li><label><input type="checkbox" name="test" value= "init">init</label></li>
+				<li><label><input type="checkbox" name="test" value= "systemd">systemd</label></li>
+
+			</ul>
+
+		</form>
+		<p>
+		</p>
+		</main>
+	</body>
+</html>
