@@ -58,6 +58,7 @@ class gem5Run:
     _id: UUID
     hash: str
     type: str
+    name: str
     gem5_binary: str
     run_script: str
     gem5_artifact: Artifact
@@ -96,6 +97,7 @@ class gem5Run:
 
     @classmethod
     def _create(cls,
+                name: str,
                 gem5_binary: str,
                 run_script: str,
                 gem5_artifact: Artifact,
@@ -107,6 +109,7 @@ class gem5Run:
         Shared code between SE and FS when creating a run object.
         """
         run = cls()
+        run.name = name
         run.gem5_binary = gem5_binary
         run.run_script = run_script
         run.gem5_artifact = gem5_artifact
@@ -140,6 +143,7 @@ class gem5Run:
 
     @classmethod
     def createSERun(cls,
+                    name: str,
                     gem5_binary: str,
                     run_script: str,
                     relative_outdir: str,
@@ -149,6 +153,9 @@ class gem5Run:
                     *params: str,
                     timeout: int = 60*15) -> 'gem5Run':
         """
+        name is the name of the run. The name is not necessarily unique. The
+        name could be used to query the results of the run.
+
         gem5_binary and run_script are the paths to the binary to run
         and the script to pass to gem5. Full paths are better.
 
@@ -164,7 +171,7 @@ class gem5Run:
         of this class.
         """
 
-        run = cls._create(gem5_binary, run_script, gem5_artifact,
+        run = cls._create(name, gem5_binary, run_script, gem5_artifact,
                           gem5_git_artifact, run_script_git_artifact, params,
                           timeout)
 
@@ -195,6 +202,7 @@ class gem5Run:
 
     @classmethod
     def createFSRun(cls,
+                    name: str,
                     gem5_binary: str,
                     run_script: str,
                     relative_outdir: str,
@@ -208,15 +216,24 @@ class gem5Run:
                     *params: str,
                     timeout: int = 60*15) -> 'gem5Run':
         """
+        name is the name of the run. The name is not necessarily unique. The
+        name could be used to query the results of the run.
+
         gem5_binary and run_script are the paths to the binary to run
         and the script to pass to gem5.
+
         The linux_binary is the kernel to run and the disk_image is the path
         to the disk image to use.
+
         Further parameters can be passed via extra arguments. These
         parameters will be passed in order to the gem5 run script.
+
+        Note: When instantiating this class for the first time, it will create
+        a file `info.json` in the outdir which contains a serialized version
+        of this class.
         """
 
-        run = cls._create(gem5_binary, run_script, gem5_artifact,
+        run = cls._create(name, gem5_binary, run_script, gem5_artifact,
                           gem5_git_artifact, run_script_git_artifact, params,
                           timeout)
         run.linux_binary = linux_binary
@@ -477,7 +494,7 @@ class gem5Run:
 
         self.results = Artifact.registerArtifact(
                 command = f'zip results.zip -r {self.outdir}',
-                name = 'results',
+                name = self.name,
                 typ = 'directory',
                 path =  os.path.join(self.outdir, 'results.zip'),
                 cwd = './',
@@ -500,5 +517,49 @@ def getRuns(fs_only: bool = False, limit: int = 0) -> Iterable[gem5Run]:
             yield gem5Run.loadFromDict(run)
 
     fsruns = _db.artifacts.find({'type':'gem5 run fs'}, limit=limit)
+    for run in fsruns:
+        yield gem5Run.loadFromDict(run)
+
+def getRunsByName(name: str, fs_only: bool = False,
+                  limit: int = 0) -> Iterable[gem5Run]:
+    """ Returns a generator of gem5Run objects, which have the field "name"
+    **exactly** the same as the name parameter. The name used in this query
+    is case sensitive.
+
+    If fs_only is True, then only full system runs will be returned.
+    Limit specifies the maximum number of runs to return.
+    """
+
+    if not fs_only:
+        seruns = _db.artifacts.find({'type:':'gem5 run', 'name': name},
+                                    limit=limit)
+        for run in seruns:
+            yield gem5Run.loadFromDict(run)
+
+    fsruns = _db.artifacts.find({'type:':'gem5 run fs', 'name': name},
+                                limit=limit)
+    for run in fsruns:
+        yield gem5Run.loadFromDict(run)
+
+def getRunsByNameLike(name: str, fs_only: bool = False,
+                      limit: int = 0) -> Iterable[gem5Run]:
+    """ Return a generator of gem5Run objects, which have the field "name"
+    containing the name parameter as a substring. The name used in this
+    query is case sensitive.
+
+    If fs_only is True, then only full system runs will be returned.
+    Limit specifies the maximum number of runs to return.
+    """
+
+    if not fs_only:
+        seruns = _db.artifacts.find({'type:':'gem5 run',
+                                     'name': {'$regex': '/{}/'.format(name)}},
+                                    limit=limit)
+        for run in seruns:
+            yield gem5Run.loadFromDict(run)
+
+    fsruns = _db.artifacts.find({'type:':'gem5 run fs',
+                                 'name': {'$regex': '/{}/'.format(name)}},
+                                limit=limit)
     for run in fsruns:
         yield gem5Run.loadFromDict(run)
