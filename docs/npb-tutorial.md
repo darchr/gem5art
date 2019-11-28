@@ -30,8 +30,6 @@ The built disk image will be stored in the same folder
 
 
 ## Setting up the environment
-
-
 First, we need to create the main directory named npb-tests (from where we will run everything) and turn it into a git repository.
 Through the use of npb-tests git repo, we will try to keep track of changes in those files which are not included in any git repo otherwise.
 An example of such files is gem5 run and config scripts (config-npb-tests).
@@ -56,6 +54,12 @@ m5out
 results
 venv
 disk-image/packer
+disk-image/packer_1.4.3_linux_amd64.zip
+disk-image/npb/npb-image/npb
+disk-image/npb/NPB3.3.1
+disk-image/packer_cache
+gem5
+linux-stable/
 ```
 
 gem5art relies on Python 3, so we suggest creating a virtual environment before using gem5art.
@@ -332,22 +336,21 @@ Now, to build the disk image, inside disk-image folder, run:
 
 ## Compiling the linux kernel
 
-In this tutorial, we will use linux kernel v5.2.3 with gem5 to run NAS parallel benchmarks.
-First, get the linux kernel config file from [here](https://github.com/darchr/gem5art/blob/master/docs/linux-configs/config.5.2.3), and place it in npb-tests folder.
-Then, we will get the linux source and checkout linux v5.2.3.
+In this tutorial, we will use the latest LTS (long term support) release of linux kernel v4.19.83 with gem5 to run NAS parallel benchmarks.
+First, get the linux kernel config file from [here](https://github.com/darchr/gem5art/blob/master/docs/linux-configs/config.4.19.83), and place it in npb-tests folder.
+Then, we will get the linux source of version 4.19.83:
 
 ```
-git clone https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
+git clone --branch v4.19.83 --depth 1 https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
 mv linux linux-stable
 cd linux-stable
-git checkout v5.2.3
 ```
-Compile the linux kernel from its source (using already downloaded config file config.5.2.3):
+Compile the linux kernel from its source (using already downloaded config file config.4.19.83):
 
 ```
-cp ../config.5.2.3 .config
+cp ../config.4.19.83 .config
 make -j8
-cp vmlinux vmlinux-5.2.3
+cp vmlinux vmlinux-4.19.83
 ```
 
 ## gem5 run scripts
@@ -463,7 +466,7 @@ gem5_binary = Artifact.registerArtifact(
 )
 
 linux_repo = Artifact.registerArtifact(
-    command = '''git clone https://github.com/torvalds/linux.git;
+    command = '''git clone --branch v4.19.83 --depth 1 https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git;
     mv linux linux-stable''',
     typ = 'git repo',
     name = 'linux-stable',
@@ -473,17 +476,17 @@ linux_repo = Artifact.registerArtifact(
 )
 
 linux_binary = Artifact.registerArtifact(
-    name = 'vmlinux-5.2.3',
+    name = 'vmlinux-4.19.83',
     typ = 'kernel',
-    path = 'linux-stable/vmlinux-5.2.3',
+    path = 'linux-stable/vmlinux-4.19.83',
     cwd = 'linux-stable/',
-    command = '''git checkout v{version};
-    cp ../config.5.2.3 .config;
+    command = '''
+    cp ../config.4.19.83 .config;
     make -j8;
-    cp vmlinux vmlinux-5.2.3;
+    cp vmlinux vmlinux-4.19.83;
     ''',
     inputs = [experiments_repo, linux_repo,],
-    documentation = "kernel binary for v5.2.3",
+    documentation = "kernel binary for v4.19.83",
 )
 ```
 
@@ -501,7 +504,7 @@ for num_cpu in num_cpus:
 			'gem5/build/X86/gem5.opt',
 			'configs-npb-tests/run_npb.py',
 			gem5_binary, gem5_repo, experiments_repo,
-			'linux-stable/vmlinux-5.2.3',
+			'linux-stable/vmlinux-4.19.83',
 			'disk-image/npb/npb-image/npb',
 			linux_binary, disk_image,
 			bm, num_cpu

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2019 The Regents of the University of California
-# All Rights Reserved.
+# Copyright (c) 2016 Jason Lowe-Power
+# All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -27,43 +27,14 @@
 #
 # Authors: Jason Lowe-Power
 
-"""A setuptools based setup module."""
+from m5.objects import IdeDisk, CowDiskImage, RawDiskImage
 
-from os.path import join
-from pathlib import Path
-from setuptools import setup, find_namespace_packages
+class CowDisk(IdeDisk):
 
+    def __init__(self, filename):
+        super(CowDisk, self).__init__()
+        self.driveID = 'master'
+        self.image = CowDiskImage(child=RawDiskImage(read_only=True),
+                                  read_only=False)
+        self.image.child.image_file = filename
 
-with open(Path(__file__).parent / 'README.md', encoding='utf-8') as f:
-    long_description = f.read()
-
-setup(
-    name = "gem5art-run",
-    version = "0.3.1",
-    description = "A collection of utilities for running gem5",
-    long_description = long_description,
-    long_description_content_type='text/markdown',
-    url='https://github.com/darchr/gem5art',
-    author='Davis Architecture Research Group (DArchR)',
-    author_email='jlowepower@ucdavis.edu',
-    license='BSD',
-    classifiers=[
-        'Development Status :: 3 - Alpha',
-        'License :: OSI Approved :: BSD License',
-        'Topic :: System :: Hardware',
-        'Intended Audience :: Science/Research',
-        'Programming Language :: Python :: 3',
-        ],
-    keywords='simulation architecture gem5',
-    packages=find_namespace_packages(),
-    install_requires=['gem5art-artifact'],
-    python_requires='>=3.6',
-    project_urls={
-        'Bug Reports':'https://github.com/darchr/gem5art/issues',
-        'Source':'https://github.com/darchr/gem5art',
-        'Documentation':'https://gem5art.readthedocs.io/en/latest/',
-    },
-    scripts = [
-        'bin/gem5art-getruns',
-    ],
-)

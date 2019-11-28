@@ -66,7 +66,7 @@ gem5_binary = Artifact.registerArtifact(
 )
 
 linux_repo = Artifact.registerArtifact(
-    command = '''git clone https://github.com/torvalds/linux.git;
+    command = '''git clone --branch v4.19.83 --depth 1 https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git;
     mv linux linux-stable''',
     typ = 'git repo',
     name = 'linux-stable',
@@ -76,17 +76,17 @@ linux_repo = Artifact.registerArtifact(
 )
 
 linux_binary = Artifact.registerArtifact(
-    name = 'vmlinux-5.2.3',
+    name = 'vmlinux-4.19.83',
     typ = 'kernel',
-    path = 'linux-stable/vmlinux-5.2.3',
+    path = 'linux-stable/vmlinux-4.19.83',
     cwd = 'linux-stable/',
-    command = '''git checkout v{version};
-    cp ../config.5.2.3 .config;
+    command = '''
+    cp ../config.4.19.83 .config;
     make -j8;
-    cp vmlinux vmlinux-5.2.3;
+    cp vmlinux vmlinux-4.19.83;
     ''',
     inputs = [experiments_repo, linux_repo,],
-    documentation = "kernel binary for v5.2.3",
+    documentation = "kernel binary for v4.19.83",
 )
 
 
@@ -100,8 +100,10 @@ for num_cpu in num_cpus:
 		run = gem5Run.createFSRun(
 			'gem5/build/X86/gem5.opt',
 			'configs-npb-tests/run_npb.py',
+                       '/results/X86/run_npb/vmlinux-5.2.3/npb/{}/{}'
+                       .format(bm, num_cpu),
 			gem5_binary, gem5_repo, experiments_repo,
-			'linux-stable/vmlinux-5.2.3',
+			'linux-stable/vmlinux-4.19.83',
 			'disk-image/npb/npb-image/npb',
 			linux_binary, disk_image,
 			bm, num_cpu

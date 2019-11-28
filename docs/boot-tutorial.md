@@ -1,7 +1,6 @@
 # Tutorial: Run Full System Linux Boot Tests
 
 ## Introduction
-
 This tutorial explains how to use gem5art to run experiments with gem5. The specific experiment we will be doing is to test the linux kernel boot for various kernel versions and simulator configurations.
 The main steps to perform such an experiment using gem5art include: setting up the environment, building gem5, creating a disk image, compiling linux kernels, preparing gem5 run script, creating a job launch script (which will also register all of the required artifacts) and finally running this script.
 
@@ -43,7 +42,13 @@ m5out
 results
 venv
 disk-image/packer
+disk-image/packer_1.4.3_linux_amd64.zip
+disk-image/boot-exit/boot-exit-image/boot-exit
+disk-image/packer_cache
+gem5
+linux-stable/
 ```
+
 Through the use of boot-tests git repo, we will try to keep track of changes in those files which are not included in any git repo otherwise.
 boot-tests will also serve as the directory from where we will run everything.
 
@@ -110,24 +115,24 @@ Now, to build the disk image, inside boot-exit folder, run:
 
 ## Compiling the linux kernel
 
-In this tutorial, we want to experiment with different linux kernels to examine the state of gem5's ability to boot different linux kernels. The specific kernel versions we picked include: v5.2.3, v4.14.134, v4.9.186, and v4.4.186.
+In this tutorial, we want to experiment with different linux kernels to examine the state of gem5's ability to boot different linux kernels. We picked the latest stable kernel (v5.3.12) and the last four LTS (long term support) releases which include: v4.19.83, v4.14.134, v4.9.186, and v4.4.186.
 
-Let's use an example of kernel v5.2.3 to see how to compile the kernel.
+Let's use an example of kernel v5.3.12 to see how to compile the kernel.
 First, add a folder linux-configs to store linux kernel config files. The configuration files of interest are available [here](https://github.com/darchr/gem5art/blob/master/docs/linux-configs/).
-Then, we will get the linux source and checkout the required linux version (e.g. 5.2.3 in this case).
+Then, we will get the linux source and checkout the required linux version (e.g. v5.3.12 in this case).
 
 ```
 git clone https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
 mv linux linux-stable
 cd linux-stable
-git checkout v{version-no: e.g. 5.2.3}
+git checkout v{version-no: e.g. 5.3.12}
 ```
 Compile the linux kernel from its source (and an appropriate config file from linux-configs/):
 
 ```
-cp ../linux-configs/config.{version-no: e.g. 5.2.3} .config
+cp ../linux-configs/config.{version-no: e.g. 5.3.12} .config
 make -j8
-cp vmlinux vmlinux-{version-no: e.g. 5.2.3}
+cp vmlinux vmlinux-{version-no: e.g. 5.3.12}
 ```
 
 Repeat the above process for other kernel versions that we want to use in this experiment.
@@ -257,7 +262,7 @@ linux_repo = Artifact.registerArtifact(
     documentation = 'linux kernel source code repo from Sep 23rd'
 )
 
-linuxes = ['5.2.3', '4.14.134', '4.9.186', '4.4.186']
+linuxes = ['5.3.12', '4.19.83', '4.14.134', '4.9.186', '4.4.186']
 linux_binaries = {
     version: Artifact.registerArtifact(
                 name = f'vmlinux-{version}',
@@ -268,7 +273,7 @@ linux_binaries = {
                 cp ../linux-configs/config.{version} .config;
                 make -j8;
                 cp vmlinux vmlinux-{version};
-                '''.format(v='5.2.3'),
+                ''',
                 inputs = [experiments_repo, linux_repo,],
                 documentation = f"Kernel binary for {version} with simple "
                                  "config file",
