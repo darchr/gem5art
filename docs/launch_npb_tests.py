@@ -92,20 +92,26 @@ linux_binary = Artifact.registerArtifact(
 
 if __name__ == "__main__":
     num_cpus = ['1', '4']
-    benchmarks = ['is.C.x', 'ep.C.x', 'cg.C.x', 'mg.C.x',
-            'ft.C.x', 'bt.C.x', 'sp.C.x', 'lu.C.x']
+    benchmarks = ['is.x', 'ep.x', 'cg.x', 'mg.x','ft.x', 'bt.x', 'sp.x', 'lu.x']
 
-for num_cpu in num_cpus:
-	for bm in benchmarks:
-		run = gem5Run.createFSRun(
-			'gem5/build/X86/gem5.opt',
-			'configs-npb-tests/run_npb.py',
-                       '/results/X86/run_npb/vmlinux-5.2.3/npb/{}/{}'
-                       .format(bm, num_cpu),
-			gem5_binary, gem5_repo, experiments_repo,
-			'linux-stable/vmlinux-4.19.83',
-			'disk-image/npb/npb-image/npb',
-			linux_binary, disk_image,
-			bm, num_cpu
-			)
-		run_gem5_instance.apply_async((run,))
+    classes = ['A', 'B', 'C', 'D']
+    cpus = ['kvm', 'atomic']
+
+for cpu in cpus:
+    for num_cpu in num_cpus:
+        for clas in classes:
+            for bm in benchmarks:
+                if cpu == 'atomic' and clas != 'A':
+                    continue
+                run = gem5Run.createFSRun(
+                    'gem5/build/X86/gem5.opt',
+                    'configs-npb-tests/run_npb.py',
+                    f'''/results/X86/run_npb/vmlinux-4.19.83/npb/
+                    {bm}/{clas}/{cpu}/{num_cpu}''',
+                    gem5_binary, gem5_repo, experiments_repo,
+                    'linux-stable/vmlinux-4.19.83',
+                    'disk-image/npb/npb-image/npb',
+                    linux_binary, disk_image,
+                    cpu, bm.replace('.x', f'.{clas}.x'), num_cpu
+                    )
+                run_gem5_instance.apply_async((run,))
