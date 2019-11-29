@@ -67,18 +67,8 @@
         },
         {
             "type": "file",
-            "source": "npb/NPB3.3.1/NPB3.3-OMP",
+            "source": "npb/npb-hooks/NPB3.3.1/NPB3.3-OMP",
             "destination": "/home/gem5/"
-        },
-        {
-            "type": "file",
-            "source": "npb/make.def",
-            "destination": "/home/gem5/NPB3.3-OMP/config/make.def"
-        },
-        {
-            "type": "file",
-            "source": "npb/suite.def_C",
-            "destination": "/home/gem5/NPB3.3-OMP/config/suite.def_C"
         },
         {
             "type": "shell",
