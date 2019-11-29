@@ -91,7 +91,7 @@ if __name__ == "__m5_main__":
         root.sim_quantum = int(1e9) # 1 ms
 
     #needed for long running jobs
-    #m5.disableAllListeners()
+    m5.disableAllListeners()
 
     # instantiate all of the objects we've created above
     m5.instantiate()

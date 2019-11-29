@@ -2,7 +2,7 @@ import os
 import sys
 from uuid import UUID
 
-from gem5art.artifact.artifact import Artifact
+from gem5art.artifact import Artifact
 from gem5art.run import gem5Run
 from gem5art.tasks.tasks import run_gem5_instance
 
@@ -20,19 +20,26 @@ packer = Artifact.registerArtifact(
 experiments_repo = Artifact.registerArtifact(
     command = 'git clone https://your-remote-add/npb-tests.git',
     typ = 'git repo',
-    name = 'npb',
+    name = 'npb_tests',
     path =  './',
     cwd = '../',
     documentation = 'main repo to run npb with gem5'
 )
 
 gem5_repo = Artifact.registerArtifact(
-    command = 'git clone https://gem5.googlesource.com/public/gem5',
+    command = '''
+        git clone https://gem5.googlesource.com/public/gem5;
+        cd gem5;
+        git remote add darchr https://github.com/darchr/gem5;
+        git fetch darchr;
+        git cherry-pick 6450aaa7ca9e3040fb9eecf69c51a01884ac370c;
+        git cherry-pick 3403665994b55f664f4edfc9074650aaa7ddcd2c;
+    ''',
     typ = 'git repo',
     name = 'gem5',
     path =  'gem5/',
     cwd = './',
-    documentation = 'git repo with gem5 master branch on Sep 23rd'
+    documentation = 'cloned gem5 master branch from googlesource (Nov 18, 2019) and cherry-picked 2 commits from darchr/gem5'
 )
 
 m5_binary = Artifact.registerArtifact(
@@ -52,7 +59,7 @@ disk_image = Artifact.registerArtifact(
     cwd = 'disk-image/npb',
     path = 'disk-image/npb/npb-image/npb',
     inputs = [packer, experiments_repo, m5_binary,],
-    documentation = 'Ubuntu with m5 binary installed and root auto login'
+    documentation = 'Ubuntu with m5 binary and NPB (with ROI annotations: darchr/npb-hooks/gem5art-npb-tutorial) installed.'
 )
 
 gem5_binary = Artifact.registerArtifact(
@@ -72,7 +79,7 @@ linux_repo = Artifact.registerArtifact(
     name = 'linux-stable',
     path =  'linux-stable/',
     cwd = './',
-    documentation = 'linux kernel source code repo from Sep 23rd'
+    documentation = 'linux kernel source code repo'
 )
 
 linux_binary = Artifact.registerArtifact(
@@ -106,8 +113,7 @@ for cpu in cpus:
                 run = gem5Run.createFSRun(
                     'gem5/build/X86/gem5.opt',
                     'configs-npb-tests/run_npb.py',
-                    f'''/results/X86/run_npb/vmlinux-4.19.83/npb/
-                    {bm}/{clas}/{cpu}/{num_cpu}''',
+                    f'''results/run_npb/{bm}/{clas}/{cpu}/{num_cpu}''',
                     gem5_binary, gem5_repo, experiments_repo,
                     'linux-stable/vmlinux-4.19.83',
                     'disk-image/npb/npb-image/npb',
