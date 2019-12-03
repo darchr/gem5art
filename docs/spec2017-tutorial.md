@@ -3,21 +3,19 @@ Authors:
   - Hoa Nguyen
 ---
 
-# Tutorial: Run SPEC CPU 2006 Benchmarks in Full System Mode with gem5art  
+# Tutorial: Run SPEC CPU 2017 Benchmarks in Full System Mode with gem5art  
 
 ## Introduction  
-In this tutorial, we will demonstrate how to utilize gem5art to run SPEC CPU 2006 benchmarks in gem5 full system mode. 
+In this tutorial, we will demonstrate how to utilize gem5art to run SPEC CPU 2017 benchmarks in gem5 full system mode. 
 The full example with all of the gem5art tutorials can be found [here](https://github.com/darchr/gem5art-experiments). 
-The scripts in this tutorial work with gem5art-* v0.3.1.
+The scripts in this tutorial work with gem5art-* v0.3.1.  
 
-### SPEC CPU 2006 Benchmarks  
-**Important:** The usage of this tutorial is just for the purpose of demonstration. 
-Those benchmarks [have been retired](https://www.spec.org/cpu2006/) [1]. 
-More details about those benchmarks are [here](https://dl.acm.org/citation.cfm?id=1186737) [2]. 
-The Appendix II section of this tutorial shows how to use the SPEC 2006 scripts to run SPEC 2017 experiments.
+**Note**: This steps in this tutorial are mostly identical to those of [the SPEC 2006 tutorial](spec2006-tutorial.md). 
+The differences are in the scripts used to create the disk image, and the name of the benchmarks.  
 
-Examples of the usage of SPEC CPU 2006 benchmark in the literature are [here](https://ieeexplore.ieee.org/abstract/document/4378787) [3] and in the book [4]. 
-Another example of the usage of SPEC CPU benchmarks is [here](https://cacm.acm.org/magazines/2019/2/234352-a-new-golden-age-for-computer-architecture/fulltext) [5].
+
+### SPEC CPU 2017 Benchmarks  
+More details about those benchmarks are [here](https://www.spec.org/cpu2017/Docs/).  
 
 ### gem5 Full System Mode  
 Different from the gem5 SE (syscall emulation) mode, the full system mode uses the Linux kernel instead of emulating syscalls. 
@@ -32,11 +30,11 @@ In this tutorial, we will provide working Linux configurations, the necessary st
 We structure the experiment as follows (note that there are many more ways to structure the experiments, and the following is one of them),  
 * root folder  
   * gem5: a folder containing gem5 source code and gem5 binaries.  
-  * disk-image: a folder containing inputs to produce a disk image containing SPEC CPU 2006 benchmarks.  
+  * disk-image: a folder containing inputs to produce a disk image containing SPEC CPU 2017 benchmarks.  
   * linux-configs: a folder containing different Linux configurations for different Linux kernel versions.  
-  * gem5-fullsystem-configs: a folder containing a gem5 configuration that is made specifically to run SPEC benchmarks as described in the below figure.  
+  * gem5-fullsystem-configs: a folder containing a gem5 configuration that is made specifically to run SPEC CPU 2017 benchmarks.  
   * results: a folder storing the experiment's results. This folder will have a certain structure in order to make sure that every gem5 run does not overwrite other gem5 runs results.  
-  * launch_spec2006_experiments.py: a script that does the following,  
+  * launch_spec2017_experiments.py: a script that does the following,  
     * Documenting the experiment using Artifacts objects.  
     * Running the experiment in gem5 full system mode.  
 
@@ -54,25 +52,24 @@ Therefore, we will see two stats in one file in stats.txt.
 The stats of the benchmark is the the first part of stats.txt, while the second part of the file contains the stats of the benchmark AND the process of writing output files back to the host. 
 We are only interested in the first part of stats.txt.
 
-
 ## Documenting the Preparing Steps  
 ### Setting up the Experiment Folder
 We set up a folder to contain (almost) all materials of the experiment. 
 We use git to keep track of changes in the folder. 
 
 ```sh
-mkdir spec2006-experiments
-cd spec2006-experiments
+mkdir spec2017-experiments
+cd spec2017-experiments
 git init
 ```
 
 We need add a remote to the repository. 
 
 ```sh
-git remote add origin https://your-remote-add/spec-experiment.git
+git remote add origin https://your-remote-add/spec2017-experiment.git
 ```
 
-We document the root folder of the experiment in launch_spec2006_experiments.py as follows,
+We document the root folder of the experiment in launch_spec2017_experiments.py as follows,
 
 ```sh
 experiments_repo = Artifact.registerArtifact(
@@ -81,7 +78,7 @@ experiments_repo = Artifact.registerArtifact(
     name = 'experiment',
     path =  './',
     cwd = './',
-    documentation = 'local repo to run spec 2006 experiments with gem5'
+    documentation = 'local repo to run spec 2017 experiments with gem5'
 )
 ```
 
@@ -95,9 +92,9 @@ m5out
 results
 gem5art-env
 disk-image/packer
-disk-image/spec2006/spec2006-image/spec2006
+disk-image/spec2017/spec2017-image/spec2017
 disk-image/packer_cache
-disk-image/spec2006/CPU2006v1.0.1.iso
+disk-image/spec2017/cpu2017-1.1.0.iso
 gem5
 linux-4.19.83/
 ```
@@ -107,7 +104,7 @@ Essentially, we will ignore files and folders that when we use gem5art to keep t
 ### Building gem5  
 In this step, we download the source code and build gem5. 
 In this tutorial, we use m5 writefile function to copy the file from the disk image to the host system.
-That function does not work out-of-the-box in the current version of gem5 (as of November 2019). 
+That function does not work out-of-the-box in the current version of gem5 (as of December 2019). 
 We need to cherry-pick two commits, one from googlesource, and one from darchr/gem5 on GitHub for that function to work. 
 
 ```sh
@@ -122,7 +119,7 @@ scons build/X86/gem5.opt -j8
 
 We have two artifacts: one is the gem5 source code (the gem5 git repo), and the gem5 binary. 
 The documentation of this step would be how we get the source code and how we compile the gem5 binary. 
-In launch_spec2006_experiments.py, we document the step in Artifact objects as follows,
+In launch_spec2017_experiments.py, we document the step in Artifact objects as follows,
 
 ```python
 gem5_repo = Artifact.registerArtifact(
@@ -168,7 +165,7 @@ cd gem5/util/m5/
 make -f Makefile.x86
 ```
 
-In launch_spec2006_experiments.py, we document the step in an Artifact object as follows,  
+In launch_spec2017_experiments.py, we document the step in an Artifact object as follows,  
 
 ```python
 m5_binary = Artifact.registerArtifact(
@@ -185,50 +182,50 @@ m5_binary = Artifact.registerArtifact(
 ### Preparing Scripts to Modify the Disk Image
 In this step, we will prepare the scripts that will modify the disk image after the Ubuntu installation process has finished, and before the first time we use the disk image in gem5. 
 We will keep the related files in the disk-image folder of the experiment. 
-The files that are made specifically for SPEC 2006 benchmarks will be in disk-image/spec2006, and the files that are commonly used accross most benchmarks will be in disk-image/shared.  
+The files that are made specifically for SPEC 2017 benchmarks will be in disk-image/spec2017, and the files that are commonly used accross most benchmarks will be in disk-image/shared.  
 
 In the root folder of the experiment,
 
 ```sh
 mkdir disk-image
-mkdir disk-image/spec2006
+mkdir disk-image/spec2017
 mkdir disk-image/shared
 ```
 
 The first script is the runscript.sh script, which will be appended to the end of `.bashrc` file. 
 Therefore, that script will run when we use the disk image in gem5, after the Linux booting process has finished. 
 Figure 1 describes how this script interacts with the gem5 config file.  
-The script could be found [here](https://github.com/darchr/gem5art/blob/master/docs/disks/spec2006/runscript.sh).
+The script could be found [here](https://github.com/darchr/gem5art/blob/master/docs/disks/spec2017/runscript.sh).
 
 To download the script, in the root folder of the experiment,
 
 ```sh
-cd disk-image/spec2006
-wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/disks/spec2006/runscript.sh
+cd disk-image/spec2017
+wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/disks/spec2017/runscript.sh
 ```
 
 The second script is post-installation.sh script, which will copy the "auto logging in" script to the correct place, and copy the m5 binary to /sbin/ in the disk image. 
 This script will also append the above script (runscript.sh) to the end of `.bashrc`.  
-The script could be found [here](https://github.com/darchr/gem5art/blob/master/docs/disks/spec2006/post-installation.sh).
+The script could be found [here](https://github.com/darchr/gem5art/blob/master/docs/disks/spec2017/post-installation.sh).
 
 To download the script, in the root folder of the experiment,
 
 ```sh
-cd disk-image/spec2006
-wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/disks/spec2006/post-installation.sh
+cd disk-image/spec2017
+wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/disks/spec2017/post-installation.sh
 ```
 
-The third script is the install-spec2006.sh script, which will install the dependencies required to compile and run the SPEC 2006 benchmarks, which will be compiled and built in the script. 
+The third script is the install-spec2017.sh script, which will install the dependencies required to compile and run the SPEC 2017 benchmarks, which will be compiled and built in the script. 
 We figure out that the dependencies include g++, gcc, and gfortran. 
-So we will get the build-essential and gfortran packages from Debian (note that "12345" is the default password, this could be modified in the spec2006.json file). 
+So we will get the build-essential and gfortran packages from Debian (note that "12345" is the default password, this could be modified in the spec2017.json file). 
 The script also modifies the default config script to make the benchmarks work with this set up.  
-The script could be found [here](https://github.com/darchr/gem5art/blob/master/docs/disks/spec2006/post-installation.sh).
+The script could be found [here](https://github.com/darchr/gem5art/blob/master/docs/disks/spec2017/post-installation.sh).
 
 To download the script, in the root folder of the experiment,
 
 ```sh
-cd disk-image/spec2006
-wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/disks/spec2006/install-spec2006.sh
+cd disk-image/spec2017
+wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/disks/spec2017/install-spec2017.sh
 ```
 
 We also need two other files: the auto logging in script and Ubuntu preseed. 
@@ -259,7 +256,7 @@ unzip packer_1.4.5_linux_amd64.zip
 rm packer_1.4.5_linux_amd64.zip
 ```
 
-In launch_spec2006_experiments.py, we document how we obtain the binary as follows, 
+In launch_spec2017_experiments.py, we document how we obtain the binary as follows, 
 
 ```python
 packer = Artifact.registerArtifact(
@@ -276,44 +273,44 @@ packer = Artifact.registerArtifact(
 ```
 
 Second, we create a packer script (a json file) that describes how the disk image will be built. 
-In this step, we assume that we have the SPEC 2006 ISO file in the disk-image/spec2006 folder. 
-In this script, the ISO file name is CPU2006v1.0.1.iso. 
-The script is available [here](https://github.com/darchr/gem5art/blob/master/docs/disks/spec2006/spec2006.json), and we save the file at disk-image/spec2006/spec2006.json.  
+In this step, we assume that we have the SPEC 2017 ISO file in the disk-image/spec2017 folder. 
+In this script, the ISO file name is cpu2017-1.1.0.iso. 
+The script is available [here](https://github.com/darchr/gem5art/blob/master/docs/disks/spec2017/spec2017.json), and we save the file at disk-image/spec2017/spec2017.json.  
 
 In the root folder of experiment,
 
 ```sh
-cd disk-image/spec2006/
-wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/disks/spec2006/spec2006.json
+cd disk-image/spec2017/
+wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/disks/spec2017/spec2017.json
 ```
 
 To build the disk image,
 
 ```sh
 cd disk-image/
-./packer validate spec2006/spec2006.json # validate the script, including checking the input files
-./packer build spec2006/spec2006.json
+./packer validate spec2017/spec2017.json # validate the script, including checking the input files
+./packer build spec2017/spec2017.json
 ```
 
-The process should not take more than 40 minutes on a fairly recent machine with a normal internet speed. 
-The disk image will be in disk-image/spec2006/spec2006-image/spec2006.  
+The process should not take more than an hour on a fairly recent machine with a normal internet speed. 
+The disk image will be in disk-image/spec2017/spec2017-image/spec2017.  
 
 **Note:**: Packer will output a VNC port that could be used to inspect the building process. 
 Ubuntu has a built-in VNC viewer, namely Remmina.  
 
 **Note:**: [More about using packer and building disk images](disks.md).  
 
-Now, in launch_spec2006_experiments.py, we make an Artifact object of the disk image.  
+Now, in launch_spec2017_experiments.py, we make an Artifact object of the disk image.  
 
 ```python
 disk_image = Artifact.registerArtifact(
-    command = './packer build spec2006/spec2006.json',
+    command = './packer build spec2017/spec2017.json',
     typ = 'disk image',
-    name = 'spec2006',
+    name = 'spec2017',
     cwd = 'disk-image/',
-    path = 'disk-image/spec2006/spec2006-image/spec2006',
+    path = 'disk-image/spec2017/spec2017-image/spec2017',
     inputs = [packer, experiments_repo, m5_binary,],
-    documentation = 'Ubuntu Server with SPEC 2006 installed, m5 binary installed and root auto login'
+    documentation = 'Ubuntu Server with SPEC 2017 installed, m5 binary installed and root auto login'
 )
 ```
 
@@ -334,7 +331,7 @@ git clone --branch v4.19.83 --depth 1 https://git.kernel.org/pub/scm/linux/kerne
 mv linux linux-4.19.83
 ```
 
-Now, in launch_spec2006_experiments.py, we make an Artifact object of the Linux stable git repo.
+Now, in launch_spec2017_experiments.py, we make an Artifact object of the Linux stable git repo.
 
 ```python
 linux_repo = Artifact.registerArtifact(
@@ -377,7 +374,7 @@ make -j8
 cp vmlinux vmlinux-4.19.83
 ```
 
-Now, in launch_spec2006_experiments.py, we make an Artifact object of the Linux kernel binary.
+Now, in launch_spec2017_experiments.py, we make an Artifact object of the Linux kernel binary.
 
 ```python
 linux_binary = Artifact.registerArtifact(
@@ -399,7 +396,7 @@ linux_binary = Artifact.registerArtifact(
 ### The gem5 Run Script/gem5 Configuration
 In this step, we take a look at the final missing piece: the gem5 run script. 
 The script is where we specify the simulated system. 
-We offer example scripts in the [configs-spec-tests folder](https://github.com/darchr/gem5art/blob/master/docs/configs-spec-tests/).   
+We offer example scripts in the [configs-spec2017-tests folder](https://github.com/darchr/gem5art/blob/master/docs/configs-spec2017-tests/).   
 
 First, we create a folder named gem5-configs containing all gem5 configs. 
 Since gem5art requires a git repo for the run scripts, we will make a local git repo for the run scripts.  
@@ -412,7 +409,7 @@ cd gem5-configs
 git init
 ```
 
-Then we copy all the scripts in configs-spec-tests folder to gem5-configs.  
+Then we copy all the scripts in configs-spec2017-tests folder to gem5-configs.  
 
 In the root folder of the experiment,
 
@@ -427,10 +424,10 @@ wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-t
 wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/system/system.py
 cd ..
 git add *
-git commit -m "Add run scripts for SPEC2006"
+git commit -m "Add run scripts for SPEC2017"
 ```
 
-In launch_spec2006_experiments.py, we make an Artifact object of the Linux kernel binary.  
+In launch_spec2017_experiments.py, we make an Artifact object of the Linux kernel binary.  
 
 ```python
 run_script_repo = Artifact.registerArtifact(
@@ -451,13 +448,13 @@ run_script_repo = Artifact.registerArtifact(
 )
 ```
 
-The gem5 run script, [run_spec.py](https://github.com/darchr/gem5art/blob/master/docs/configs-spec-tests/run_spec.py), takes the following parameters:  
+The gem5 run script, [run_spec.py](https://github.com/darchr/gem5art/blob/master/docs/configs-spec2017-tests/run_spec.py), takes the following parameters:  
 * --kernel: (required) the path to vmlinux file.  
 * --disk: (required) the path to spec image.  
 * --cpu: (required) name of the detailed CPU model. 
 Currently, we are supporting the following CPU models: kvm, o3, atomic, timing. 
 More CPU models could be added to getDetailedCPUModel() in run_spec.py.  
-* --benchmark: (required) name of the SPEC CPU 2006 benchmark. 
+* --benchmark: (required) name of the SPEC CPU 2017 benchmark. 
 The availability of the benchmarks could be found [here](#) TODO.  
 * --size: (required) size of the benchmark. There are three options: ref, train, test.
 * --no-copy-logs: this is an optional parameter specifying whether the spec log files should be copied to the host system.  
@@ -467,6 +464,7 @@ We don't use another Artifact object to document this file.
 The Artifact repository object of the root folder will keep track of the changes of the script.  
 
 **Note:** The first two parameters of the gem5 run script for full system simulation should always be the path to the linux binary and the path to the disk image, in that order.
+
 
 ## Run the Experiment  
 ### Setting up the Python virtual environment  
@@ -522,7 +520,7 @@ celery -E -A gem5art.tasks.celery worker --autoscale=[number of workers],0
 
 ### Creating the Launch Script Running the Experiment  
 Now, we can put together the run script! 
-In launch_spec2006_experiments.py, we import the required modules and classes at the beginning of the file,
+In launch_spec2017_experiments.py, we import the required modules and classes at the beginning of the file,
 
 ```python
 import os
@@ -534,7 +532,7 @@ from gem5art.run import gem5Run
 from gem5art.tasks.tasks import run_gem5_instance
 ```
 
-And then, we put the launch function at the end of launch_spec2006_experiments.py,
+And then, we put the launch function at the end of launch_spec2017_experiments.py,
 
 ```python
 if __name__ == "__main__":
@@ -544,13 +542,7 @@ if __name__ == "__main__":
                        'o3':     ['test'],
                        'timing': ['test']
                       }
-    benchmarks = ['401.bzip2','403.gcc','410.bwaves','416.gamess','429.mcf',
-                  '433.milc','434.zeusmp','435.gromacs','436.cactusADM',
-                  '437.leslie3d','444.namd','445.gobmk','453.povray',
-                  '454.calculix','456.hmmer','458.sjeng','459.GemsFDTD',
-                  '462.libquantum','464.h264ref','465.tonto','470.lbm',
-                  '471.omnetpp','473.astar','481.wrf','482.sphinx3',
-                  '998.specrand','999.specrand']
+    benchmarks = [TODO]
     # unavailable benchmarks: 400.perlbench,447.dealII,450.soplex,483.xalancbmk
 
     for cpu in cpus:
@@ -564,13 +556,13 @@ if __name__ == "__main__":
                     gem5_repo, # gem5_git_artifact
                     run_script_repo, # run_script_git_artifact
                     'linux-4.19.83/vmlinux-4.19.83', # linux_binary
-                    'disk-image/spec2006/spec2006-image/spec2006', # disk_image
+                    'disk-image/spec2017/spec2017-image/spec2017', # disk_image
                     linux_binary, # linux_binary_artifact
                     disk_image, # disk_image_artifact
                     cpu, benchmark, size, # params
                     timeout = 5*24*60*60 # 5 days
                 )
-                run_gem5_instance.apply_async((run,)) # TODO: update this script to gem5art-0.4.1
+                run_gem5_instance.apply_async((run,))
 
 ```
 The above launch function will run the all the available benchmarks with kvm, atomic, timing, and o3 cpus. 
@@ -585,86 +577,64 @@ Having celery and mongoDB servers running, we can start the experiment.
 In the root folder of the experiment,
 
 ```sh
-python3 launch_spec2006_experiment.py
+python3 launch_spec2017_experiment.py
 ```
 
 ## Getting the Results  
-The results folder of each benchmark has a folder named `speclogs`, which contains the logs of the run spec commands. There are two logs in this folder: `CPU2006.001.log` and `CPU2006.002.log`. The former is the log of compiling SPEC benchmarks, which is generated when we compile SPEC benchmarks while we create the disk image. The latter is the log of the benchmark run. So, we only interest in `CPU2006.002.log`.  
+TODO
 
-If the benchmark run is successful, there will be a line starting with `Success: 1x` followed by `benchmark_name`. We will look for this line in each `CPU2006.002.log` file.  
-
-[This Python notebook shows how the Appendix I. Working SPEC 2006 Benchmarks x CPU Model table is generated](https://github.com/darchr/gem5art-experiments/blob/master/spec2006-experiments/results.ipynb).
-
-## References
-[1]  “Standard Performance Evaluation Corporation,” *SPEC CPU® 2006*. [Online]. Available: https://www.spec.org/cpu2006/. [Accessed: 12-Nov-2019].
-
-[2] J. L. Henning, “SPEC CPU2006 benchmark descriptions,” *ACM SIGARCH Computer Architecture News*, vol. 34, no. 4, pp. 1–17, Jan. 2006.
-
-[3] J. Owens, W. Dally, R. Ho, D. Jayasimha, S. Keckler, and L.-S. Peh, “Research Challenges for On-Chip Interconnection Networks,” IEEE Micro, vol. 27, no. 5, pp. 96–108, 2007.
-
-[4] M. McCool, A. Robison, and J. Reinders, Structured parallel programming: patterns for efficient computation. Waltham, MA: Morgan Kaufmann, 2012.
-
-[5] J. L. Hennessy and D. A. Patterson, “A new golden age for computer architecture,” *Communications of the ACM*, vol. 62, no. 2, pp. 48–60, 2019.  
- 
-
-## Appendix I. Working SPEC 2006 Benchmarks x CPU Model table
-Not all benchmarks are compiled in the above set up as of November 2019. 
+## Appendix I. Working SPEC 2017 Benchmarks x CPU Model Matrix
+All benchmarks are compiled in the above set up as of December 2019. 
 The following are compiled benchmarks:  
 
-| Benchmarks         | KVM/test        | KVM/ref         | AtomicCPU/test  | O3CPU/test      | TimingSimpleCPU/test |
-|--------------------|-----------------|-----------------|-----------------|-----------------|----------------------|
-| 401.bzip2          | Success         | Success         | Success         | Success         | Success              |
-| 403.gcc            | Success         | Success         | Success         | Success         | Success              |
-| 410.bwaves         | Success         | Success         | Success         | Success         | Success              |
-| 416.gamess         | Error           | Error           | Error           | Error           | Error                |
-| 429.mcf            | Success         | Success         | Success         | Success         | No SPEC logs         |
-| 433.milc           | Success         | Success         | Success         | Success         | Success              |
-| 434.zeusmp         | Success         | Success         | Success         | No SPEC logs    | Success              |
-| 435.gromacs        | Success         | Success         | Success         | Success         | Success              |
-| 436.cactusADM      | Success         | Success         | Success         | Success         | Success              |
-| 437.leslie3d       | Success         | Success         | Success         | Success         | Success              |
-| 444.namd           | Success         | Success         | Success         | Success         | Success              |
-| 445.gobmk          | Success         | Success         | Success         | No SPEC logs    | Success              |
-| 453.povray         | Success         | Success         | Success         | Success         | Success              |
-| 454.calculix       | Success         | Success         | Success         | Success         | Success              |
-| 456.hmmer          | Success         | Success         | Success         | Success         | Success              |
-| 458.sjeng          | Success         | Success         | Success         | Success         | Success              |
-| 459.GemsFDTD       | Success         | Success         | Success         | Success         | Success              |
-| 462.libquantum     | Success         | Success         | Success         | Success         | Success              |
-| 464.h264ref        | Success         | Success         | Success         | No SPEC logs    | Success              |
-| 465.tonto          | Success         | Success         | Success         | Success         | Success              |
-| 470.lbm            | Success         | Success         | Success         | Success         | Success              |
-| 471.omnetpp        | Success         | Success         | Success         | Success         | Success              |
-| 473.astar          | Success         | Success         | Success         | No SPEC logs    | Success              |
-| 481.wrf            | Error           | Error           | Error           | Error           | Error                |
-| 482.sphinx3        | Success         | Success         | Success         | Success         | Success              |
-| 998.specrand       | Success         | Success         | Success         | Success         | Success              |
-| 999.specrand       | Success         | Success         | Success         | Success         | Success              |
+| Benchmarks             | KVM/test       | KVM/ref        | O3CPU/test     | AtomicCPU/test | TimingSimpleCPU/test |
+|------------------------|----------------|----------------|----------------|----------------|----------------------|
+| 503.bwaves_r           |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 507.cactuBSSN_r        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 508.namd_r             |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 510.parest_r           |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 511.povray_r           |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 519.lbm_r              |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 521.wrf_r              |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 526.blender_r          |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 527.cam4_r             |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 538.imagick_r          |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 544.nab_r              |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 549.fotonik3d_r        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 554.roms_r             |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 997.specrand_fr        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 603.bwaves_s           |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 607.cactuBSSN_s        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 619.lbm_s              |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 621.wrf_s              |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 627.cam4_s             | Workload segfault | Workload segfault |      gem5 error |     gem5 error |                     ?|
+| 628.pop2_s             |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 638.imagick_s          |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 644.nab_s              |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 649.fotonik3d_s        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 654.roms_s             |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 996.specrand_fs        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 500.perlbench_r        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 502.gcc_r              |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 505.mcf_r              |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 520.omnetpp_r          |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 523.xalancbmk_r        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 525.x264_r             |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 531.deepsjeng_r        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 541.leela_r            |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 548.exchange2_r        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 557.xz_r               |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 999.specrand_ir        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 600.perlbench_s        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 602.gcc_s              |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 605.mcf_s              |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 620.omnetpp_s          |        Success |        Success |     gem5 error |              ? |                     ?|
+| 623.xalancbmk_s        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 625.x264_s             |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 631.deepsjeng_s        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 641.leela_s            |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 648.exchange2_s        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 657.xz_s               |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 998.specrand_is        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
 
-
-Benchmarks that are not available:
-```
-Build errors:
-400.perlbench
-447.dealII
-450.soplex
-483.xalancbmk
-```
-
-## Appendix II. Transtition to SPEC 2017
-As mentioned earlier, SPEC 2006 benchmark suite has been retired, and the newer version, SPEC 2017, is available. 
-This section will show how to reuse the scripts made for SPEC 2006 to run SPEC 2017 experiments. 
-Changes are minimal, ie. changing `2006` to `2017`, updating the location of the ISO file, changing SPEC 2006 run command (`runspec`) to SPEC 2017 run command (`runcpu`), and manipulating the SPEC 2017 config.  
-### Updating Disk Image Scripts
-The disk image scripts to generate the SPEC 2017 disk image [could be found here](https://github.com/darchr/gem5art/tree/master/docs/disks/spec2017).  
-[The changes could be found here.](https://github.com/darchr/gem5art/commit/70019fd0196d946a65efd96bb9b2b692c0dd04be)  
-
-**Note:** In the example SPEC 2017 config, the workloads are compiled using the flag `-march=native`. 
-However, since workloads are compiled while the disk image is being building by packer, the binaries would be built accordingly to the configuration of the CPU simulated by packer. 
-This is definitely not ideal to run those binaries on gem5, which is not guaranteed to support all instructions of all hardware. 
-Hence, the `-march=native` flag is removed. 
-Other tuning flags should be manually added.
-### Updating the Launch Script
-The new launch script [could be found here](https://github.com/darchr/gem5art/blob/master/docs/launch_spec2017_experiments.py). 
-Names of SPEC 2017 workloads are updated.
 
