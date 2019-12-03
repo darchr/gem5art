@@ -604,33 +604,33 @@ The following are compiled benchmarks:
 
 | Benchmarks             | KVM/test       | KVM/ref        | O3CPU/test     | AtomicCPU/test | TimingSimpleCPU/test |
 |------------------------|----------------|----------------|----------------|----------------|----------------------|
-| 401.bzip2              |              ? |              ? |              ? |              ? |                     ?|
-| 403.gcc                |              ? |              ? |              ? |              ? |                     ?|
-| 410.bwaves             |              ? |              ? |              ? |              ? |                     ?|
-| 416.gamess             |              ? |              ? |              ? |              ? |                     ?|
-| 429.mcf                |              ? |              ? |              ? |              ? |                     ?|
-| 433.milc               |              ? |              ? |              ? |              ? |                     ?|
-| 434.zeusmp             |              ? |              ? |              ? |              ? |                     ?|
-| 435.gromacs            |              ? |              ? |              ? |              ? |                     ?|
-| 436.cactusADM          |              ? |              ? |              ? |              ? |                     ?|
-| 437.leslie3d           |              ? |              ? |              ? |              ? |                     ?|
-| 444.namd               |              ? |              ? |              ? |              ? |                     ?|
-| 445.gobmk              |              ? |              ? |              ? |              ? |                     ?|
-| 453.povray             |              ? |              ? |              ? |              ? |                     ?|
-| 454.calculix           |              ? |              ? |              ? |              ? |                     ?|
-| 456.hmmer              |              ? |              ? |              ? |              ? |                     ?|
-| 458.sjeng              |              ? |              ? |              ? |              ? |                     ?|
-| 459.GemsFDTD           |              ? |              ? |              ? |              ? |                     ?|
-| 462.libquantum         |              ? |              ? |              ? |              ? |                     ?|
-| 464.h264ref            |              ? |              ? |              ? |              ? |                     ?|
-| 465.tonto              |              ? |              ? |              ? |              ? |                     ?|
-| 470.lbm                |              ? |              ? |              ? |              ? |                     ?|
-| 471.omnetpp            |              ? |              ? |              ? |              ? |                     ?|
-| 473.astar              |              ? |              ? |              ? |              ? |                     ?|
-| 481.wrf                |              ? |              ? |              ? |              ? |                     ?|
-| 482.sphinx3            |              ? |              ? |              ? |              ? |                     ?|
-| 998.specrand           |              ? |              ? |              ? |              ? |                     ?|
-| 999.specrand           |              ? |              ? |              ? |              ? |                     ?|
+| 401.bzip2              |        Success |        Success |              ? |              ? |                     ?|
+| 403.gcc                |        Success |        Success |              ? |              ? |                     ?|
+| 410.bwaves             |        Success |        Success |              ? |              ? |                     ?|
+| 416.gamess             |          Error |          Error |              ? |              ? |                     ?|
+| 429.mcf                |        Success |        Success |              ? |              ? |                     ?|
+| 433.milc               |        Success |        Success |              ? |              ? |                     ?|
+| 434.zeusmp             |        Success |        Success |              ? |              ? |                     ?|
+| 435.gromacs            |        Success |        Success |              ? |              ? |                     ?|
+| 436.cactusADM          |        Success |        Success |              ? |              ? |                     ?|
+| 437.leslie3d           |        Success |        Success |              ? |              ? |                     ?|
+| 444.namd               |        Success |        Success |              ? |              ? |                     ?|
+| 445.gobmk              |        Success |        Success |              ? |              ? |                     ?|
+| 453.povray             |        Success |        Success |              ? |              ? |                     ?|
+| 454.calculix           |        Success |        Success |              ? |              ? |                     ?|
+| 456.hmmer              |        Success |        Success |              ? |              ? |                     ?|
+| 458.sjeng              |        Success |        Success |              ? |              ? |                     ?|
+| 459.GemsFDTD           |        Success |        Success |              ? |              ? |                     ?|
+| 462.libquantum         |        Success |        Success |              ? |              ? |                     ?|
+| 464.h264ref            |        Success |        Success |              ? |              ? |                     ?|
+| 465.tonto              |        Success |        Success |              ? |              ? |                     ?|
+| 470.lbm                |        Success |        Success |              ? |              ? |                     ?|
+| 471.omnetpp            |        Success |        Success |              ? |              ? |                     ?|
+| 473.astar              |        Success |        Success |              ? |              ? |                     ?|
+| 481.wrf                |          Error |          Error |              ? |              ? |                     ?|
+| 482.sphinx3            |        Success |        Success |              ? |              ? |                     ?|
+| 998.specrand           |        Success |        Success |              ? |              ? |                     ?|
+| 999.specrand           |        Success |        Success |              ? |              ? |                     ?|
 
 Benchmarks that are not available:
 ```
