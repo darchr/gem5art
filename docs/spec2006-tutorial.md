@@ -614,7 +614,7 @@ The following are compiled benchmarks:
 | 435.gromacs            |        Success |        Success |              ? |        Success |                     ?|
 | 436.cactusADM          |        Success |        Success |              ? |        Success |                     ?|
 | 437.leslie3d           |        Success |        Success |              ? |        Success |                     ?|
-| 444.namd               |        Success |        Success |              ? |              ? |                     ?|
+| 444.namd               |        Success |        Success |              ? |        Success |                     ?|
 | 445.gobmk              |        Success |        Success |              ? |              ? |                     ?|
 | 453.povray             |        Success |        Success |              ? |        Success |                     ?|
 | 454.calculix           |        Success |        Success |              ? |        Success |                     ?|
