@@ -449,7 +449,7 @@ The gem5 run script, [run_spec.py](https://github.com/darchr/gem5art/blob/master
 * --kernel: (required) the path to vmlinux file.  
 * --disk: (required) the path to spec image.  
 * --cpu: (required) name of the detailed CPU model. 
-Currently, we are supporting the following CPU model: kvm, o3, atomic, timing. 
+Currently, we are supporting the following CPU models: kvm, o3, atomic, timing. 
 More CPU models could be added to getDetailedCPUModel() in run_spec.py.  
 * --benchmark: (required) name of the SPEC CPU 2006 benchmark. 
 The availability of the benchmarks could be found [here](#) TODO.  
