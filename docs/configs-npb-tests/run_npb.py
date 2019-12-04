@@ -71,11 +71,8 @@ if __name__ == "__m5_main__":
     # create the system we are going to simulate
     system = MySystem(kernel, disk, int(num_cpus), opts, no_kvm=False)
 
-    # For workitems to work correctly
-    # This will cause the simulator to exit simulation when the first work
-    # item is reached and when the first work item is finished.
-    system.work_begin_exit_count = 1
-    system.work_end_exit_count = 1
+    # Exit from guest on workbegin/workend
+    system.exit_on_work_items = True
 
     # Create and pass a script to the simulated system to run the reuired
     # benchmark
@@ -102,10 +99,10 @@ if __name__ == "__m5_main__":
     print("Using cpu: {}".format(cpu))
     exit_event = m5.simulate()
 
-    if exit_event.getCause() == "m5_exit instruction encountered":
+    if exit_event.getCause() == "workbegin":
         # Reached the start of ROI
         # start of ROI is marked by an
-        # m5_exit() call
+        # m5_work_begin() call
         print("Resetting stats at the start of ROI!")
         m5.stats.reset()
         start_tick = m5.curTick()
