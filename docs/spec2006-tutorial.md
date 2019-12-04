@@ -629,7 +629,7 @@ The following are compiled benchmarks:
 | 473.astar              |        Success |        Success |              ? |        Success |                    ? |
 | 481.wrf                |          Error |          Error |              ? |          Error |                    ? |
 | 482.sphinx3            |        Success |        Success |              ? |        Success |                    ? |
-| 998.specrand           |        Success |        Success |              ? |        Success |                    ? |
+| 998.specrand           |        Success |        Success |              ? |        Success |              Success |
 | 999.specrand           |        Success |        Success |              ? |        Success |                    ? |
 
 Benchmarks that are not available:
