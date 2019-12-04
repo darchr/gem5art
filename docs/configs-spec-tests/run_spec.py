@@ -229,7 +229,7 @@ if __name__ == "__m5_main__":
     detailed_cpu = getDetailedCPUModel(cpu_name)
     if detailed_cpu == None:
         print("'{}' is not define in the config script.".format(cpu_name))
-        print("Change getDeatiledCPUModel in run_spec.py "
+        print("Change getDeatiledCPUModel() in run_spec.py "
               "to add more CPU Models.")
         exit(1)
 
