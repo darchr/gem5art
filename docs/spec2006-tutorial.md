@@ -30,7 +30,7 @@ We structure the experiment as follows (note that there are many more ways to st
   * linux-configs: a folder containing different Linux configurations for different Linux kernel versions.  
   * gem5-fullsystem-configs: a folder containing a gem5 configuration that is made specifically to run SPEC CPU 2006 benchmarks.  
   * results: a folder storing the experiment's results. This folder will have a certain structure in order to make sure that every gem5 run does not overwrite other gem5 runs results.  
-  * launch_spec_experiments.py: a script that does the following,  
+  * launch_spec2006_experiments.py: a script that does the following,  
     * Documenting the experiment using Artifacts objects.  
     * Running the experiment in gem5 full system mode.  
 
@@ -66,7 +66,7 @@ We need add a remote to the repository.
 git remote add origin https://your-remote-add/spec-experiment.git
 ```
 
-We document the root folder of the experiment in launch_spec_experiments.py as follows,
+We document the root folder of the experiment in launch_spec2006_experiments.py as follows,
 
 ```sh
 experiments_repo = Artifact.registerArtifact(
@@ -117,7 +117,7 @@ scons build/X86/gem5.opt -j8
 
 We have two artifacts: one is the gem5 source code (the gem5 git repo), and the gem5 binary. 
 The documentation of this step would be how we get the source code and how we compile the gem5 binary. 
-In launch_spec_experiments.py, we document the step in Artifact objects as follows,
+In launch_spec2006_experiments.py, we document the step in Artifact objects as follows,
 
 ```python
 gem5_repo = Artifact.registerArtifact(
@@ -163,7 +163,7 @@ cd gem5/util/m5/
 make -f Makefile.x86
 ```
 
-In launch_spec_experiments.py, we document the step in an Artifact object as follows,  
+In launch_spec2006_experiments.py, we document the step in an Artifact object as follows,  
 
 ```python
 m5_binary = Artifact.registerArtifact(
@@ -254,7 +254,7 @@ unzip packer_1.4.5_linux_amd64.zip
 rm packer_1.4.5_linux_amd64.zip
 ```
 
-In launch_spec_experiments.py, we document how we obtain the binary as follows, 
+In launch_spec2006_experiments.py, we document how we obtain the binary as follows, 
 
 ```python
 packer = Artifact.registerArtifact(
@@ -298,7 +298,7 @@ Ubuntu has a built-in VNC viewer, namely Remmina.
 
 **Note:**: [More about using packer and building disk images](disks.md).  
 
-Now, in launch_spec_experiments.py, we make an Artifact object of the disk image.  
+Now, in launch_spec2006_experiments.py, we make an Artifact object of the disk image.  
 
 ```python
 disk_image = Artifact.registerArtifact(
@@ -329,7 +329,7 @@ git clone --branch v4.19.83 --depth 1 https://git.kernel.org/pub/scm/linux/kerne
 mv linux linux-4.19.83
 ```
 
-Now, in launch_spec_experiments.py, we make an Artifact object of the Linux stable git repo.
+Now, in launch_spec2006_experiments.py, we make an Artifact object of the Linux stable git repo.
 
 ```python
 linux_repo = Artifact.registerArtifact(
@@ -372,7 +372,7 @@ make -j8
 cp vmlinux vmlinux-4.19.83
 ```
 
-Now, in launch_spec_experiments.py, we make an Artifact object of the Linux kernel binary.
+Now, in launch_spec2006_experiments.py, we make an Artifact object of the Linux kernel binary.
 
 ```python
 linux_binary = Artifact.registerArtifact(
@@ -425,7 +425,7 @@ git add *
 git commit -m "Add run scripts for SPEC2006"
 ```
 
-In launch_spec_experiments.py, we make an Artifact object of the Linux kernel binary.  
+In launch_spec2006_experiments.py, we make an Artifact object of the Linux kernel binary.  
 
 ```python
 run_script_repo = Artifact.registerArtifact(
@@ -517,7 +517,7 @@ celery -E -A gem5art.tasks.celery worker --autoscale=[number of workers],0
 
 ### Creating the Launch Script Running the Experiment  
 Now, we can put together the run script! 
-In launch_spec_experiments.py, we import the required modules and classes at the beginning of the file,
+In launch_spec2006_experiments.py, we import the required modules and classes at the beginning of the file,
 
 ```python
 import os
@@ -529,7 +529,7 @@ from gem5art.run import gem5Run
 from gem5art.tasks.tasks import run_gem5_instance
 ```
 
-And then, we put the launch function at the end of launch_spec_experiments.py,
+And then, we put the launch function at the end of launch_spec2006_experiments.py,
 
 ```python
 if __name__ == "__main__":
@@ -580,7 +580,7 @@ Having celery and mongoDB servers running, we can start the experiment.
 In the root folder of the experiment,
 
 ```sh
-python3 launch_spec_experiment.py
+python3 launch_spec2006_experiment.py
 ```
 
 ## Getting the Results  
