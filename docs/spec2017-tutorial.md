@@ -34,7 +34,7 @@ We structure the experiment as follows (note that there are many more ways to st
     * Running the experiment in gem5 full system mode.  
 
 ### An Overview of Host System - gem5 Interactions
-![**Figure 1.**]( spec2006_tutorial_figure1.png "")
+![**Figure 1.**]( spec_tutorial_figure1.png "")
 A visual depict of how gem5 interacts with the host system. 
 gem5 is configured to do the following: booting the Linux kernel, running the benchmark, and copying the SPEC outputs to the host system. 
 However, since we are interested in getting the stats only for the benchmark, we configure gem5 to exit after the kernel is booted, and then we reset the stats before running the benchmark. 
