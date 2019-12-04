@@ -597,7 +597,7 @@ TODO
 [5] J. L. Hennessy and D. A. Patterson, “A new golden age for computer architecture,” *Communications of the ACM*, vol. 62, no. 2, pp. 48–60, 2019.  
  
 
-## Apprendix I. Working SPEC 2006 Benchmarks x CPU Model matrix
+## Apprendix I. Working SPEC 2006 Benchmarks x CPU Model Matrix
 Not all benchmarks are compiled in the above set up as of November 2019. 
 The following are compiled benchmarks:  
 
