@@ -287,7 +287,7 @@ cd disk-image/
 ./packer build spec2017/spec2017.json
 ```
 
-The process should not take more than 40 minutes on a fairly recent machine with a normal internet speed. 
+The process should not take more than an hour on a fairly recent machine with a normal internet speed. 
 The disk image will be in disk-image/spec2017/spec2017-image/spec2017.  
 
 **Note:**: Packer will output a VNC port that could be used to inspect the building process. 
@@ -410,13 +410,13 @@ In the root folder of the experiment,
 
 ```sh
 cd gem5-configs
-wget https://github.com/darchr/gem5art/blob/master/docs/configs-spec2017-tests/run_spec.py
-mkdir system
+wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/run_spec.py
+mkdir -p system
 cd system
-wget https://github.com/darchr/gem5art/blob/master/docs/configs-spec2017-tests/system/__init__.py
-wget https://github.com/darchr/gem5art/blob/master/docs/configs-spec2017-tests/system/caches.py
-wget https://github.com/darchr/gem5art/blob/master/docs/configs-spec2017-tests/system/fs_tools.py
-wget https://github.com/darchr/gem5art/blob/master/docs/configs-spec2017-tests/system/system.py
+wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/system/__init__.py
+wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/system/caches.py
+wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/system/fs_tools.py
+wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/system/system.py
 cd ..
 git add *
 git commit -m "Add run scripts for SPEC2017"
@@ -427,13 +427,13 @@ In launch_spec2017_experiments.py, we make an Artifact object of the Linux kerne
 ```python
 run_script_repo = Artifact.registerArtifact(
     command = '''
-        wget https://github.com/darchr/gem5art/blob/master/docs/configs-spec2017-tests/run_spec.py;
-        mkdir -p system;
-        cd system;
-        wget https://github.com/darchr/gem5art/blob/master/docs/configs-spec2017-tests/system/__init__.py;
-        wget https://github.com/darchr/gem5art/blob/master/docs/configs-spec2017-tests/system/caches.py;
-        wget https://github.com/darchr/gem5art/blob/master/docs/configs-spec2017-tests/system/fs_tools.py;
-        wget https://github.com/darchr/gem5art/blob/master/docs/configs-spec2017-tests/system/system.py;
+        wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/run_spec.py
+        mkdir -p system
+        cd system
+        wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/system/__init__.py
+        wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/system/caches.py
+        wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/system/fs_tools.py
+        wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/system/system.py
     ''',
     typ = 'git repo',
     name = 'gem5-configs',
@@ -447,7 +447,7 @@ The gem5 run script, [run_spec.py](https://github.com/darchr/gem5art/blob/master
 * --kernel: (required) the path to vmlinux file.  
 * --disk: (required) the path to spec image.  
 * --cpu: (required) name of the detailed CPU model. 
-Currently, we are supporting the following CPU model: kvm, o3, atomic, timing. 
+Currently, we are supporting the following CPU models: kvm, o3, atomic, timing. 
 More CPU models could be added to getDetailedCPUModel() in run_spec.py.  
 * --benchmark: (required) name of the SPEC CPU 2017 benchmark. 
 The availability of the benchmarks could be found [here](#) TODO.  
