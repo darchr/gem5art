@@ -9,5 +9,6 @@ The scripts in this tutorial work with gem5art-* v0.3.1.
 The differences are in the scripts used to create the disk image, and the name of the benchmarks.  
 
 
-
+### SPEC CPU 2017 Benchmarks  
+More details about those benchmarks are [here](https://www.spec.org/cpu2017/Docs/).  
 
