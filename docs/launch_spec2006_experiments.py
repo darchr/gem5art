@@ -31,6 +31,7 @@ gem5_repo = Artifact.registerArtifact(
     documentation = 'cloned gem5 master branch from googlesource and cherry-picked 2 commits on Nov 20th'
 )
 
+
 gem5_binary = Artifact.registerArtifact(
     command = 'scons build/X86/gem5.opt -j8',
     typ = 'gem5 binary',
@@ -76,7 +77,7 @@ disk_image = Artifact.registerArtifact(
 linux_repo = Artifact.registerArtifact(
     command = '''
         git clone git clone --branch v4.19.83 --depth 1 https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/;
-        mv linux linux-4.19.83;
+        mv linux linux-4.19.83
     ''',
     typ = 'git repo',
     name = 'linux-4.19.83',
@@ -102,13 +103,13 @@ linux_binary = Artifact.registerArtifact(
 
 run_script_repo = Artifact.registerArtifact(
     command = '''
-        wget https://github.com/darchr/gem5art/blob/master/docs/configs-spec-tests/run_spec.py;
-        mkdir -p system;
-        cd system;
-        wget https://github.com/darchr/gem5art/blob/master/docs/configs-spec-tests/system/__init__.py;
-        wget https://github.com/darchr/gem5art/blob/master/docs/configs-spec-tests/system/caches.py;
-        wget https://github.com/darchr/gem5art/blob/master/docs/configs-spec-tests/system/fs_tools.py;
-        wget https://github.com/darchr/gem5art/blob/master/docs/configs-spec-tests/system/system.py;
+        wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/run_spec.py
+        mkdir -p system
+        cd system
+        wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/system/__init__.py
+        wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/system/caches.py
+        wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/system/fs_tools.py
+        wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/system/system.py
     ''',
     typ = 'git repo',
     name = 'gem5-configs',
@@ -116,6 +117,7 @@ run_script_repo = Artifact.registerArtifact(
     cwd = './',
     documentation = 'gem5 run scripts made specifically for SPEC benchmarks'
 )
+
 
 if __name__ == "__main__":
     cpus = ['kvm', 'atomic', 'o3', 'timing']
@@ -151,4 +153,3 @@ if __name__ == "__main__":
                     timeout = 5*24*60*60 # 5 days
                 )
                 run_gem5_instance.apply_async((run,))
-
