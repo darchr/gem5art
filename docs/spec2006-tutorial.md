@@ -28,7 +28,7 @@ We structure the experiment as follows (note that there are many more ways to st
   * gem5: a folder containing gem5 source code and gem5 binaries.  
   * disk-image: a folder containing inputs to produce a disk image containing SPEC CPU 2006 benchmarks.  
   * linux-configs: a folder containing different Linux configurations for different Linux kernel versions.  
-  * gem5-fullsystem-configs: a folder containing a gem5 configuration that is made specifically to run SPEC CPU 2006 benchmarks.  
+  * gem5-fullsystem-configs: a folder containing a gem5 configuration that is made specifically to run SPEC benchmarks as described in the below figure.  
   * results: a folder storing the experiment's results. This folder will have a certain structure in order to make sure that every gem5 run does not overwrite other gem5 runs results.  
   * launch_spec2006_experiments.py: a script that does the following,  
     * Documenting the experiment using Artifacts objects.  
@@ -394,7 +394,7 @@ linux_binary = Artifact.registerArtifact(
 ### The gem5 Run Script/gem5 Configuration
 In this step, we take a look at the final missing piece: the gem5 run script. 
 The script is where we specify the simulated system. 
-We offer example scripts in the [configs-spec2006-tests folder](https://github.com/darchr/gem5art/blob/master/docs/configs-spec2006-tests/).   
+We offer example scripts in the [configs-spec-tests folder](https://github.com/darchr/gem5art/blob/master/docs/configs-spec-tests/).   
 
 First, we create a folder named gem5-configs containing all gem5 configs. 
 Since gem5art requires a git repo for the run scripts, we will make a local git repo for the run scripts.  
@@ -407,19 +407,19 @@ cd gem5-configs
 git init
 ```
 
-Then we copy all the scripts in configs-spec2006-tests folder to gem5-configs.  
+Then we copy all the scripts in configs-spec-tests folder to gem5-configs.  
 
 In the root folder of the experiment,
 
 ```sh
 cd gem5-configs
-wget https://github.com/darchr/gem5art/blob/master/docs/configs-spec2006-tests/run_spec.py
+wget https://github.com/darchr/gem5art/blob/master/docs/configs-spec-tests/run_spec.py
 mkdir system
 cd system
-wget https://github.com/darchr/gem5art/blob/master/docs/configs-spec2006-tests/system/__init__.py
-wget https://github.com/darchr/gem5art/blob/master/docs/configs-spec2006-tests/system/caches.py
-wget https://github.com/darchr/gem5art/blob/master/docs/configs-spec2006-tests/system/fs_tools.py
-wget https://github.com/darchr/gem5art/blob/master/docs/configs-spec2006-tests/system/system.py
+wget https://github.com/darchr/gem5art/blob/master/docs/configs-spec-tests/system/__init__.py
+wget https://github.com/darchr/gem5art/blob/master/docs/configs-spec-tests/system/caches.py
+wget https://github.com/darchr/gem5art/blob/master/docs/configs-spec-tests/system/fs_tools.py
+wget https://github.com/darchr/gem5art/blob/master/docs/configs-spec-tests/system/system.py
 cd ..
 git add *
 git commit -m "Add run scripts for SPEC2006"
@@ -430,13 +430,13 @@ In launch_spec2006_experiments.py, we make an Artifact object of the Linux kerne
 ```python
 run_script_repo = Artifact.registerArtifact(
     command = '''
-        wget https://github.com/darchr/gem5art/blob/master/docs/configs-spec2006-tests/run_spec.py;
+        wget https://github.com/darchr/gem5art/blob/master/docs/configs-spec-tests/run_spec.py;
         mkdir -p system;
         cd system;
-        wget https://github.com/darchr/gem5art/blob/master/docs/configs-spec2006-tests/system/__init__.py;
-        wget https://github.com/darchr/gem5art/blob/master/docs/configs-spec2006-tests/system/caches.py;
-        wget https://github.com/darchr/gem5art/blob/master/docs/configs-spec2006-tests/system/fs_tools.py;
-        wget https://github.com/darchr/gem5art/blob/master/docs/configs-spec2006-tests/system/system.py;
+        wget https://github.com/darchr/gem5art/blob/master/docs/configs-spec-tests/system/__init__.py;
+        wget https://github.com/darchr/gem5art/blob/master/docs/configs-spec-tests/system/caches.py;
+        wget https://github.com/darchr/gem5art/blob/master/docs/configs-spec-tests/system/fs_tools.py;
+        wget https://github.com/darchr/gem5art/blob/master/docs/configs-spec-tests/system/system.py;
     ''',
     typ = 'git repo',
     name = 'gem5-configs',
@@ -446,7 +446,7 @@ run_script_repo = Artifact.registerArtifact(
 )
 ```
 
-The gem5 run script, [run_spec.py](https://github.com/darchr/gem5art/blob/master/docs/configs-spec2006-tests/run_spec.py), takes the following parameters:  
+The gem5 run script, [run_spec.py](https://github.com/darchr/gem5art/blob/master/docs/configs-spec-tests/run_spec.py), takes the following parameters:  
 * --kernel: (required) the path to vmlinux file.  
 * --disk: (required) the path to spec image.  
 * --cpu: (required) name of the detailed CPU model. 
