@@ -460,3 +460,128 @@ We don't use another Artifact object to document this file.
 The Artifact repository object of the root folder will keep track of the changes of the script.  
 
 **Note:** The first two parameters of the gem5 run script for full system simulation should always be the path to the linux binary and the path to the disk image, in that order.
+
+
+## Run the Experiment  
+### Setting up the Python virtual environment  
+gem5art code works with Python 3.5 or above.  
+
+The following script will set up a python3 virtual environment named gem5art-env. In the root folder of the experiment,
+
+```sh
+virtualenv -p python3 gem5art-env
+```
+
+To activate the virtual environment, in the root folder of the experiment,
+
+```sh
+source gem5art-env/bin/activate
+```
+
+To install the gem5art dependency (this should be done when we are in the virtual environment),
+
+```sh
+pip install gem5art-artifact gem5art-run gem5art-tasks
+```
+
+To exit the virtual environment, 
+
+```sh
+deactivate
+```
+
+**Note:** the following steps should be done while using the Python virtual environment.
+
+### Running the Database Server
+The following script will run the MongoDB database server in a docker container.  
+
+The -p 27017:27017 option maps the port 27017 in the container to port 27017 on the host.  
+The -v /path/in/host:/data/db option mounts the /data/db folder in the docker container to the folder /path/in/host in the host.  
+The path of the host folder should an absoblute path, and the database files created by MongoDB will be in that folder. 
+The --name mongo-1 option specifies the name of the docker container. 
+We can use this name to identify to the container. 
+The -d option will let the container run in the background.  
+mongo is the name of [the offical mongo image](https://hub.docker.com/_/mongo).  
+
+```sh
+docker run -p 27017:27017 -v /path/in/host:/data/db --name mongo-1 -d mongo
+```
+
+### Running Celery Server 
+Inisde the path in the host specified above,
+
+```sh
+celery -E -A gem5art.tasks.celery worker --autoscale=[number of workers],0
+```
+
+### Creating the Launch Script Running the Experiment  
+Now, we can put together the run script! 
+In launch_spec2017_experiments.py, we import the required modules and classes at the beginning of the file,
+
+```python
+import os
+import sys
+from uuid import UUID
+
+from gem5art.artifact import Artifact
+from gem5art.run import gem5Run
+from gem5art.tasks.tasks import run_gem5_instance
+```
+
+And then, we put the launch function at the end of launch_spec2017_experiments.py,
+
+```python
+if __name__ == "__main__":
+    cpus = ['kvm', 'atomic', 'o3', 'timing']
+    benchmark_sizes = {'kvm':    ['test', 'ref'],
+                       'atomic': ['test'],
+                       'o3':     ['test'],
+                       'timing': ['test']
+                      }
+    benchmarks = [TODO]
+    # unavailable benchmarks: 400.perlbench,447.dealII,450.soplex,483.xalancbmk
+
+    for cpu in cpus:
+        for size in benchmark_sizes[cpu]:
+            for benchmark in benchmarks:
+                run = gem5Run.createFSRun(
+                    'gem5/build/X86/gem5.opt', # gem5_binary
+                    'gem5-configs/run_spec.py', # run_script
+                    'results/{}/{}/{}'.format(cpu, size, benchmark), # relative_outdir
+                    gem5_binary, # gem5_artifact
+                    gem5_repo, # gem5_git_artifact
+                    run_script_repo, # run_script_git_artifact
+                    'linux-4.19.83/vmlinux-4.19.83', # linux_binary
+                    'disk-image/spec2017/spec2017-image/spec2017', # disk_image
+                    linux_binary, # linux_binary_artifact
+                    disk_image, # disk_image_artifact
+                    cpu, benchmark, size, # params
+                    timeout = 5*24*60*60 # 5 days
+                )
+                run_gem5_instance.apply_async((run,))
+
+```
+The above launch function will run the all the available benchmarks with kvm, atomic, timing, and o3 cpus. 
+For kvm, both test and ref sizes will be run, while for the rest, only benchmarks of size test will be run.  
+
+Note that the line `'results/{}/{}/{}'.format(cpu, size, benchmark), # relative_outdir` specifies how the results folder is structured. 
+The results folder should be carefully structured so that there does not exist two gem5 runs write to the same place.  
+
+### Run the Experiment
+Having celery and mongoDB servers running, we can start the experiment.  
+
+In the root folder of the experiment,
+
+```sh
+python3 launch_spec2017_experiment.py
+```
+
+## Getting the Results  
+TODO
+
+## Apprendix I. Working SPEC 2017 Benchmarks x CPU Model matrix
+All benchmarks are compiled in the above set up as of December 2019. 
+The following are compiled benchmarks:  
+
+| Benchmarks             | KVM/test       | KVM/ref        | O3CPU/test     | AtomicCPU/test | TimingSimpleCPU/test |
+|------------------------|----------------|----------------|----------------|----------------|----------------------|
