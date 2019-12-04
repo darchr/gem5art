@@ -52,7 +52,8 @@
                   Please follow this link to check the availability of the
                   benchmarks. The working benchmark matrix is near the bottom
                   of the page:
-              https://gem5art.readthedocs.io/en/latest/spec2006-tutorial.html
+         (SPEC 2006) https://gem5art.readthedocs.io/en/latest/spec2006-tutorial.html
+         (SPEC 2017) https://gem5art.readthedocs.io/en/latest/spec2017-tutorial.html
         ** size:
                   This is a positional argument specifying the size of the
                   benchmark. The available sizes are: ref, test, train.
