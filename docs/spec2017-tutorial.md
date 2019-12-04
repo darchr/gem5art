@@ -578,7 +578,7 @@ python3 launch_spec2017_experiment.py
 ## Getting the Results  
 TODO
 
-## Apprendix I. Working SPEC 2017 Benchmarks x CPU Model matrix
+## Apprendix I. Working SPEC 2017 Benchmarks x CPU Model Matrix
 All benchmarks are compiled in the above set up as of December 2019. 
 The following are compiled benchmarks:  
 
