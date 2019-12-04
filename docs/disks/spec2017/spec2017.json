@@ -52,7 +52,7 @@
     [
         {
             "type": "file",
-            "source": "../../gem5/util/m5/m5",
+            "source": "../gem5/util/m5/m5",
             "destination": "/home/gem5/"
         },
         {
