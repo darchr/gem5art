@@ -90,7 +90,6 @@ results
 gem5art-env
 disk-image/packer
 disk-image/spec2006/spec2006-image/spec2006
-disk-image/spec2006
 disk-image/packer_cache
 disk-image/spec2006/CPU2006v1.0.1.iso
 gem5
