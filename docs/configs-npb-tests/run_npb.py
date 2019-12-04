@@ -68,6 +68,10 @@ def writeBenchScript(dir, bench):
 if __name__ == "__m5_main__":
     (opts, args) = SimpleOpts.parse_args()
     kernel, disk, cpu, benchmark, num_cpus = args
+
+    if not cpu in ['atomic', 'kvm']:
+        m5.fatal("cpu not supported")
+
     # create the system we are going to simulate
     system = MySystem(kernel, disk, int(num_cpus), opts, no_kvm=False)
 
