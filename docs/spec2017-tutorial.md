@@ -88,7 +88,6 @@ results
 gem5art-env
 disk-image/packer
 disk-image/spec2017/spec2017-image/spec2017
-disk-image/spec2017
 disk-image/packer_cache
 disk-image/spec2017/cpu2017-1.1.0.iso
 gem5
