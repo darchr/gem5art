@@ -609,7 +609,7 @@ The following are compiled benchmarks:
 | 410.bwaves             |        Success |        Success |        Running |        Success |              Success |
 | 416.gamess             |          Error |          Error |          Error |          Error |                Error |
 | 429.mcf                |        Success |        Success |        Success |        Success |              Success |
-| 433.milc               |        Success |        Success |        Running |        Success |              Success |
+| 433.milc               |        Success |        Success |        Success |        Success |              Success |
 | 434.zeusmp             |        Success |        Success |     gem5 Error |        Success |              Success |
 | 435.gromacs            |        Success |        Success |        Success |        Success |              Success |
 | 436.cactusADM          |        Success |        Success |        Success |        Success |              Success |
@@ -619,7 +619,7 @@ The following are compiled benchmarks:
 | 453.povray             |        Success |        Success |        Success |        Success |              Success |
 | 454.calculix           |        Success |        Success |        Success |        Success |              Success |
 | 456.hmmer              |        Success |        Success |        Success |        Success |              Success |
-| 458.sjeng              |        Success |        Success |        Running |        Success |              Success |
+| 458.sjeng              |        Success |        Success |        Success |        Success |              Success |
 | 459.GemsFDTD           |        Success |        Success |        Success |        Success |              Success |
 | 462.libquantum         |        Success |        Success |        Success |        Success |              Success |
 | 464.h264ref            |        Success |        Success |        Running |        Success |              Success |
