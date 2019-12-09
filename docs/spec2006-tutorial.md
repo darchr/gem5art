@@ -584,7 +584,11 @@ python3 launch_spec_experiment.py
 ```
 
 ## Getting the Results  
-TODO
+The results folder of each benchmark has a folder named `speclogs`, which contains the logs of the run spec commands. There are two logs in this folder: `CPU2006.001.log` and `CPU2006.002.log`. The former is the log of compiling SPEC benchmarks, which is generated when we compile SPEC benchmarks while we create the disk image. The latter is the log of the benchmark run. So, we only interest in `CPU2006.002.log`.  
+
+If the benchmark run is successful, there will be a line starting with `Success: 1x` followed by `benchmark_name`. We will look for this line in each `CPU2006.002.log` file.  
+
+[This Python notebook shows how the Apprendix I. Working SPEC 2006 Benchmarks x CPU Model table is generated](https://github.com/darchr/gem5art-experiments/blob/master/spec2006-experiments/results.ipynb).
 
 ## References
 [1]  “Standard Performance Evaluation Corporation,” *SPEC CPU® 2006*. [Online]. Available: https://www.spec.org/cpu2006/. [Accessed: 12-Nov-2019].
@@ -598,39 +602,40 @@ TODO
 [5] J. L. Hennessy and D. A. Patterson, “A new golden age for computer architecture,” *Communications of the ACM*, vol. 62, no. 2, pp. 48–60, 2019.  
  
 
-## Apprendix I. Working SPEC 2006 Benchmarks x CPU Model matrix
+## Apprendix I. Working SPEC 2006 Benchmarks x CPU Model table
 Not all benchmarks are compiled in the above set up as of November 2019. 
 The following are compiled benchmarks:  
 
-| Benchmarks             | KVM/test       | KVM/ref        | O3CPU/test     | AtomicCPU/test | TimingSimpleCPU/test |
-|------------------------|----------------|----------------|----------------|----------------|----------------------|
-| 401.bzip2              |        Success |        Success |        Success |        Success |              Success |
-| 403.gcc                |        Success |        Success |        Success |        Success |              Success |
-| 410.bwaves             |        Success |        Success |        Success |        Success |              Success |
-| 416.gamess             |          Error |          Error |          Error |          Error |                Error |
-| 429.mcf                |        Success |        Success |        Success |        Success |              Success |
-| 433.milc               |        Success |        Success |        Success |        Success |              Success |
-| 434.zeusmp             |        Success |        Success |     gem5 Error |        Success |              Success |
-| 435.gromacs            |        Success |        Success |        Success |        Success |              Success |
-| 436.cactusADM          |        Success |        Success |        Success |        Success |              Success |
-| 437.leslie3d           |        Success |        Success |        Success |        Success |              Success |
-| 444.namd               |        Success |        Success |        Success |        Success |              Success |
-| 445.gobmk              |        Success |        Success |              ? |        Success |              Success |
-| 453.povray             |        Success |        Success |        Success |        Success |              Success |
-| 454.calculix           |        Success |        Success |        Success |        Success |              Success |
-| 456.hmmer              |        Success |        Success |        Success |        Success |              Success |
-| 458.sjeng              |        Success |        Success |        Success |        Success |              Success |
-| 459.GemsFDTD           |        Success |        Success |        Success |        Success |              Success |
-| 462.libquantum         |        Success |        Success |        Success |        Success |              Success |
-| 464.h264ref            |        Success |        Success |              ? |        Success |              Success |
-| 465.tonto              |        Success |        Success |        Success |        Success |              Success |
-| 470.lbm                |        Success |        Success |        Success |        Success |              Success |
-| 471.omnetpp            |        Success |        Success |        Success |        Success |              Success |
-| 473.astar              |        Success |        Success |              ? |        Success |              Success |
-| 481.wrf                |          Error |          Error |          Error |          Error |                Error |
-| 482.sphinx3            |        Success |        Success |        Success |        Success |              Success |
-| 998.specrand           |        Success |        Success |        Success |        Success |              Success |
-| 999.specrand           |        Success |        Success |        Success |        Success |              Success |
+| Benchmarks         | KVM/test        | KVM/ref         | AtomicCPU/test  | O3CPU/test      | TimingSimpleCPU/test |
+|--------------------|-----------------|-----------------|-----------------|-----------------|----------------------|
+| 401.bzip2          | Success         | Success         | Success         | Success         | Success              |
+| 403.gcc            | Success         | Success         | Success         | Success         | Success              |
+| 410.bwaves         | Success         | Success         | Success         | Success         | Success              |
+| 416.gamess         | Error           | Error           | Error           | Error           | Error                |
+| 429.mcf            | Success         | Success         | Success         | Success         | No SPEC logs         |
+| 433.milc           | Success         | Success         | Success         | Success         | Success              |
+| 434.zeusmp         | Success         | Success         | Success         | No SPEC logs    | Success              |
+| 435.gromacs        | Success         | Success         | Success         | Success         | Success              |
+| 436.cactusADM      | Success         | Success         | Success         | Success         | Success              |
+| 437.leslie3d       | Success         | Success         | Success         | Success         | Success              |
+| 444.namd           | Success         | Success         | Success         | Success         | Success              |
+| 445.gobmk          | Success         | Success         | Success         | No SPEC logs    | Success              |
+| 453.povray         | Success         | Success         | Success         | Success         | Success              |
+| 454.calculix       | Success         | Success         | Success         | Success         | Success              |
+| 456.hmmer          | Success         | Success         | Success         | Success         | Success              |
+| 458.sjeng          | Success         | Success         | Success         | Success         | Success              |
+| 459.GemsFDTD       | Success         | Success         | Success         | Success         | Success              |
+| 462.libquantum     | Success         | Success         | Success         | Success         | Success              |
+| 464.h264ref        | Success         | Success         | Success         | No SPEC logs    | Success              |
+| 465.tonto          | Success         | Success         | Success         | Success         | Success              |
+| 470.lbm            | Success         | Success         | Success         | Success         | Success              |
+| 471.omnetpp        | Success         | Success         | Success         | Success         | Success              |
+| 473.astar          | Success         | Success         | Success         | No SPEC logs    | Success              |
+| 481.wrf            | Error           | Error           | Error           | Error           | Error                |
+| 482.sphinx3        | Success         | Success         | Success         | Success         | Success              |
+| 998.specrand       | Success         | Success         | Success         | Success         | Success              |
+| 999.specrand       | Success         | Success         | Success         | Success         | Success              |
+
 
 Benchmarks that are not available:
 ```
