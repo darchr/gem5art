@@ -588,7 +588,7 @@ The results folder of each benchmark has a folder named `speclogs`, which contai
 
 If the benchmark run is successful, there will be a line starting with `Success: 1x` followed by `benchmark_name`. We will look for this line in each `CPU2006.002.log` file.  
 
-[This Python notebook shows how the Apprendix I. Working SPEC 2006 Benchmarks x CPU Model table is generated](https://github.com/darchr/gem5art-experiments/blob/master/spec2006-experiments/results.ipynb).
+[This Python notebook shows how the Appendix I. Working SPEC 2006 Benchmarks x CPU Model table is generated](https://github.com/darchr/gem5art-experiments/blob/master/spec2006-experiments/results.ipynb).
 
 ## References
 [1]  “Standard Performance Evaluation Corporation,” *SPEC CPU® 2006*. [Online]. Available: https://www.spec.org/cpu2006/. [Accessed: 12-Nov-2019].
@@ -602,7 +602,7 @@ If the benchmark run is successful, there will be a line starting with `Success:
 [5] J. L. Hennessy and D. A. Patterson, “A new golden age for computer architecture,” *Communications of the ACM*, vol. 62, no. 2, pp. 48–60, 2019.  
  
 
-## Apprendix I. Working SPEC 2006 Benchmarks x CPU Model table
+## Appendix I. Working SPEC 2006 Benchmarks x CPU Model table
 Not all benchmarks are compiled in the above set up as of November 2019. 
 The following are compiled benchmarks:  
 
