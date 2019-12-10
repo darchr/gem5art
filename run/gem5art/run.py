@@ -487,7 +487,7 @@ class gem5Run:
                              zipfile.ZIP_DEFLATED) as zipf:
             for root, dirs, files in os.walk(self.outdir):
                 if root == self.outdir:
-                    files = filter(lambda f: f != 'results.zip', files)
+                    files = list(filter(lambda f: f != 'results.zip', files))
                 for f in files:
                     zipf.write(os.path.join(root, f), '{}/{}'.format(root.replace(self.outdir,os.path.basename(self.outdir)),f))
 
