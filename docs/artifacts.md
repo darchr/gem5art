@@ -134,7 +134,52 @@ for i in gem5art.artifact.getByName("gem5"):print(i)
 
 ## Downloading from the Database
 
-You can also download a file associated with an artifact using functions provided by gem5art. For example, assume there is a disk image named  `npb` (containing [NAS Parallel](https://www.nas.nasa.gov/) Benchmarks) in your database and you want to download the disk image to your local directory. You can do the following to download the disk image:
+You can also download a file associated with an artifact using functions provided by gem5art. A good way to search and download items from the database is by using the Python interactive shell.
+You can search the database with the functions provided by the `artifact` module (e.g., [`getByName`](artifacts.html#gem5art.artifact.artifact.getByName), [`getByType`](artifacts.html#gem5art.artifact.artifact.getByType), etc.).
+Then, once you've found the ID of the artifact you'd like to download, you can call [`downloadFile`](artifacts.html#gem5art.artifact._artifactdb.ArtifactDB.downloadFile).
+See the example below.
+
+```sh
+$ python
+Python 3.6.8 (default, Oct  7 2019, 12:59:55)
+[GCC 8.3.0] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> from gem5art.artifact import *
+>>> db = ArtifactDB()
+>>> for i in getDiskImages(limit=2): print(i)
+...
+ubuntu
+    id: d4a54de8-3a1f-4d4d-9175-53c15e647afd
+    type: disk image
+    path: disk-image/ubuntu-image/ubuntu
+    inputs: packer:fe8ba737-ffd4-44fa-88b7-9cd072f82979, fs-x86-test:94092971-4277-4d38-9e4a-495a7119a5e5, m5:69dad8b1-48d0-43dd-a538-f3196a894804
+    Ubuntu with m5 binary installed and root auto login
+ubuntu
+    id: c54b8805-48d6-425d-ac81-9b1badba206e
+    type: disk image
+    path: disk-image/ubuntu-image/ubuntu
+    inputs: packer:fe8ba737-ffd4-44fa-88b7-9cd072f82979, fs-x86-test:5bfaab52-7d04-49f2-8fea-c5af8a7f34a8, m5:69dad8b1-48d0-43dd-a538-f3196a894804
+    Ubuntu with m5 binary installed and root auto login
+>>> for i in getLinuxBinaries(limit=2): print(i)
+...
+
+vmlinux-5.2.3
+    id: 8cfd9fbe-24d0-40b5-897e-beca3df80dd2
+    type: kernel
+    path: linux-stable/vmlinux-5.2.3
+    inputs: fs-x86-test:94092971-4277-4d38-9e4a-495a7119a5e5, linux-stable:25feca9a-3642-458e-a179-f3705266b2fe
+    Kernel binary for 5.2.3 with simple config file
+vmlinux-5.2.3
+    id: 9721d8c9-dc41-49ba-ab5c-3ed169e24166
+    type: kernel
+    path: linux-stable/vmlinux-5.2.3
+    inputs: npb:85e6dd97-c946-4596-9b52-0bb145810d68, linux-stable:25feca9a-3642-458e-a179-f3705266b2fe
+    Kernel binary for 5.2.3 with simple config file
+>>> from uuid import UUID
+>>> db.downloadFile(UUID('8cfd9fbe-24d0-40b5-897e-beca3df80dd2'), 'linux-stable/vmlinux-5.2.3')
+```
+
+For another example, assume there is a disk image named  `npb` (containing [NAS Parallel](https://www.nas.nasa.gov/) Benchmarks) in your database and you want to download the disk image to your local directory. You can do the following to download the disk image:
 
 ```python
 import gem5art.artifact
@@ -148,9 +193,9 @@ for disk in disks:
         db.downloadFile(disk._id, 'npb')
 ```
 
-Here, we assume that there can be multiple disk images/artifacts with the name `npb` and we are only interested in downloading the npb disk image with a particular documentation ('npb disk image created on Nov 20').
+Here, we assume that there can be multiple disk images/artifacts with the name `npb` and we are only interested in downloading the npb disk image with a particular documentation ('npb disk image created on Nov 20'). Also, note that there is not a single way to download files from the database (although they will eventually use the downloadFile function).
 
-The documentation on [downloadFile](artifacts.html#gem5art.artifact._artifactdb.ArtifactDB.downloadFile) method used in the above code snippet is available at the bottom of this page. The dual of this method is [upload](artifacts.html#gem5art.artifact._artifactdb.ArtifactDB.upload).
+The dual of the [downloadFile](artifacts.html#gem5art.artifact._artifactdb.ArtifactDB.downloadFile) method used above is [upload](artifacts.html#gem5art.artifact._artifactdb.ArtifactDB.upload).
 
 
 
