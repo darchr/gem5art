@@ -180,7 +180,6 @@ class gem5Run:
 
         run.string = f"{run.gem5_name} {run.script_name}"
         run.string += ' '.join(run.params)
-        
         run.relative_outdir = relative_outdir
 
         run.outdir = os.path.abspath(run.relative_outdir)
@@ -253,7 +252,6 @@ class gem5Run:
         run.string = f"{run.gem5_name} {run.script_name} "
         run.string += f"{run.linux_name} {run.disk_name} "
         run.string += ' '.join(run.params)
-        
         run.relative_outdir = relative_outdir
 
         run.outdir = os.path.abspath(run.relative_outdir)
@@ -484,16 +482,14 @@ class gem5Run:
     def saveResults(self) -> None:
         """Zip up the output directory and store the results in the database.
         """
-        files = filter(lambda f: f != 'results.zip',
-                       os.listdir(self.outdir))
 
         with zipfile.ZipFile(os.path.join(self.outdir, 'results.zip'), 'w',
                              zipfile.ZIP_DEFLATED) as zipf:
-            for root, dirs, files in os.walk(self.relative_outdir):
-                if root == self.relative_outdir:
+            for root, dirs, files in os.walk(self.outdir):
+                if root == self.outdir:
                     files = filter(lambda f: f != 'results.zip', files)
                 for f in files:
-                    zipf.write(os.path.join(root, f))
+                    zipf.write(os.path.join(root, f), '{}/{}'.format(root.replace(self.outdir,os.path.basename(self.outdir)),f))
 
         self.results = Artifact.registerArtifact(
                 command = f'zip results.zip -r {self.outdir}',
