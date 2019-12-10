@@ -20,7 +20,7 @@ packer = Artifact.registerArtifact(
 experiments_repo = Artifact.registerArtifact(
     command = 'git clone https://your-remote-add/npb-tests.git',
     typ = 'git repo',
-    name = 'npb_tests',
+    name = 'npb-tests',
     path =  './',
     cwd = '../',
     documentation = 'main repo to run npb with gem5'
@@ -53,10 +53,10 @@ m5_binary = Artifact.registerArtifact(
 )
 
 disk_image = Artifact.registerArtifact(
-    command = 'packer build npb.json',
+    command = './packer build npb/npb.json',
     typ = 'disk image',
     name = 'npb',
-    cwd = 'disk-image/npb',
+    cwd = 'disk-image',
     path = 'disk-image/npb/npb-image/npb',
     inputs = [packer, experiments_repo, m5_binary,],
     documentation = 'Ubuntu with m5 binary and NPB (with ROI annotations: darchr/npb-hooks/gem5art-npb-tutorial) installed.'
@@ -69,7 +69,7 @@ gem5_binary = Artifact.registerArtifact(
     cwd = 'gem5/',
     path =  'gem5/build/X86/gem5.opt',
     inputs = [gem5_repo,],
-    documentation = 'default gem5 x86'
+    documentation = 'gem5 binary based on googlesource (Nov 18, 2019) gem5 with cherry-picked commits from darchr/gem5'
 )
 
 linux_repo = Artifact.registerArtifact(
@@ -118,6 +118,7 @@ for cpu in cpus:
                     'linux-stable/vmlinux-4.19.83',
                     'disk-image/npb/npb-image/npb',
                     linux_binary, disk_image,
-                    cpu, bm.replace('.x', f'.{clas}.x'), num_cpu
+                    cpu, bm.replace('.x', f'.{clas}.x'), num_cpu,
+                    timeout = 24*60*60 #24 hours
                     )
                 run_gem5_instance.apply_async((run,))

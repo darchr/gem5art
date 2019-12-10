@@ -125,8 +125,7 @@ class MyRubySystem(LinuxX86System):
 
     def _createMemoryControllers(self, num, cls):
         self.mem_cntrls = [
-            cls(range = self.mem_ranges[0],
-                channels = num)
+            cls(range = self.mem_ranges[0])
             for i in range(num)
         ]
 
