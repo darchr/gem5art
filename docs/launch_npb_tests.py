@@ -118,6 +118,7 @@ for cpu in cpus:
                     'linux-stable/vmlinux-4.19.83',
                     'disk-image/npb/npb-image/npb',
                     linux_binary, disk_image,
-                    cpu, bm.replace('.x', f'.{clas}.x'), num_cpu
+                    cpu, bm.replace('.x', f'.{clas}.x'), num_cpu,
+                    timeout = 24*60*60 #24 hours
                     )
                 run_gem5_instance.apply_async((run,))

@@ -509,14 +509,15 @@ for cpu in cpus:
                     'linux-stable/vmlinux-4.19.83',
                     'disk-image/npb/npb-image/npb',
                     linux_binary, disk_image,
-                    cpu, bm.replace('.x', f'.{clas}.x'), num_cpu
+                    cpu, bm.replace('.x', f'.{clas}.x'), num_cpu,
+                    timeout = 24*60*60 #24 hours
                     )
                 run_gem5_instance.apply_async((run,))
 ```
 The above lines are responsible for looping through all possible combinations of variables involved in this experiment.
 For each combination, a gem5Run object is created and eventually passed to run_gem5_instance to be
 executed asynchronously using Celery.
-We are running class A,B,C and D of NPB with KVM cpu and only class A with atomic cpu.
+We are running class A,B,C and D of NPB with KVM cpu and only class A with atomic cpu. Moreover, we are using a timeout value of 24 hours (which hopefully will be a reasonable number to finish most of the gem5 jobs).
 
 The complete launch script is available [here:](https://github.com/darchr/gem5art/blob/master/docs/launch_npb_tests.py).
 Finally, make sure you are in python virtual env and then run the script:
