@@ -1,7 +1,7 @@
 # Disk Images
 
 ## Introduction
-This section discusses an automated way of creating gem5-compatible disk images with Ubuntu server installed. We make use of packer to do this which makes use of .json template files to build and configure a disk image. These template files can be configured to build a disk image with specific benchmarks installed.
+This section discusses an automated way of creating gem5-compatible disk images with Ubuntu server installed. We make use of packer to do this which uses .json template files to build and configure a disk image. These template files can be configured to build a disk image with specific benchmarks installed.
 
 
 ## Building a Simple Disk Image with Packer
@@ -18,10 +18,16 @@ If not already installed, QEMU can be installed using:
 ```shell
 sudo apt-get install qemu
 ```
-Download the Packer binary from [the official website](https://www.packer.io/downloads.html).
+The packer binary can be downloaded from [the official website](https://www.packer.io/downloads.html) using the following commands:
+
+```sh
+wget https://releases.hashicorp.com/packer/1.4.3/packer_1.4.3_linux_amd64.zip
+unzip packer_1.4.3_linux_amd64.zip
+```
+
 <a name="customizing"></a>
 ### c. Customize the Packer Script
-The default packer script `template.json` should be modified and adapted according to the required disk image and the avaiable resources for the build proces. We will rename the default template to `[disk-name].json`. The variables that should be modified appear at the end of `[disk-name].json` file, in `variables` section.
+The default packer script `template.json` should be modified and adapted according to the required disk image and the available resources for the build process. We will rename the default template to `[disk-name].json`. The variables that should be modified appear at the end of `[disk-name].json` file, in `variables` section.
 The configuration files that we use to build the disk image, and the directory structure is shown below:
 ```shell
 disk-image/
@@ -31,12 +37,12 @@ disk-image/
 
   shared/
     post-installation.sh: generic shell script that is executed after Ubuntu is installed
-    preseed.cfg: preseeded configuration to install Ubuntu
+    preseed.cfg: pre-seeded configuration to install Ubuntu
 ```
 
 <a name="customizingVM"></a>
 #### i. Customizing the VM (Virtual Machine)
-In `[disk-name].json`, following variables are available to customize the VM:
+In `[disk-name].json`, following variables are available to customize the VM (to be used for the disk building process):
 
 | Variable         | Purpose     | Example  |
 | ---------------- |-------------|----------|
@@ -126,7 +132,7 @@ The disk image with the user-defined name (image_name) will be produced in a fol
 [We recommend to use a VNC viewer in order to inspect the building process](#inspect).
 <a name="inspect"></a>
 #### ii. Inspect the Building Process
-While the building of disk image takes place, Packer will run a VNC (Virtual Network Computing) server and you will be able to see the building process by connecting to the VNC server from a VNC client. There are a plenty of choices for VNC client. When you run the Packer script, it will tell you which port is used by the VNC server. For example, if it says `qemu: Connecting to VM via VNC (127.0.0.1:5932)`, the VNC port is 5932.
+While the building of disk image takes place, packer will run a VNC (Virtual Network Computing) server and you will be able to see the building process by connecting to the VNC server from a VNC client. There are a plenty of choices for VNC client. When you run the packer script, it will tell you which port is used by the VNC server. For example, if it says `qemu: Connecting to VM via VNC (127.0.0.1:5932)`, the VNC port is 5932.
 To connect to VNC server from the VNC client, use the address `127.0.0.1:5932` for a port number 5932.
 If you need port forwarding to forward the VNC port from a remote machine to your local machine, use SSH tunneling
 ```shell
@@ -134,7 +140,7 @@ ssh -L 5932:127.0.0.1:5932 <username>@<host>
 ```
 This command will forward port 5932 from the host machine to your machine, and then you will be able to connect to the VNC server using the address `127.0.0.1:5932` from your VNC viewer.
 
-**Note**: While Packer is installing Ubuntu, the terminal screen will display "waiting for SSH" without any update for a long time.
+**Note**: While packer is installing Ubuntu, the terminal screen will display "waiting for SSH" without any update for a long time.
 This is not an indicator of whether the Ubuntu installation produces any errors.
 Therefore, we strongly recommend using VNC viewer at least once to inspect the image building process.
 <a name="checking"></a>
