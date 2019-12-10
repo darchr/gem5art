@@ -81,6 +81,7 @@ class TestSERun(unittest.TestCase):
             })
 
         self.run = gem5Run.createSERun(
+		'test SE run',
 		'gem5/build/X86/gem5.opt',
 		'configs-tests/run_test.py',
 		'results/run_test/out',
