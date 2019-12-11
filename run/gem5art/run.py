@@ -72,7 +72,6 @@ class gem5Run:
     linux_name: str
     disk_name: str
     string: str
-    relative_outdir: str
     outdir: str
 
     linux_binary: str
@@ -100,6 +99,7 @@ class gem5Run:
                 name: str,
                 gem5_binary: str,
                 run_script: str,
+                outdir: str,
                 gem5_artifact: Artifact,
                 gem5_git_artifact: Artifact,
                 run_script_git_artifact: Artifact,
@@ -119,6 +119,8 @@ class gem5Run:
         run.timeout = timeout
 
         run._id = uuid4()
+
+        run.outdir = os.path.abspath(outdir)
 
         # Assumes **/<gem5_name>/gem5.<anything>
         run.gem5_name = os.path.split(os.path.split(run.gem5_binary)[0])[1]
@@ -146,7 +148,7 @@ class gem5Run:
                     name: str,
                     gem5_binary: str,
                     run_script: str,
-                    relative_outdir: str,
+                    outdir: str,
                     gem5_artifact: Artifact,
                     gem5_git_artifact: Artifact,
                     run_script_git_artifact: Artifact,
@@ -171,20 +173,16 @@ class gem5Run:
         of this class.
         """
 
-        run = cls._create(name, gem5_binary, run_script, gem5_artifact,
+        run = cls._create(name, gem5_binary, run_script, outdir, gem5_artifact,
                           gem5_git_artifact, run_script_git_artifact, params,
                           timeout)
 
         run.artifacts = [gem5_artifact, gem5_git_artifact,
                          run_script_git_artifact]
 
+
         run.string = f"{run.gem5_name} {run.script_name}"
         run.string += ' '.join(run.params)
-        run.relative_outdir = relative_outdir
-
-        run.outdir = os.path.abspath(run.relative_outdir)
-        # Make the directory if it doesn't exist
-        os.makedirs(run.outdir, exist_ok=True)
 
         run.command = [
             run.gem5_binary,
@@ -195,6 +193,8 @@ class gem5Run:
         run.hash = run._getHash()
         run.type = 'gem5 run'
 
+        # Make the directory if it doesn't exist
+        os.makedirs(run.outdir, exist_ok=True)
         run.dumpJson('info.json')
 
         return run
@@ -204,7 +204,7 @@ class gem5Run:
                     name: str,
                     gem5_binary: str,
                     run_script: str,
-                    relative_outdir: str,
+                    outdir: str,
                     gem5_artifact: Artifact,
                     gem5_git_artifact: Artifact,
                     run_script_git_artifact: Artifact,
@@ -232,7 +232,7 @@ class gem5Run:
         of this class.
         """
 
-        run = cls._create(name, gem5_binary, run_script, gem5_artifact,
+        run = cls._create(name, gem5_binary, run_script, outdir, gem5_artifact,
                           gem5_git_artifact, run_script_git_artifact, params,
                           timeout)
         run.linux_binary = linux_binary
@@ -252,11 +252,6 @@ class gem5Run:
         run.string = f"{run.gem5_name} {run.script_name} "
         run.string += f"{run.linux_name} {run.disk_name} "
         run.string += ' '.join(run.params)
-        run.relative_outdir = relative_outdir
-
-        run.outdir = os.path.abspath(run.relative_outdir)
-        # Make the directory if it doesn't exist
-        os.makedirs(run.outdir, exist_ok=True)
 
         run.command = [
             run.gem5_binary,
@@ -268,6 +263,8 @@ class gem5Run:
         run.hash = run._getHash()
         run.type = 'gem5 run fs'
 
+        # Make the directory if it doesn't exist
+        os.makedirs(run.outdir, exist_ok=True)
         run.dumpJson('info.json')
 
         return run
@@ -396,14 +393,19 @@ class gem5Run:
         d = self._convertForJson(self._getSerializable())
         return json.dumps(d)
 
-    def run(self, task: Any = None) -> None:
+    def run(self, task: Any = None, cwd: str = '.') -> None:
         """Actually run the test.
 
         Calls Popen with the command to fork a new process.
         Then, this function polls the process every 5 seconds to check if it
         has finished or not. Each time it checks, it dumps the json info so
         other applications can poll those files.
+
         task is the celery task that is running this gem5 instance.
+
+        cwd is the directory to change to before running. This allows a server
+        process to run in a different directory than the running process. Note
+        that only the spawned process runs in the new directory.
         """
         # Check if the run is already in the database
         if self.hash in _db:
@@ -424,7 +426,7 @@ class gem5Run:
         self.dumpJson('info.json')
 
         # Start running the gem5 command
-        proc = subprocess.Popen(self.command)
+        proc = subprocess.Popen(self.command, cwd = cwd)
 
         # Register handler in case this process is killed while the gem5
         # instance is running. Note: there's a bit of a race condition here,
