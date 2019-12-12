@@ -308,14 +308,14 @@ class gem5Run:
         """
         for v in self.artifacts:
             if v.type == 'git repo':
-                new = artifact.artifact.getGit(os.path.join(cwd,v.path))['hash']
+                new = artifact.artifact.getGit(os.path.join(cwd, v.path))['hash']
                 old = v.git['hash']
             else:
-                new = artifact.artifact.getHash(os.path.join(cwd,v.path))
+                new = artifact.artifact.getHash(os.path.join(cwd, v.path))
                 old = v.hash
 
             if new != v.hash:
-                status = f"Failed artifact check for {os.path.join(cwd,v.path)}"
+                status = f"Failed artifact check for {os.path.join(cwd, v.path)}"
                 return False
 
         return True
