@@ -298,7 +298,7 @@ class gem5Run:
                 setattr(run, k, v)
         return run
 
-    def checkArtifacts(self) -> bool:
+    def checkArtifacts(self, cwd: str) -> bool:
         """Checks to make sure all of the artifacts are up to date
 
         This should happen just before running gem5. This function will return
@@ -308,14 +308,14 @@ class gem5Run:
         """
         for v in self.artifacts:
             if v.type == 'git repo':
-                new = artifact.artifact.getGit(v.path)['hash']
+                new = artifact.artifact.getGit(os.path.join(cwd,v.path))['hash']
                 old = v.git['hash']
             else:
-                new = artifact.artifact.getHash(v.path)
+                new = artifact.artifact.getHash(os.path.join(cwd,v.path))
                 old = v.hash
 
             if new != v.hash:
-                status = f"Failed artifact check for {v.path}"
+                status = f"Failed artifact check for {os.path.join(cwd,v.path)}"
                 return False
 
         return True
@@ -415,7 +415,7 @@ class gem5Run:
         self.status = "Begin run"
         self.dumpJson('info.json')
 
-        if not self.checkArtifacts():
+        if not self.checkArtifacts(cwd):
             self.dumpJson('info.json')
             return
 
