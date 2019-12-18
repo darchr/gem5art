@@ -1,3 +1,6 @@
+Authors: Hoa Nguyen
+         Ayaz Akram
+
 # Disk Images
 
 ## Introduction

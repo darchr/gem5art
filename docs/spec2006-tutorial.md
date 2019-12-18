@@ -1,3 +1,5 @@
+Authors: Hoa Nguyen
+
 # Tutorial: Run SPEC CPU 2006 Benchmarks in Full System Mode with gem5art  
 
 ## Introduction  

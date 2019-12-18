@@ -1,3 +1,6 @@
+Authors: Ayaz Akram
+         Jason Lowe-Power
+
 # Artifacts
 
 ## Introduction

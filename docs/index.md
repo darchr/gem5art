@@ -1,3 +1,5 @@
+Authors: Jason Lowe-Power
+
 ```eval_rst
 .. gem5art documentation master file, created by
    sphinx-quickstart on Mon Oct 28 14:35:02 2019.
