@@ -1,5 +1,8 @@
-Authors: Ayaz Akram
-        Jason Lowe-Power
+---
+Authors:
+  - Ayaz Akram
+  - Jason Lowe-Power
+---
 
 # Introduction
 

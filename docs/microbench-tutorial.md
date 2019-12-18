@@ -1,4 +1,7 @@
-Authors: Ayaz Akram
+---
+Authors:
+  - Ayaz Akram
+---
 
 # Tutorial: Run Microbenchmarks with gem5
 

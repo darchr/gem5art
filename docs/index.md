@@ -1,4 +1,7 @@
-Authors: Jason Lowe-Power
+---
+Authors:
+  - Jason Lowe-Power
+---
 
 ```eval_rst
 .. gem5art documentation master file, created by

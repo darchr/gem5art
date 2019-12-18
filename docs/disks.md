@@ -1,5 +1,8 @@
-Authors: Hoa Nguyen
-         Ayaz Akram
+---
+Authors:
+  - Hoa Nguyen
+  - Ayaz Akram
+---
 
 # Disk Images
 
