@@ -1,3 +1,8 @@
+---
+Authors:
+  - Ayaz Akram
+---
+
 # Tutorial: Run NAS Parallel Benchmarks with gem5
 
 ## Introduction
