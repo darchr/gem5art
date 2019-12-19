@@ -1,132 +1,606 @@
-<!DOCTYPE HTML>
-<html>
-	<head>
-		<style>
-header
-{
-	position: fixed;
-	top: 0;
-	left: 0;
-	width: 100vw;
-	height: 10vh;
-	display: flex;
-	flex-direction: row;
-	background-color: black;
-}
-	    main
-	    {
-		    margin-top: 35vh;
-		    margin-bottom: 0vh;
-		    width: 100vw;
-		    display: flex;
-		    height: 70vh;
-		    width: 100vw;
-		    background-color: white;
-		    display: flex;
-		    flex-direction: column;
-		    align-items: center;
-	    }
-	    p, ol{
-		    font-family: sans-serif;
-		    font-size: 3vmin;
-		    color: dimgray;
-		    margin-left: 5vw;
-		    margin-right: 5vw;
-	    }
-	    h1
-	    {
-		    font-family: "Righteous", sans-serif;
-		    font-size: 4vmin;
-		    color: white;
-		    margin-left: 5vw;
-		    margin-top: auto;
-		    margin-bottom: auto;
-	    }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Gem5Arg</title>
+    <style>
+        html {
+            height: 100%;
+            margin: auto;
+            width: 100%;
+            overflow: scroll;
 
-	    #header-img
-	    {
-		    height: 8vh;
-		    width: auto;
-		    padding: 1vmin;
-		    border-radius: 50%;
-	    }
-	    form
-	    {
-		    position: fixed;
-		    top: 10vh;
-		    left: 0;
-		    width: 100vw;
-		    height: 25vh;
-		    background-color: #CFFFFD;
-		    vertical-align: top;
-	    }
-	    ul
-	    {
-		    display: inline-block;
-		    text-align: left;
-		    text-align: top;
-		    font-family: "Iceland", display;
-		    font-size: 3vmin;
-	    }
-		</style>
-		<link href="https://fonts.googleapis.com/css?family=Iceland" rel="stylesheet">
+        }
 
-		<title>
-			Gem5 Status
-		</title>
-	</head>
-	<body>
-		<header>
-			<img id = "header-img" src="https://avatars3.githubusercontent.com/u/32246645?s=200&v=4" alt="DarchR-logo">
-			<h1>
-				UC Davis Computer Architecture Research Group <i>Status Page</i>
-			</h1>
-		</header>
-		<main>
-		<form action="/url-where-you-want-to-submit-form-data">
-			<ul>
-				<label>Gem5 Name</label>
-				<li><label><input type="checkbox" name="gem5-name" value= "X86">X86</label></li>
-				<li><label><input type="checkbox" name="gem5-name" value= "ARM">ARM</label></li>
-				<li><label><input type="checkbox" name="gem5-name" value= "X86.MESI">X86.MESI</label></li>
-			</ul>
-			<ul>
-				<label>Linux Name</label>	
-				<li><label><input type="checkbox" name="linux-name" value="5.2.3">5.2.3</label></li>
-				<li><label><input type="checkbox" name="linux-name" value="4.9.81">4.9.81</label></li>
-				<li><label><input type="checkbox" name="linux-name" value="4.20.20">4.20.20</label></li>
+        header {
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 10vh;
+            display: flex;
+            flex-direction: row;
+            background-color: black;
+        }
 
-			</ul>
-			<ul>
-				<label>Disk Name</label>
-				<li><label><input type="checkbox" name="disk-name" value="ubuntu">Ubuntu</label></li>
-				<li><label><input type="checkbox" name="disk-name" value="spec">spec</label></li>
-				<li><label><input type="checkbox" name="disk-name" value="opensource">opensource</label></li>
+        main {
+            left: 0;
+            width: 100vw;
+            height: 90vh;
+            text-align: center;
+        }
 
-			</ul>
-			<ul>
-				<label>Number of Cores</label>
-				<li><label><input type="checkbox" name="cpu" value="1">1</label></li>
-				<li><label><input type="checkbox" name="cpu" value="2">2</label></li>
-				<li><label><input type="checkbox" name="cpu" value="4">4</label></li>
-				<li><label><input type="checkbox" name="cpu" value="8">8</label></li>
+        h1 {
+            font-family: "Righteous", sans-serif;
+            font-size: 4vmin;
+            color: white;
+            margin-left: 5vw;
+            margin-top: auto;
+            margin-bottom: auto;
+        }
 
-			</ul>
-			<ul>
-				<label>Script Name</label>
-				<li><label><input type="checkbox" name="script-name" value="scripto1">scripto1</label></li>
-				<li><label><input type="checkbox" name="script-name" value="scriptoface">scriptoface</label></li>
-			</ul>
-			<ul>
-				<label>Workload</label>
-				<li><label><input type="checkbox" name="test" value= "init">init</label></li>
-				<li><label><input type="checkbox" name="test" value= "systemd">systemd</label></li>
+        h2 {
+            font-family: sans-serif;
+            font-size: 2vmin;
+            color: black;
+            margin-top: 3vh;
+            margin-right: auto;
+            margin-left: auto;
+        }
 
-			</ul>
+        .successful-test-box {
+            background-color: forestgreen;
+        }
 
-		</form>
-		<p>
-		</p>
-		</main>
-	</body>
+        .timed-out-test-box {
+            background-color: darkorange;
+        }
+
+        .failed-test-box {
+            background-color: red;
+        }
+
+        .test-type-label {
+            font-size: 1.5vmin;
+            text-align: left;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+        }
+
+        .cpu-number-label {
+            font-size: 2vmin;
+            margin-top: 4vh;
+            height: 12vh;
+            line-height: 3vmin;
+        }
+
+        .test-grid-title {
+            font-size: 1.5vmin;
+            grid-column-start: 1;
+            grid-column-end: 5;
+            grid-row-start: 1;
+            grid-row-end: 2;
+        }
+
+        .color-code {
+            word-spacing: 5em;
+            margin-top: 1vh;
+            font-size: 2vmin;
+            grid-column-start: 1;
+            grid-column-end: 7;
+            grid-row-start: 0;
+            grid-row-end: 1;
+        }
+
+        .box-of-test-grids {
+            display: grid;
+            grid-template-rows: auto auto;
+            grid-template-columns: 5vw auto auto auto auto auto;
+            width: 60vw;
+            height: 20vh;
+            text-align: center;
+            margin-right: auto;
+            margin-left: auto;
+            margin-bottom: 10vh;
+            border-style: solid;
+        }
+
+        .test-grid {
+            display: grid;
+            grid-gap: 2px;
+            margin: 1vh auto 0;
+            grid-template-columns: 3vmin 3vmin 3vmin 3vmin;
+            grid-template-rows: 3vmin 3vmin 3vmin 3vmin 3vmin 6vmin;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css?family=Righteous" rel="stylesheet">
+</head>
+<body>
+<header>
+    <h1>
+        UC Davis Computer Architecture Research Group <i>Status Page</i>
+    </h1>
+</header>
+<main>
+    <h2>Mem Sys: classic, Boot Type: init</h2>
+    <div class=box-of-test-grids>
+        <div class="color-code"><span style="color: red;">Failure </span><span style="color: darkorange;">Timeout </span><span style="color: forestgreen;">Success</span></div>
+        <div class="cpu-number-label">8 CPU—<br>4 CPU—<br>2 CPU—<br>1 CPU—<br></div>
+        <div class="test-grid">
+            <div class="test-grid-title">linux-4.4.186</div>
+            <div class=timed-out-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=test-type-label>-kvm</div>
+            <div class=test-type-label>-atomic</div>
+            <div class=test-type-label>-simple</div>
+            <div class=test-type-label>-o3</div>
+        </div>
+        <div class="test-grid">
+            <div class="test-grid-title">linux-4.9.186</div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=timed-out-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=failed-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=test-type-label>-kvm</div>
+            <div class=test-type-label>-atomic</div>
+            <div class=test-type-label>-simple</div>
+            <div class=test-type-label>-o3</div>
+        </div>
+        <div class="test-grid">
+            <div class="test-grid-title">linux-4.14.134</div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=timed-out-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=failed-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=test-type-label>-kvm</div>
+            <div class=test-type-label>-atomic</div>
+            <div class=test-type-label>-simple</div>
+            <div class=test-type-label>-o3</div>
+        </div>
+        <div class="test-grid">
+            <div class="test-grid-title">linux-4.19.83</div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=timed-out-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=failed-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=test-type-label>-kvm</div>
+            <div class=test-type-label>-atomic</div>
+            <div class=test-type-label>-simple</div>
+            <div class=test-type-label>-o3</div>
+        </div>
+        <div class="test-grid">
+            <div class="test-grid-title">linux-5.2.3</div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=timed-out-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=failed-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=test-type-label>-kvm</div>
+            <div class=test-type-label>-atomic</div>
+            <div class=test-type-label>-simple</div>
+            <div class=test-type-label>-o3</div>
+        </div>
+    </div>
+    <h2>Mem Sys: classic, Boot Type: systemd</h2>
+    <div class=box-of-test-grids>
+        <div class="color-code"><span style="color: red;">Failure </span><span style="color: darkorange;">Timeout </span><span style="color: forestgreen;">Success</span></div>
+        <div class="cpu-number-label">8 CPU—<br>4 CPU—<br>2 CPU—<br>1 CPU—<br></div>
+        <div class="test-grid">
+            <div class="test-grid-title">linux-4.4.186</div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=timed-out-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=failed-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=test-type-label>-kvm</div>
+            <div class=test-type-label>-atomic</div>
+            <div class=test-type-label>-simple</div>
+            <div class=test-type-label>-o3</div>
+        </div>
+        <div class="test-grid">
+            <div class="test-grid-title">linux-4.9.186</div>
+            <div class=successful-test-box></div>
+            <div class=timed-out-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=failed-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=timed-out-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=failed-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=test-type-label>-kvm</div>
+            <div class=test-type-label>-atomic</div>
+            <div class=test-type-label>-simple</div>
+            <div class=test-type-label>-o3</div>
+        </div>
+        <div class="test-grid">
+            <div class="test-grid-title">linux-4.14.134</div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=timed-out-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=failed-test-box></div>
+            <div class=timed-out-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=failed-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=test-type-label>-kvm</div>
+            <div class=test-type-label>-atomic</div>
+            <div class=test-type-label>-simple</div>
+            <div class=test-type-label>-o3</div>
+        </div>
+        <div class="test-grid">
+            <div class="test-grid-title">linux-4.19.83</div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=timed-out-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=failed-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=failed-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=test-type-label>-kvm</div>
+            <div class=test-type-label>-atomic</div>
+            <div class=test-type-label>-simple</div>
+            <div class=test-type-label>-o3</div>
+        </div>
+        <div class="test-grid">
+            <div class="test-grid-title">linux-5.2.3</div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=timed-out-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=failed-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=test-type-label>-kvm</div>
+            <div class=test-type-label>-atomic</div>
+            <div class=test-type-label>-simple</div>
+            <div class=test-type-label>-o3</div>
+        </div>
+    </div>
+    <h2>Mem Sys: ruby, Boot Type: init</h2>
+    <div class=box-of-test-grids>
+        <div class="color-code"><span style="color: red;">Failure </span><span style="color: darkorange;">Timeout </span><span style="color: forestgreen;">Success</span></div>
+        <div class="cpu-number-label">8 CPU—<br>4 CPU—<br>2 CPU—<br>1 CPU—<br></div>
+        <div class="test-grid">
+            <div class="test-grid-title">linux-4.4.186</div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=timed-out-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=failed-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=test-type-label>-kvm</div>
+            <div class=test-type-label>-atomic</div>
+            <div class=test-type-label>-simple</div>
+            <div class=test-type-label>-o3</div>
+        </div>
+        <div class="test-grid">
+            <div class="test-grid-title">linux-4.9.186</div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=timed-out-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=failed-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=test-type-label>-kvm</div>
+            <div class=test-type-label>-atomic</div>
+            <div class=test-type-label>-simple</div>
+            <div class=test-type-label>-o3</div>
+        </div>
+        <div class="test-grid">
+            <div class="test-grid-title">linux-4.14.134</div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=timed-out-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=failed-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=test-type-label>-kvm</div>
+            <div class=test-type-label>-atomic</div>
+            <div class=test-type-label>-simple</div>
+            <div class=test-type-label>-o3</div>
+        </div>
+        <div class="test-grid">
+            <div class="test-grid-title">linux-4.19.83</div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=failed-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=timed-out-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=failed-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=test-type-label>-kvm</div>
+            <div class=test-type-label>-atomic</div>
+            <div class=test-type-label>-simple</div>
+            <div class=test-type-label>-o3</div>
+        </div>
+        <div class="test-grid">
+            <div class="test-grid-title">linux-5.2.3</div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=failed-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=timed-out-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=failed-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=test-type-label>-kvm</div>
+            <div class=test-type-label>-atomic</div>
+            <div class=test-type-label>-simple</div>
+            <div class=test-type-label>-o3</div>
+        </div>
+    </div>
+    <h2>Mem Sys: ruby, Boot Type: systemd</h2>
+    <div class=box-of-test-grids>
+        <div class="color-code"><span style="color: red;">Failure </span><span style="color: darkorange;">Timeout </span><span style="color: forestgreen;">Success</span></div>
+        <div class="cpu-number-label">8 CPU—<br>4 CPU—<br>2 CPU—<br>1 CPU—<br></div>
+        <div class="test-grid">
+            <div class="test-grid-title">linux-4.4.186</div>
+            <div class=timed-out-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=timed-out-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=timed-out-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=failed-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=failed-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=test-type-label>-kvm</div>
+            <div class=test-type-label>-atomic</div>
+            <div class=test-type-label>-simple</div>
+            <div class=test-type-label>-o3</div>
+        </div>
+        <div class="test-grid">
+            <div class="test-grid-title">linux-4.9.186</div>
+            <div class=timed-out-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=timed-out-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=timed-out-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=timed-out-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=test-type-label>-kvm</div>
+            <div class=test-type-label>-atomic</div>
+            <div class=test-type-label>-simple</div>
+            <div class=test-type-label>-o3</div>
+        </div>
+        <div class="test-grid">
+            <div class="test-grid-title">linux-4.14.134</div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=timed-out-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=failed-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=failed-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=test-type-label>-kvm</div>
+            <div class=test-type-label>-atomic</div>
+            <div class=test-type-label>-simple</div>
+            <div class=test-type-label>-o3</div>
+        </div>
+        <div class="test-grid">
+            <div class="test-grid-title">linux-4.19.83</div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=timed-out-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=timed-out-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=test-type-label>-kvm</div>
+            <div class=test-type-label>-atomic</div>
+            <div class=test-type-label>-simple</div>
+            <div class=test-type-label>-o3</div>
+        </div>
+        <div class="test-grid">
+            <div class="test-grid-title">linux-5.2.3</div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=timed-out-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=failed-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=successful-test-box></div>
+            <div class=test-type-label>-kvm</div>
+            <div class=test-type-label>-atomic</div>
+            <div class=test-type-label>-simple</div>
+            <div class=test-type-label>-o3</div>
+        </div>
+    </div>
+</main>
+</body>
 </html>
