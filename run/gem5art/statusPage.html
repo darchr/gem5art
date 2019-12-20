@@ -1,15 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
-    <title>Gem5Arg</title>
+    <title>Gem5Art</title>
     <style>
         html {
             height: 100%;
             margin: auto;
             width: 100%;
             overflow: scroll;
-
         }
 
         header {
@@ -112,6 +111,41 @@
             grid-template-rows: 3vmin 3vmin 3vmin 3vmin 3vmin 6vmin;
         }
     </style>
+    <script>
+        function readTextFile(file, callback) {
+            let rawFile = new XMLHttpRequest();
+            rawFile.overrideMimeType("application/json");
+            rawFile.open("GET", file, true);
+            rawFile.onreadystatechange = function () {
+                if (rawFile.readyState === 4 && rawFile.status === 200) {
+                    callback(rawFile.responseText);
+                } else {
+                    callback('{}');
+                }
+            };
+            rawFile.send(null);
+        }
+
+        function determineColor(linuxName, testType, memSys, cpuNumber, bootType) {
+            readTextFile("./data.json", function (json) {
+                let parsedJSON = JSON.parse(json);
+                for (let i in parsedJSON) {
+                    if (parsedJSON[i]['linux_name'] === linuxName && parsedJSON[i]['params'][0] === testType && parsedJSON[i]['params'][1] === memSys && parsedJSON[i]['params'][2] === cpuNumber && parsedJSON[i]['params'][3] === bootType) {
+                        if (parsedJSON[i]['status'] === "Finished") {
+                            //alert("successful-test-box");
+                            return "successful-test-box";
+                        } else if (parsedJSON[i]['status'] === "Failed") {
+                            //alert("timed-out-test-box");
+                            return "timed-out-test-box";
+                        } else {
+                            //alert("failed-test-box");
+                            return "failed-test-box";
+                        }
+                    }
+                }
+            });
+        }
+    </script>
     <link href="https://fonts.googleapis.com/css?family=Righteous" rel="stylesheet">
 </head>
 <body>
@@ -123,11 +157,12 @@
 <main>
     <h2>Mem Sys: classic, Boot Type: init</h2>
     <div class=box-of-test-grids>
-        <div class="color-code"><span style="color: red;">Failure </span><span style="color: darkorange;">Timeout </span><span style="color: forestgreen;">Success</span></div>
+        <div class="color-code"><span style="color: red;">Failure </span><span
+                style="color: darkorange;">Timeout </span><span style="color: forestgreen;">Success</span></div>
         <div class="cpu-number-label">8 CPU—<br>4 CPU—<br>2 CPU—<br>1 CPU—<br></div>
         <div class="test-grid">
             <div class="test-grid-title">linux-4.4.186</div>
-            <div class=timed-out-test-box></div>
+            <div class=successful-test-box></div>
             <div class=successful-test-box></div>
             <div class=successful-test-box></div>
             <div class=successful-test-box></div>
@@ -243,7 +278,8 @@
     </div>
     <h2>Mem Sys: classic, Boot Type: systemd</h2>
     <div class=box-of-test-grids>
-        <div class="color-code"><span style="color: red;">Failure </span><span style="color: darkorange;">Timeout </span><span style="color: forestgreen;">Success</span></div>
+        <div class="color-code"><span style="color: red;">Failure </span><span
+                style="color: darkorange;">Timeout </span><span style="color: forestgreen;">Success</span></div>
         <div class="cpu-number-label">8 CPU—<br>4 CPU—<br>2 CPU—<br>1 CPU—<br></div>
         <div class="test-grid">
             <div class="test-grid-title">linux-4.4.186</div>
@@ -363,7 +399,8 @@
     </div>
     <h2>Mem Sys: ruby, Boot Type: init</h2>
     <div class=box-of-test-grids>
-        <div class="color-code"><span style="color: red;">Failure </span><span style="color: darkorange;">Timeout </span><span style="color: forestgreen;">Success</span></div>
+        <div class="color-code"><span style="color: red;">Failure </span><span
+                style="color: darkorange;">Timeout </span><span style="color: forestgreen;">Success</span></div>
         <div class="cpu-number-label">8 CPU—<br>4 CPU—<br>2 CPU—<br>1 CPU—<br></div>
         <div class="test-grid">
             <div class="test-grid-title">linux-4.4.186</div>
@@ -483,7 +520,8 @@
     </div>
     <h2>Mem Sys: ruby, Boot Type: systemd</h2>
     <div class=box-of-test-grids>
-        <div class="color-code"><span style="color: red;">Failure </span><span style="color: darkorange;">Timeout </span><span style="color: forestgreen;">Success</span></div>
+        <div class="color-code"><span style="color: red;">Failure </span><span
+                style="color: darkorange;">Timeout </span><span style="color: forestgreen;">Success</span></div>
         <div class="cpu-number-label">8 CPU—<br>4 CPU—<br>2 CPU—<br>1 CPU—<br></div>
         <div class="test-grid">
             <div class="test-grid-title">linux-4.4.186</div>
@@ -604,3 +642,4 @@
 </main>
 </body>
 </html>
+
