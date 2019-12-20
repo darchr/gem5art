@@ -193,7 +193,8 @@ gem5_binary = Artifact.registerArtifact(
 
 The number of artifacts is less than what we had to use in previous (full-system) tutorials ([boot](boot-tutorial.md), [npb](npb-tutorial.md)), as expected.
 
-Now to run the benchmarks, we will iterate through possible cpu types, memory types and all of the microbenchmarks from microbench/ folder:
+Now to run the benchmarks, we will iterate through possible cpu types, memory types and all of the microbenchmarks from microbench/ folder.
+We will also register an artifact for each microbenchmark:
 
 ```python
 
@@ -210,6 +211,21 @@ if __name__ == "__main__":
     for filename in os.listdir('microbench'):
         if os.path.isdir(f'microbench/{filename}') and filename != '.git':
             bm_list.append(filename)
+
+    # create an artifact for each single microbenchmark
+    for bm in bm_list:
+        bm = Artifact.registerArtifact(
+        command = '''
+        cd microbench/{};
+        make X86;
+        '''.format(bm),
+        typ = 'binary',
+        name = bm,
+        cwd = 'microbench/{}'.format(bm),
+        path =  'microbench/{}/bench.X86'.format(bm),
+        inputs = [experiments_repo,],
+        documentation = 'microbenchmark ({}) binary for X86 ISA'.format(bm)
+        )
 
     for bm in bm_list:
         for cpu in cpu_types:
