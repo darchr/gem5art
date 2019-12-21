@@ -1,5 +1,6 @@
+<!--- Programmed by Mira Welner in Dr. Jason Lowe-Power's lab at UC Davis 2019 -->
 <!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/html">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Gem5Art</title>
@@ -16,9 +17,9 @@
             left: 0;
             width: 100vw;
             height: 10vh;
-            display: flex;
-            flex-direction: row;
             background-color: black;
+            display: flex;
+            flex-flow: row wrap;
         }
 
         main {
@@ -32,7 +33,6 @@
             font-family: "Righteous", sans-serif;
             font-size: 4vmin;
             color: white;
-            margin-left: 5vw;
             margin-top: auto;
             margin-bottom: auto;
         }
@@ -44,6 +44,12 @@
             margin-top: 3vh;
             margin-right: auto;
             margin-left: auto;
+        }
+
+        img {
+            height: 10vh;
+            margin-left: 2vw;
+            margin-right: 5vw;
         }
 
         .test-type-label {
@@ -171,9 +177,8 @@
 </head>
 <body>
 <header>
-    <h1>
-        UC Davis Computer Architecture Research Group <i>Status Page</i>
-    </h1>
+    <img src="https://avatars2.githubusercontent.com/u/32246645?s=280&v=4" alt="DArchR">
+    <h1>UC Davis Computer Architecture Research Group <i>Status Page</i></h1>
 </header>
 <main>
     <h2>Mem Sys: classic, Boot Type: init</h2>
