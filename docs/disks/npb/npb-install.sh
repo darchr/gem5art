@@ -4,7 +4,8 @@
 
 echo "12345" | sudo apt-get install build-essential gfortran
 
-cp /home/gem5/NPB3.3-OMP/config/suite.def_C /home/gem5/NPB3.3-OMP/config/suite.def
-
 cd /home/gem5/NPB3.3-OMP/
-make suite
+
+mkdir bin
+
+make suite HOOKS=1

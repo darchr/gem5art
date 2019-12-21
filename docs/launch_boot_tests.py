@@ -22,21 +22,21 @@ packer = Artifact.registerArtifact(
 )
 
 experiments_repo = Artifact.registerArtifact(
-    command = 'git clone https://github.com/darchr/fs-x86-test',
+    command = 'git clone https://your-remote-add/boot_tests.git',
     typ = 'git repo',
-    name = 'Boot_test',
+    name = 'boot_tests',
     path =  './',
     cwd = '../',
-    documentation = 'main experiments repo to run full system tests with gem5'
+    documentation = 'main experiments repo to run full system boot tests with gem5'
 )
 
 gem5_repo = Artifact.registerArtifact(
-    command = 'git clone https://github.com/darchr/gem5',
+    command = 'git clone https://gem5.googlesource.com/public/gem5',
     typ = 'git repo',
     name = 'gem5',
     path =  'gem5/',
     cwd = './',
-    documentation = 'git repo with gem5 master branch on Sep 23rd'
+    documentation = 'cloned gem5 master branch from googlesource (Nov 18, 2019)'
 )
 
 m5_binary = Artifact.registerArtifact(
@@ -50,7 +50,7 @@ m5_binary = Artifact.registerArtifact(
 )
 
 disk_image = Artifact.registerArtifact(
-    command = 'packer build template.json',
+    command = './packer build boot-exit/boot-exit.json',
     typ = 'disk image',
     name = 'boot-disk',
     cwd = 'disk-image',
@@ -60,13 +60,16 @@ disk_image = Artifact.registerArtifact(
 )
 
 gem5_binary = Artifact.registerArtifact(
-    command = 'scons build/X86/gem5.opt',
+    command = '''cd gem5;
+    git checkout d40f0bc579fb8b10da7181;
+    scons build/X86/gem5.opt -j8
+    ''',
     typ = 'gem5 binary',
     name = 'gem5',
     cwd = 'gem5/',
     path =  'gem5/build/X86/gem5.opt',
     inputs = [gem5_repo,],
-    documentation = 'default gem5 x86'
+    documentation = 'gem5 binary based on googlesource (Nov 18, 2019)'
 )
 
 linux_repo = Artifact.registerArtifact(
@@ -79,7 +82,7 @@ linux_repo = Artifact.registerArtifact(
     documentation = 'linux kernel source code repo from Sep 23rd'
 )
 
-linuxes = ['5.3.12', '4.19.83', '4.14.134', '4.9.186', '4.4.186']
+linuxes = ['5.2.3', '4.19.83', '4.14.134', '4.9.186', '4.4.186']
 linux_binaries = {
     version: Artifact.registerArtifact(
                 name = f'vmlinux-{version}',
@@ -112,12 +115,13 @@ if __name__ == "__main__":
                         run = gem5Run.createFSRun(
                             'gem5/build/X86/gem5.opt',
                             'configs-boot-tests/run_exit.py',
-                            'results/X86/run_exit/vmlinux-{}/boot-exit/{}/{}/{}/{}'.
+                            'results/run_exit/vmlinux-{}/boot-exit/{}/{}/{}/{}'.
                             format(linux, cpu, mem, num_cpu, boot_type),
                             gem5_binary, gem5_repo, experiments_repo,
                             os.path.join('linux-stable', 'vmlinux'+'-'+linux),
                             'disk-image/boot-exit/boot-exit-image/boot-exit',
                             linux_binaries[linux], disk_image,
-                            cpu, mem, num_cpu, boot_type
+                            cpu, mem, num_cpu, boot_type,
+                            timeout = 6*60*60 #6 hours
                             )
                         run_gem5_instance.apply_async((run,))

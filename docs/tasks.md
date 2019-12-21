@@ -1,8 +1,13 @@
+---
+Authors:
+  - Ayaz Akram
+---
+
 # Tasks
 
 ## Introduction
 The actual gem5 experiment is executed with the help of [Celery](http://www.celeryproject.org/).
-Celery server can run many gem5 tasks asynchronously. Once a user creates a gem5Run object (discussed previously) while using gem5art, this object needs to be passed to a method run_gem5_instance() registered with Celery app, which is responsible for starting a Celery task to run gem5.
+Celery server can run many gem5 tasks asynchronously. Once a user creates a gem5Run object (discussed previously) while using gem5art, this object needs to be passed to a method run_gem5_instance() registered with Celery app, which is responsible for starting a Celery task to run gem5. Fundamentally, celery is not required to run gem5 jobs with gem5art and a job can be directly launched by calling run() function of gem5Run object. However, celery can do a better job of managing multiple runs.
 
 Celery server can be started with the following command:
 

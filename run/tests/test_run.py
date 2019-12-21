@@ -81,6 +81,7 @@ class TestSERun(unittest.TestCase):
             })
 
         self.run = gem5Run.createSERun(
+		'test SE run',
 		'gem5/build/X86/gem5.opt',
 		'configs-tests/run_test.py',
 		'results/run_test/out',
@@ -91,8 +92,12 @@ class TestSERun(unittest.TestCase):
 		)
 
     def test_out_dir(self):
-        self.assertEqual(self.run.relative_outdir,
-                'results/run_test/out')
+        relative_outdir = 'results/run_test/out'
+        self.assertEqual(self.run.outdir[-len(relative_outdir):],
+                relative_outdir)
+
+        self.assertIs(self.run.outdir[0], '/',
+                     "outdir should be absolute directory")
 
     def test_command(self):
         self.assertEqual(self.run.command,

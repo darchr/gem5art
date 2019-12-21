@@ -1,17 +1,24 @@
+---
+Authors:
+  - Ayaz Akram
+  - Jason Lowe-Power
+---
+
 # Run
 
 ## Introduction
-Each gem5 experiment is wrapped inside a run object which eventually is executed using Celery scheduler(discussed in the next section). gem5art uses a class gem5Run which contains all information required to run a gem5 experiment. gem5Run interacts with the Artifact class of gem5art to ensure reproducibility of gem5 experiments and also stores the current gem5Run object and the output results in the database for later analysis.
+Each gem5 experiment is wrapped inside a run object which is eventually executed using [Celery](http://www.celeryproject.org/) scheduler (discussed in the next section). gem5art uses a class gem5Run which contains all information required to run a gem5 experiment. gem5Run interacts with the Artifact class of gem5art to ensure reproducibility of gem5 experiments and also stores the current gem5Run object and the output results in the database for later analysis.
 
 ## SE and FS mode runs
 
-Next are two methods (for SE and FS modes of gem5) from gem5Run class which give an idea of the required arguments from a user's perspective to create a gem5Run object:
+Next are two methods (for SE (system-emulation) and FS (full-system) modes of gem5) from gem5Run class which give an idea of the required arguments from a user's perspective to create a gem5Run object:
 
 ```python
 @classmethod
 def createSERun(cls,
                 gem5_binary: str,
                 run_script: str,
+                outdir: str,
                 gem5_artifact: Artifact,
                 gem5_git_artifact: Artifact,
                 run_script_git_artifact: Artifact,
@@ -23,6 +30,7 @@ def createSERun(cls,
 def createFSRun(cls,
                 gem5_binary: str,
                 run_script: str,
+                outdir: str,
                 gem5_artifact: Artifact,
                 gem5_git_artifact: Artifact,
                 run_script_git_artifact: Artifact,
@@ -39,6 +47,7 @@ For the user it is important to understand different arguments passed to run obj
 
 - gem5_binary: path to the actual gem5 binary to be used
 - run_script: path to the python run script that will be used with gem5 binary
+- outdir: path to the directory where gem5 results should be written
 - gem5_artifact: gem5 binary git artifact object
 - gem5_git_artifact: gem5 source git repo artifact object
 - run_script_git_artifact: run script artifact object
@@ -53,7 +62,23 @@ The artifact parameters (gem5_artifact, gem5_git_artifact, and run_script_git_ar
 Apart from the above mentioned parameters, gem5Run class also keeps track of other features of a gem5 run e.g. start_time, end_time,
 current status of gem5 run, kill_reason (if the run is finished) etc.
 
-While the user can write their own run_script to use with gem5 (with any command line arguments), currently when gem5Run object is created for a full-system experiment using createFSRun method, it is assumed that the path to the linunx_binary and disk_image is passed to the run_script on the command line (as arguments of the createFSRun method),
+While the user can write their own run_script to use with gem5 (with any command line arguments), currently when gem5Run object is created for a full-system experiment using createFSRun method, it is assumed that the path to the linux_binary and disk_image is passed to the run_script on the command line (as arguments of the createFSRun method),
+
+## Searching the Database to find Runs
+
+Once you start running the experiments with gem5 and want to know the status of those runs, you can look at the gem5Run artifacts in the database.
+For this purpose, gem5art provides a method `getRuns`, which you can use as follows:
+
+```python
+import gem5art.run
+for i in gem5art.run.getRuns(fs_only=False, limit=100):print(i)
+```
+
+The documentation on [getRuns](run.html#gem5art.run.getRuns) is available at the bottom of this page.
+
+```
+TO DO: Add examples of new getRuns methods as well.
+```
 
 ## Runs API Documentation
 ```eval_rst

@@ -1,3 +1,8 @@
+---
+Authors:
+  - Ayaz Akram
+---
+
 # Tutorial: Run NAS Parallel Benchmarks with gem5
 
 ## Introduction
@@ -20,11 +25,12 @@ There are different classes (A,B,C,D,E and F) of the workloads based on the data
 
 This tutorial follows the following directory structure:
 
-- configs-npb-tests: the base gem5 configuration to be used to run full-system simulations
+- configs-npb-tests: gem5 run and configuration scripts to run NPB
 - disk-image: contains packer script and template files used to build a disk image.
 The built disk image will be stored in the same folder
 - gem5: gem5 [source code](https://gem5.googlesource.com/public/gem5) and the compiled binary
 - linux-stable: linux kernel [source code](https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git)  used for full-system experiments
+- config.4.19.83: linux kernel config file used for its compilation
 - results: directory to store the results of the experiments (generated once gem5 jobs are executed)
 - launch_npb_tests.py:  gem5 jobs launch script (creates all of the needed artifacts as well)
 
@@ -34,7 +40,6 @@ First, we need to create the main directory named npb-tests (from where we will 
 Through the use of npb-tests git repo, we will try to keep track of changes in those files which are not included in any git repo otherwise.
 An example of such files is gem5 run and config scripts (config-npb-tests).
 We want to make sure that we can keep record of any changes in these scripts, so that a particular run of NPB benchmarks can be associated with a particular snapshot of these files.
-All such files, which are not part of other artifacts, will be a part fo the experiments repo artifact (which we will create later in this tutorial).
 We also need to add a git remote to this repo pointing to a remote location where we want this repo to be hosted.
 
 
@@ -45,7 +50,7 @@ git init
 git remote add origin https://your-remote-add/npb-tests.git
 ```
 
-We also need to add a .gitignore file in our git repo, to not track files we don't care about:
+We also need to add a .gitignore file in our git repo, to avoid tracking those files which are not important or will be tracked through other git repos:
 
 ```sh
 *.pyc
@@ -56,7 +61,7 @@ venv
 disk-image/packer
 disk-image/packer_1.4.3_linux_amd64.zip
 disk-image/npb/npb-image/npb
-disk-image/npb/NPB3.3.1
+disk-image/npb/npb-hooks
 disk-image/packer_cache
 gem5
 linux-stable/
@@ -77,17 +82,32 @@ pip install gem5art-artifact gem5art-run gem5art-tasks
 
 ## Building gem5
 
-Clone gem5 and build it:
+Next clone gem5 from googlesource:
 
 ```sh
 git clone https://gem5.googlesource.com/public/gem5
+```
+
+Before building gem5, we need to apply some changes to the source.
+These changes are needed to run gem5 in KVM mode on Intel platforms and also to run some gem5 magic instructions in KVM mode.
+We will get these changes from darchr/gem5 (GitHub).
+Run the following to apply changes and build gem5:
+
+```sh
 cd gem5
+git checkout d40f0bc579fb8b10da7181
+git remote add darchr https://github.com/darchr/gem5
+git fetch darchr
+git cherry-pick 6450aaa7ca9e3040fb9eecf69c51a01884ac370c
+git cherry-pick 3403665994b55f664f4edfc9074650aaa7ddcd2c
 scons build/X86/gem5.opt -j8
 ```
-You can also add your changes to gem5 source before building it. Make sure to commit any changes you make to gem5 repo.
+
+Like the linux boot tutorial, you can use or ignore the git checkout command in the above commands depending on if you want to use the gem5 source from the time of making this tutorial or from the time of reading it.
+
 Also make sure to build the m5 utility which will be moved to the disk image eventually.
 m5 utility allows to trigger simulation tasks from inside the simulated system.
-For example, it can be used dump simuation statistics when the simulated system triggers to do so.
+For example, it can be used dump simulation statistics when the simulated system triggers to do so.
 We will need m5 mainly to exit the simulation when the simulated system will be done with the execution of a particular NPB benchmark.
 
 ```sh
@@ -108,14 +128,18 @@ Add a folder named shared for config files which will be shared among all disk i
 In npb/ we will add the benchmark source first, which will eventually be transferred to the disk image through our npb.json file.
 
 ```sh
-wget https://www.nas.nasa.gov/assets/npb/NPB3.3.1.tar.gz
-tar xvzf  NPB3.3.1.tar.gz
+cd disk-image/npb
+git clone https://github.com/darchr/npb-hooks.git
 ```
 
-Next, we will add few other files in npb/ which will be used for compilation of NPB inside the disk image and eventually running of these benchmarks with gem5.
-These files will be moved from host to the disk image using npb.json file as we will soon seee.
+This source of NPB has ROI (region of interest) annotations for each benchmark which will be used by gem5 to
+separate out simulation statistics of the important parts of a program from the rest of the program.
+Basically, gem5 magic instructions are used before and after the ROI which exit the guest and transfer control to gem5 run script which can then do things like dumping or resetting stats or switching to cpu of interest.
 
-First, create a file npb-install.sh, which will install NPB on the disk image:
+Next, we will add few other files in npb/ which will be used for compilation of NPB inside the disk image and eventually running of these benchmarks with gem5.
+These files will be moved from host to the disk image using npb.json file as we will soon see.
+
+First, create a file npb-install.sh, which will be executed inside the disk image (once it is built) and will install NPB on the disk image:
 
 ```sh
 # install build-essential (gcc and g++ included) and gfortran
@@ -124,43 +148,21 @@ First, create a file npb-install.sh, which will install NPB on the disk image:
 
 echo "12345" | sudo apt-get install build-essential gfortran
 
-cp /home/gem5/NPB3.3-OMP/config/suite.def_C /home/gem5/NPB3.3-OMP/config/suite.def
-
 cd /home/gem5/NPB3.3-OMP/
-make suite
-```
 
-We are specifically compiling OpenMP (OMP) version of class C NPB workloads.
-Class C of NPB is the largest of the standard test problems and will be a reasonable choice for our experiments.
+mkdir bin
 
-To configure the benchmark build process, we will use modified make.def and suite.def files. Look [here](https://github.com/darchr/npb-hooks/blob/master/NPB3.3.1/NPB3.3-OMP/README.install) in order to understand the build process of NAS parallel benchmarks.
-suite.def file is used to determine which workloads (and of which class) do we want to compile when we run make suite command.
-Let's create suite.def_C in npb/ and add:
+make suite HOOKS=1
+```
+`HOOKS=1` flag in the above make command enables the ROI annotations while compiling NPB workloads.
+We are specifically compiling OpenMP (OMP) version of class A, B, C and D of NPB workloads.
 
-```
-ft      C
-mg      C
-sp      C
-lu      C
-bt      C
-is      C
-ep      C
-cg      C
-ua      C
-```
+To configure the benchmark build process, the source of NPB which we are using relies on modified make.def and suite.def files (build system files). Look [here](https://github.com/darchr/npb-hooks/blob/master/NPB3.3.1/NPB3.3-OMP/README.install) in order to understand the build process of NAS parallel benchmarks.
+'suite.def' file is used to determine which workloads (and of which class) do we want to compile when we run 'make suite' command (as in the above script).
+You can look at the modified suite.def file [here](https://github.com/darchr/npb-hooks/blob/master/NPB3.3.1/NPB3.3-OMP/config/suite.def).
 
-suite.def_C will be copied to the disk image and renamed to suite.def before compilation of the benchmarks.
-
-Next, create make.def in npb/.
-We will use the default make.def file and modify it to set OMP flags to compile OMP version of the benchmarks.
-Following are the needed changes:
-```
-FFLAGS	= -O3 -fopenmp
-FLINKFLAGS = -O3 -fopenmp
-CFLAGS	= -O3 -fopenmp
-CLINKFLAGS = -O3 -fopenmp
-```
-You can find the complete file [here]((https://github.com/darchr/gem5art/blob/master/docs/disks/npb/make.def)).
+The make.def file we are using add OMP flags to the compiler flags to compile OMP version of the benchmarks. We also add another flag '-DM5OP_ADDR=0xFFFF0000' to the compiler flags, which makes sure that the gem5 magic instructions added to the benchmarks will also work in KVM mode.
+You can look at the complete file [here](https://github.com/darchr/npb-hooks/blob/master/NPB3.3.1/NPB3.3-OMP/config/make.def).
 
 In npb/, create a file post-installation.sh and add following lines to it:
 
@@ -179,9 +181,9 @@ cat /home/gem5/runscript.sh >> /root/.bashrc
 echo 'Post Installation Done'
 ```
 
-This post-installation.sh script (which is a script to run after Ubuntu is installed on the disk image) installs m5 and copies the contents of runscript.sh to .bashrc. Therefore, we need
-to add those things in runscript.sh which we want to execute as soon as the sytem boots up. Create runscript.sh in npb/ and add following
-lines to it:
+This post-installation.sh script (which is a script to run after Ubuntu is installed on the disk image) installs m5 and copies the contents of runscript.sh to .bashrc.
+Therefore, we need to add those things in runscript.sh which we want to execute as soon as the system boots up.
+Create runscript.sh in npb/ and add following lines to it:
 
 ```sh
 #!/bin/sh
@@ -189,7 +191,7 @@ lines to it:
 m5 readfile > script.sh
 if [ -s script.sh ]; then
     # if the file is not empty, execute it
-    chmod +x script.shm5 re
+    chmod +x script.sh
     ./script.sh
     m5 exit
 fi
@@ -270,18 +272,8 @@ Finally, create npb.json and add following contents:
         },
         {
             "type": "file",
-            "source": "npb/NPB3.3.1/NPB3.3-OMP",
+            "source": "npb/npb-hooks/NPB3.3.1/NPB3.3-OMP",
             "destination": "/home/gem5/"
-        },
-        {
-            "type": "file",
-            "source": "npb/make.def",
-            "destination": "/home/gem5/NPB3.3-OMP/config/make.def"
-        },
-        {
-            "type": "file",
-            "source": "npb/suite.def_C",
-            "destination": "/home/gem5/NPB3.3-OMP/config/suite.def_C"
         },
         {
             "type": "shell",
@@ -326,7 +318,7 @@ cd disk-image/
 wget https://releases.hashicorp.com/packer/1.4.3/packer_1.4.3_linux_amd64.zip
 unzip packer_1.4.3_linux_amd64.zip
 ```
-Now, to build the disk image, inside disk-image folder, run:
+Now, to build the disk image inside the disk-image folder, run:
 
 ```
 ./packer validate npb/npb.json
@@ -361,7 +353,8 @@ Get the run script named run_npb.py from [here](https://github.com/darchr/gem5ar
 The run script (run_npb.py) takes the following arguments:
 - kernel: compiled kernel to be used for simulation
 - disk: built disk image to be used for simulation
-- benchmark: NPB workload to run (e.g. is.C.x, ep.C.x, bt.C.x)
+- cpu: the cpu model to use (e.g. kvm or atomic)
+- benchmark: NPB workload to run (e.g. is.C.x, ep.C.x, bt.C.x, where C is the class)
 - num_cpus: number of parallel cpus to be simulated
 
 ## Database and Celery Server
@@ -414,7 +407,7 @@ For our npb-tests repo,
 experiments_repo = Artifact.registerArtifact(
     command = 'git clone https://your-remote-add/npb-tests.git',
     typ = 'git repo',
-    name = 'npb',
+    name = 'npb-tests',
     path =  './',
     cwd = '../',
     documentation = 'main repo to run npb with gem5'
@@ -427,12 +420,19 @@ For all other artifacts, add following lines in launch_npb_tests.py:
 
 ```python
 gem5_repo = Artifact.registerArtifact(
-    command = 'git clone https://gem5.googlesource.com/public/gem5',
+    command = '''
+        git clone https://gem5.googlesource.com/public/gem5;
+        cd gem5;
+        git remote add darchr https://github.com/darchr/gem5;
+        git fetch darchr;
+        git cherry-pick 6450aaa7ca9e3040fb9eecf69c51a01884ac370c;
+        git cherry-pick 3403665994b55f664f4edfc9074650aaa7ddcd2c;
+    ''',
     typ = 'git repo',
     name = 'gem5',
     path =  'gem5/',
     cwd = './',
-    documentation = 'git repo with gem5 master branch on Sep 23rd'
+    documentation = 'cloned gem5 master branch from googlesource (Nov 18, 2019) and cherry-picked 2 commits from darchr/gem5'
 )
 
 m5_binary = Artifact.registerArtifact(
@@ -452,7 +452,7 @@ disk_image = Artifact.registerArtifact(
     cwd = 'disk-image/npb',
     path = 'disk-image/npb/npb-image/npb',
     inputs = [packer, experiments_repo, m5_binary,],
-    documentation = 'Ubuntu with m5 binary installed and root auto login'
+    documentation = 'Ubuntu with m5 binary and NPB (with ROI annotations: darchr/npb-hooks/) installed.'
 )
 
 gem5_binary = Artifact.registerArtifact(
@@ -472,7 +472,7 @@ linux_repo = Artifact.registerArtifact(
     name = 'linux-stable',
     path =  'linux-stable/',
     cwd = './',
-    documentation = 'linux kernel source code repo from Sep 23rd'
+    documentation = 'linux kernel source code repo'
 )
 
 linux_binary = Artifact.registerArtifact(
@@ -495,25 +495,34 @@ Once, all of the artifacts are registered, the next step is to launch all gem5 j
 ```python
 if __name__ == "__main__":
     num_cpus = ['1', '4']
-    benchmarks = ['is.C.x', 'ep.C.x', 'cg.C.x', 'mg.C.x',
-            'ft.C.x', 'bt.C.x', 'sp.C.x', 'lu.C.x']
+    benchmarks = ['is.x', 'ep.x', 'cg.x', 'mg.x','ft.x', 'bt.x', 'sp.x', 'lu.x']
 
-for num_cpu in num_cpus:
-	for bm in benchmarks:
-		run = gem5Run.createFSRun(
-			'gem5/build/X86/gem5.opt',
-			'configs-npb-tests/run_npb.py',
-			gem5_binary, gem5_repo, experiments_repo,
-			'linux-stable/vmlinux-4.19.83',
-			'disk-image/npb/npb-image/npb',
-			linux_binary, disk_image,
-			bm, num_cpu
-			)
-		run_gem5_instance.apply_async((run,))
+    classes = ['A', 'B', 'C', 'D']
+    cpus = ['kvm', 'atomic']
+
+for cpu in cpus:
+    for num_cpu in num_cpus:
+        for clas in classes:
+            for bm in benchmarks:
+                if cpu == 'atomic' and clas != 'A':
+                    continue
+                run = gem5Run.createFSRun(
+                    'gem5/build/X86/gem5.opt',
+                    'configs-npb-tests/run_npb.py',
+                    f'''results/run_npb/{bm}/{clas}/{cpu}/{num_cpu}''',
+                    gem5_binary, gem5_repo, experiments_repo,
+                    'linux-stable/vmlinux-4.19.83',
+                    'disk-image/npb/npb-image/npb',
+                    linux_binary, disk_image,
+                    cpu, bm.replace('.x', f'.{clas}.x'), num_cpu,
+                    timeout = 24*60*60 #24 hours
+                    )
+                run_gem5_instance.apply_async((run,))
 ```
 The above lines are responsible for looping through all possible combinations of variables involved in this experiment.
 For each combination, a gem5Run object is created and eventually passed to run_gem5_instance to be
 executed asynchronously using Celery.
+We are running class A,B,C and D of NPB with KVM cpu and only class A with atomic cpu. Moreover, we are using a timeout value of 24 hours (which hopefully will be a reasonable number to finish most of the gem5 jobs).
 
 The complete launch script is available [here:](https://github.com/darchr/gem5art/blob/master/docs/launch_npb_tests.py).
 Finally, make sure you are in python virtual env and then run the script:
@@ -522,8 +531,17 @@ Finally, make sure you are in python virtual env and then run the script:
 python launch_npb_tests.py
 ```
 
+## Results
+
 Once you run the launch script, the declared artifacts will be registered by gem5art and stored in the database.
 Celery will run as many jobs in parallel as allowed by the user (at the time of starting the server).
 As soon as a gem5 job finishes, a compressed version of the results will be stored in the database as well.
-User can also query the database using the methods discussed in the [Artifacts](artifacts.md) section previously.
+User can also query the database using the methods discussed in the [Artifacts](artifacts.md), [Runs](runs.md) sections and [boot-test](boot-tutorial.md) tutorial previously.
+
+The status of working of the NAS parallel benchmarks on gem5 based on the results from the experiments of this tutorial is following:
+
+![](npb_kvm)
+![](npb_atomic)
+
+Details of these results can be found [here](https://github.com/darchr/gem5art-experiments/blob/master/npb-experiments/npb_gem5art.ipynb).
 

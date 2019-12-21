@@ -1,3 +1,8 @@
+---
+Authors:
+  - Jason Lowe-Power
+---
+
 ```eval_rst
 .. gem5art documentation master file, created by
    sphinx-quickstart on Mon Oct 28 14:35:02 2019.
@@ -64,6 +69,7 @@ Tutorials
    boot-tutorial.md
    npb-tutorial.md
    spec2006-tutorial.md
+   microbench-tutorial.md
 
 Indices and tables
 ==================
