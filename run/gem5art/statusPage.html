@@ -1,6 +1,3 @@
-<!-- 
-	Programmed by Mira Welner at UC Davis 2019
--->
 <!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/html">
 <head>
@@ -47,18 +44,6 @@
             margin-top: 3vh;
             margin-right: auto;
             margin-left: auto;
-        }
-
-        .successful-test-box {
-            background-color: forestgreen;
-        }
-
-        .timed-out-test-box {
-            background-color: darkorange;
-        }
-
-        .failed-test-box {
-            background-color: red;
         }
 
         .test-type-label {
@@ -118,12 +103,6 @@
         //IF THERE IS AN ERROR IT IS PROBABLY BECAUSE YOU PUT THE WRONG PATH TO THE JSON FILE! PUT THE CORRECT PATH HERE
         const JSONPath = "./data.json";
 
-        const testType = ["kvm", "atomic", "simple", "o3"];
-        const memSysType = ["classic", "ruby"];
-        const bootTypeType = ["init", "systemd"];
-        const CPUNumber = ["1", "2", "4", "8"];
-        const linuxType = ["vmlinux-4.4.186", "vmlinux-4.9.186", "vmlinux-4.14.134", "vmlinux-4.19.83", "vmlinux-5.2.3"];
-
         function readTextFile(file, callback) {
             let rawFile = new XMLHttpRequest();
             rawFile.overrideMimeType("application/json");
@@ -136,38 +115,6 @@
                 }
             };
             rawFile.send(null);
-        }
-
-        function determineColor(input) {
-            let inputArray = input.split(" ");
-            readTextFile(JSONPath, function (json) {
-                let parsedJSON = JSON.parse(json);
-                for (let i in parsedJSON) {
-                    if (parsedJSON[i]['linux_name'] === inputArray[0] && parsedJSON[i]['params'][0] === inputArray[1] && parsedJSON[i]['params'][1] === inputArray[2] && parsedJSON[i]['params'][2] === inputArray[3] && parsedJSON[i]['params'][3] === inputArray[4]) {
-                        document.getElementById(input).title = getHoverText(parsedJSON[i]);
-                        if (parsedJSON[i]['status'] === "Finished") {
-                            document.getElementById(input).className = "successful-test-box";
-                        } else if (parsedJSON[i]['status'] === "Failed" && parsedJSON[i]['kill_reason'] === "timeout") {
-                            document.getElementById(input).className = "timed-out-test-box";
-                        } else if (parsedJSON[i]['status'] === "Failed" && parsedJSON[i]['kill_reason'] !== "timeout") {
-                            document.getElementById(input).className = "failed-test-box";
-                        }
-                    }
-                }
-            });
-        }
-
-        for (let i = 0; i < linuxType.length; i++) {
-            for (let j = 0; j < testType.length; j++) {
-                for (let k = 0; k < memSysType.length; k++) {
-                    for (let l = 0; l < CPUNumber.length; l++) {
-                        for (let m = 0; m < bootTypeType.length; m++) {
-                            let idToTest = linuxType[i] + " " + testType[j] + " " + memSysType[k] + " " + CPUNumber[l] + " " + bootTypeType[m];
-                            determineColor(idToTest);
-                        }
-                    }
-                }
-            }
         }
 
         function getHoverText(object) {
@@ -194,10 +141,30 @@
             title += "string: " + object['string'] + "\n";
             title += "hash: " + object['hash'] + "\n";
             title += "type: " + object['type'] + "\n";
-            title += "current_time: " + object['current_time'] + "\n";
+            title += "current_time: " + object['current_time'];
             return title;
         }
 
+        function determineColor() {
+            readTextFile(JSONPath, function (json) {
+                let parsedJSON = JSON.parse(json);
+                for (let i in parsedJSON) {
+                    let idToTest = parsedJSON[i]['linux_name'] + " " + parsedJSON[i]['params'][0] + " " + parsedJSON[i]['params'][1] + " " + parsedJSON[i]['params'][2] + " " + parsedJSON[i]['params'][3];
+                    if (document.getElementById(idToTest)) {
+                        document.getElementById(idToTest).title = getHoverText(parsedJSON[i]);
+                        if (parsedJSON[i]['status'] === "Finished") {
+                            document.getElementById(idToTest).style.backgroundColor = "forestgreen";
+                        } else if (parsedJSON[i]['status'] === "Failed" && parsedJSON[i]['kill_reason'] === "timeout") {
+                            document.getElementById(idToTest).style.backgroundColor = "darkorange";
+                        } else if (parsedJSON[i]['status'] === "Failed" && parsedJSON[i]['kill_reason'] !== "timeout") {
+                            document.getElementById(idToTest).style.backgroundColor = "red";
+                        }
+                    }
+                }
+            });
+        }
+
+        determineColor();
     </script>
 
     <link href="https://fonts.googleapis.com/css?family=Righteous" rel="stylesheet">
@@ -696,4 +663,3 @@
 </main>
 </body>
 </html>
-
