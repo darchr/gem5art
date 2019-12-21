@@ -56,6 +56,21 @@ if __name__ == "__main__":
         if os.path.isdir(f'microbench/{filename}') and filename != '.git':
             bm_list.append(filename)
 
+    # create an artifact for each single microbenchmark
+    for bm in bm_list:
+        bm = Artifact.registerArtifact(
+        command = '''
+        cd microbench/{};
+        make X86;
+        '''.format(bm),
+        typ = 'binary',
+        name = bm,
+        cwd = 'microbench/{}'.format(bm),
+        path =  'microbench/{}/bench.X86'.format(bm),
+        inputs = [experiments_repo,],
+        documentation = 'microbenchmark ({}) binary for X86 ISA'.format(bm)
+        )
+
     for bm in bm_list:
         for cpu in cpu_types:
             for mem in mem_types:
