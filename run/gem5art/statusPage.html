@@ -1,4 +1,4 @@
-<!--- Programmed by Mira Welner in Dr. Jason Lowe-Power's lab at UC Davis 2019 -->
+<!--- Programmed by Mira Welner at UC Davis 2019 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,6 +10,7 @@
             margin: auto;
             width: 100%;
             overflow: scroll;
+            background-color: white;
         }
 
         header {
@@ -23,15 +24,16 @@
         }
 
         main {
+            background-color: white;
             left: 0;
             width: 100vw;
-            height: 90vh;
             text-align: center;
+            margin: 5vh auto 0;
         }
 
         h1 {
             font-family: "Righteous", sans-serif;
-            font-size: 4vmin;
+            font-size: 2vw;
             color: white;
             margin-top: auto;
             margin-bottom: auto;
@@ -41,15 +43,15 @@
             font-family: sans-serif;
             font-size: 2vmin;
             color: black;
-            margin-top: 3vh;
+            margin-top: 3vmin;
             margin-right: auto;
             margin-left: auto;
         }
 
         img {
-            height: 10vh;
-            margin-left: 2vw;
-            margin-right: 5vw;
+            height: 10vmin;
+            margin-left: 2vmax;
+            margin-right: 5vmax;
         }
 
         .test-type-label {
@@ -60,10 +62,11 @@
         }
 
         .cpu-number-label {
-            font-size: 2vmin;
-            margin-top: 4vh;
-            height: 12vh;
-            line-height: 3vmin;
+            font-size: 1vw;
+            line-height: 3vh;
+            margin-top: 4vmin;
+            margin-bottom: 0;
+            height: 12vmin;
         }
 
         .test-grid-title {
@@ -76,7 +79,7 @@
 
         .color-code {
             word-spacing: 5em;
-            margin-top: 1vh;
+            margin-top: 1vmin;
             font-size: 2vmin;
             grid-column-start: 1;
             grid-column-end: 7;
@@ -86,21 +89,23 @@
 
         .box-of-test-grids {
             display: grid;
+            grid-column-gap: 10px;
             grid-template-rows: auto auto;
-            grid-template-columns: 5vw auto auto auto auto auto;
-            width: 60vw;
-            height: 20vh;
+            grid-template-columns: 5vmax auto auto auto auto auto;
+            width: 90vw;
+            height: 20vmin;
             text-align: center;
             margin-right: auto;
             margin-left: auto;
-            margin-bottom: 10vh;
-            border-style: solid;
+            margin-bottom: 10vmin;
+            border-top: solid;
+            border-bottom: solid;
         }
 
         .test-grid {
             display: grid;
             grid-gap: 2px;
-            margin: 1vh auto 0;
+            margin: 1vmin auto 0;
             grid-template-columns: 3vmin 3vmin 3vmin 3vmin;
             grid-template-rows: 3vmin 3vmin 3vmin 3vmin 3vmin 6vmin;
         }
@@ -185,7 +190,7 @@
     <div class=box-of-test-grids>
         <div class="color-code"><span style="color: red;">Failure </span><span
                 style="color: darkorange;">Timeout </span><span style="color: forestgreen;">Success</span></div>
-        <div class="cpu-number-label">8 CPU—<br>4 CPU—<br>2 CPU—<br>1 CPU—<br></div>
+        <div class="cpu-number-label">8 CPU—<br>4 CPU—<br>2 CPU—<br>1 CPU—</div>
         <div class="test-grid">
             <div class="test-grid-title">linux-4.4.186</div>
             <div id="vmlinux-4.4.186 kvm classic 8 init"></div>
@@ -306,7 +311,7 @@
     <div class=box-of-test-grids>
         <div class="color-code"><span style="color: red;">Failure </span><span
                 style="color: darkorange;">Timeout </span><span style="color: forestgreen;">Success</span></div>
-        <div class="cpu-number-label">8 CPU—<br>4 CPU—<br>2 CPU—<br>1 CPU—<br></div>
+        <div class="cpu-number-label">8 CPU—<br>4 CPU—<br>2 CPU—<br>1 CPU—</div>
         <div class="test-grid">
             <div class="test-grid-title">linux-4.4.186</div>
             <div id="vmlinux-4.4.186 kvm classic 8 systemd"></div>
