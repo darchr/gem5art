@@ -570,7 +570,7 @@ if __name__ == "__main__":
                     cpu, benchmark, size, # params
                     timeout = 5*24*60*60 # 5 days
                 )
-                run_gem5_instance.apply_async((run,))
+                run_gem5_instance.apply_async((run,)) # TODO: update this script to gem5art-0.4.1
 
 ```
 The above launch function will run the all the available benchmarks with kvm, atomic, timing, and o3 cpus. 
@@ -650,3 +650,9 @@ Build errors:
 450.soplex
 483.xalancbmk
 ```
+
+## Appendix II. Transtition to SPEC 2017
+As mentioned earlier, SPEC 2006 benchmark suite has been retired, and the newer version, SPEC 2017, is available. 
+This section will show how to reuse the scripts made for SPEC 2006 to run SPEC 2017 experiments.  
+### Updating packer scripts
+
