@@ -13,7 +13,8 @@ The scripts in this tutorial work with gem5art-* v0.3.1.
 ### SPEC CPU 2006 Benchmarks  
 **Important:** The usage of this tutorial is just for the purpose of demonstration. 
 Those benchmarks [have been retired](https://www.spec.org/cpu2006/) [1]. 
-More details about those benchmarks are [here](https://dl.acm.org/citation.cfm?id=1186737) [2].  
+More details about those benchmarks are [here](https://dl.acm.org/citation.cfm?id=1186737) [2]. 
+The Appendix II section of this tutorial shows how to use the SPEC 2006 scripts to run SPEC 2017 experiments.
 
 Examples of the usage of SPEC CPU 2006 benchmark in the literature are [here](https://ieeexplore.ieee.org/abstract/document/4378787) [3] and in the book [4]. 
 Another example of the usage of SPEC CPU benchmarks is [here](https://cacm.acm.org/magazines/2019/2/234352-a-new-golden-age-for-computer-architecture/fulltext) [5].
@@ -653,6 +654,8 @@ Build errors:
 
 ## Appendix II. Transtition to SPEC 2017
 As mentioned earlier, SPEC 2006 benchmark suite has been retired, and the newer version, SPEC 2017, is available. 
-This section will show how to reuse the scripts made for SPEC 2006 to run SPEC 2017 experiments.  
+This section will show how to reuse the scripts made for SPEC 2006 to run SPEC 2017 experiments. 
+Changes are minimal, ie. changing `2006` to `2017`, updating the location of the ISO file, and changing SPEC 2006 run command (`runspec`) to SPEC 2017 run command (`runcpu`).  
 ### Updating packer scripts
+
 
