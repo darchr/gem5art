@@ -1,6 +1,5 @@
 # install build-essential (gcc and g++ included) and gfortran
-# install gdb for debugging
-echo "12345" | sudo DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential gfortran gdb
+echo "12345" | sudo DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential gfortran
 
 # mount the SPEC2017 ISO file and install SPEC to the disk image
 mkdir /home/gem5/mnt
@@ -17,6 +16,9 @@ cp /home/gem5/spec2017/config/Example-gcc-linux-x86.cfg /home/gem5/spec2017/conf
 
 # Use sed command to replace the default gcc_dir
 sed -i "s/\/opt\/rh\/devtoolset-7\/root\/usr/\/usr/g" /home/gem5/spec2017/config/myconfig.x86.cfg
+
+# Use sed command to remove the march=native flag when compiling
+sed -i "s/-march=native//g" /home/gem5/spec2017/config/myconfig.x86.cfg
 
 # build all SPEC workloads
 runcpu --config=myconfig.x86.cfg --action=build all
