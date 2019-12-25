@@ -21,4 +21,4 @@ sed -i "s/\/opt\/rh\/devtoolset-7\/root\/usr/\/usr/g" /home/gem5/spec2017/config
 sed -i "s/-march=native//g" /home/gem5/spec2017/config/myconfig.x86.cfg
 
 # build all SPEC workloads
-runcpu --config=myconfig.x86.cfg --build_ncpus $(nproc) --action=build all
+runcpu --config=myconfig.x86.cfg --define build_ncpus=$(nproc) --action=build all
