@@ -655,7 +655,17 @@ Build errors:
 ## Appendix II. Transtition to SPEC 2017
 As mentioned earlier, SPEC 2006 benchmark suite has been retired, and the newer version, SPEC 2017, is available. 
 This section will show how to reuse the scripts made for SPEC 2006 to run SPEC 2017 experiments. 
-Changes are minimal, ie. changing `2006` to `2017`, updating the location of the ISO file, and changing SPEC 2006 run command (`runspec`) to SPEC 2017 run command (`runcpu`).  
-### Updating packer scripts
+Changes are minimal, ie. changing `2006` to `2017`, updating the location of the ISO file, changing SPEC 2006 run command (`runspec`) to SPEC 2017 run command (`runcpu`), and manipulating the SPEC 2017 config.  
+### Updating Disk Image Scripts
+The disk image scripts to generate the SPEC 2017 disk image [could be found here](https://github.com/darchr/gem5art/tree/master/docs/disks/spec2017).  
+[The changes could be found here.](https://github.com/darchr/gem5art/commit/70019fd0196d946a65efd96bb9b2b692c0dd04be)  
 
+**Note:** In the example SPEC 2017 config, the workloads are compiled using the flag `-march=native`. 
+However, since workloads are compiled while the disk image is being building by packer, the binaries would be built accordingly to the configuration of the CPU simulated by packer. 
+This is definitely not ideal to run those binaries on gem5, which is not guaranteed to support all instructions of all hardware. 
+Hence, the `-march=native` flag is removed. 
+Other tuning flags should be manually added.
+### Updating the Launch Script
+The new launch script [could be found here](https://github.com/darchr/gem5art/blob/master/docs/launch_spec2017_experiments.py). 
+Names of SPEC 2017 workloads are updated.
 
