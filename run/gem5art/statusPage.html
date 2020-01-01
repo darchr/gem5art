@@ -10,7 +10,6 @@
             margin: auto;
             width: 100%;
             overflow: scroll;
-            background-color: white;
         }
 
         header {
@@ -34,40 +33,40 @@
             font-family: "Righteous", sans-serif;
             font-size: 2vw;
             color: white;
-            margin-top: auto;
             margin-bottom: auto;
         }
 
         h2 {
             font-family: "Open Sans", sans-serif;
-            font-size: 2vmin;
+            font-size: 2vh;
             color: black;
-            margin-top: 3vmin;
             margin-right: auto;
             margin-left: auto;
         }
 
         img {
-            height: 10vmin;
-            margin-left: 2vmax;
-            margin-right: 5vmax;
+            height: 9vmin;
+            margin: auto 5vmax auto 2vmax;
         }
 
         .test-type-label {
             font-family: "Open Sans", sans-serif;
-            font-size: 1.5vmin;
+            font-size: 1.5vh;
             text-align: left;
             writing-mode: vertical-rl;
             text-orientation: mixed;
+            color: black;
         }
 
         .cpu-number-label {
             font-family: "Open Sans", sans-serif;
-            font-size: 1.5vmin;
+            font-size: 1vw;
             line-height: 3vh;
+            color: black;
         }
 
         .test-grid-title {
+            color: black;
             font-family: "Open Sans", sans-serif;
             font-size: 1.5vmin;
             text-align: center;
@@ -90,7 +89,6 @@
 
         .box-of-test-grids {
             display: grid;
-            grid-column-gap: 10px;
             grid-template-rows: auto auto;
             grid-template-columns: auto auto auto auto auto;
             width: 90vw;
@@ -98,15 +96,16 @@
             margin-right: auto;
             margin-left: auto;
             margin-bottom: 3vmin;
-            border: solid;
+            border: thick solid black;
+            color: white;
         }
 
         .test-grid {
             display: grid;
             grid-gap: 2px;
-            margin: 1vmin auto 0;
-            grid-template-columns: 6vmin 3vmin 3vmin 3vmin 3vmin;
-            grid-template-rows: 3vmin 3vmin 3vmin 3vmin 3vmin 6vmin;
+            margin: 1vmin auto 1vmin;
+            grid-template-columns: auto 3vw 3vw 3vw 3vw;
+            grid-template-rows: 3vh 5vh 5vh 5vh 5vh auto;
         }
     </style>
     <script>
@@ -188,7 +187,8 @@
     <h1>UC Davis Computer Architecture Research Group <i>Status Page</i></h1>
 </header>
 <main>
-    <!--- If you want to make a new test, create a div with an ID equal to: "linux-type test-type mem-sys cpu-number boot-type -->
+    <!--- If you want to make a new test, create a div with an ID equal to: "linux-type test-type mem-sys cpu-number boot-type
+    You might notice there area lot of empty div tags, this is to make the grid objects work -->
     <h2>Mem Sys: classic, Boot Type: init</h2>
     <div class=box-of-test-grids>
         <div class="color-code"><span style="color: red;">Failure </span><span
