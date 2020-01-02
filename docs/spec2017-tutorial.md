@@ -604,7 +604,7 @@ The following are compiled benchmarks:
 | 621.wrf_s              |        Success |        Success |              ? |     gem5 error |                     ?|
 | 627.cam4_s             | Workload segfault | Workload segfault |              ? |     gem5 error |                     ?|
 | 628.pop2_s             |        Success |        Success |              ? |     gem5 error |                     ?|
-| 638.imagick_s          |        Success |              ? |              ? |     gem5 error |                     ?|
+| 638.imagick_s          |        Success |        Success |              ? |     gem5 error |                     ?|
 | 644.nab_s              |        Success |        Success |              ? |     gem5 error |                     ?|
 | 649.fotonik3d_s        |        Success |        Success |              ? |     gem5 error |                     ?|
 | 654.roms_s             |        Success |        Success |              ? |     gem5 error |                     ?|
