@@ -105,7 +105,7 @@ img {
     grid-gap: 2px;
     margin: 1vmin auto 1vmin;
     grid-template-columns: auto 2vw 2vw 2vw 2vw;
-    grid-template-rows: 3vh 3vh 3vh 3vh 3vh auto;
+    grid-template-rows: 3.5vh 3.5vh 3.5vh 3.5vh 3.5vh auto;
 }
 
 .test-grid-title {
