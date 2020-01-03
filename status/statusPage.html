@@ -4,12 +4,11 @@
 <head>
     <link rel="stylesheet" type="text/css" href="style.css"/>
     <meta charset="UTF-8">
-    <title>Gem5Art</title>
+    <title>gem5Art</title>
     <link rel="stylesheet" type="text/css" href="style.css">
     <script>
         //IF THE BOXES ARE ALL BLANK IT IS PROBABLY BECAUSE YOU PUT THE WRONG PATH TO THE JSON FILE! PUT THE CORRECT PATH HERE:
         const JSONPath = "./data.json";
-
         function readTextFile(file, callback) {
             let rawFile = new XMLHttpRequest();
             rawFile.overrideMimeType("application/json");
@@ -23,17 +22,16 @@
             };
             rawFile.send(null);
         }
-
         function getDetails(object) {
             let title = "";
             title += "Id: " + object['_id'] + "<br>";
-            title += "Gem5 Binary: " + object['gem5_binary'] + "<br>";
+            title += "gem5 Binary: " + object['gem5_binary'] + "<br>";
             title += "Run Script: " + object['run_script'] + "<br>";
-            title += "Gem5 Artifact: " + object['gem5_artifact'] + "<br>";
-            title += "Gem5 Git Artifact: " + object['gem5_git_artifact'] + "<br>";
+            title += "gem5 Artifact: " + object['gem5_artifact'] + "<br>";
+            title += "gem5 Git Artifact: " + object['gem5_git_artifact'] + "<br>";
             title += "Run Script Git Artifact: " + object['run_script_git_artifact'] + "<br>";
             title += "Timeout: " + object['timeout'] + "<br>";
-            title += "Gem5_name: " + object['gem5_name'] + "<br>";
+            title += "gem5_name: " + object['gem5_name'] + "<br>";
             title += "Script_name: " + object['script_name'] + "<br>";
             title += "Running: " + object['running'] + "<br>";
             title += "Enqueue_time: " + object['enqueue_time'] + "<br>";
@@ -55,7 +53,6 @@
             title += "Current_time: " + object['current_time'];
             return title;
         }
-
         //Runs through the JSON file, at each object, it creates an ID based on the linux name and parameters. It searches to see if the ID exists,
         //if it does, it assigns the box with the ID the correct color and hovertext.
         function determineColor() {
@@ -64,7 +61,7 @@
                 for (let i in parsedJSON) {
                     let idToTest = parsedJSON[i]['linux_name'] + " " + parsedJSON[i]['params'][0] + " " + parsedJSON[i]['params'][1] + " " + parsedJSON[i]['params'][2] + " " + parsedJSON[i]['params'][3];
                     if (document.getElementById(idToTest)) {
-                        document.getElementById(idToTest).onmouseover = function () {
+                        document.getElementById(idToTest).onclick = function () {
                             document.getElementsByClassName("detailsBarText")[0].innerHTML = getDetails(parsedJSON[i]);
                         };
                         if (parsedJSON[i]['status'] === "Finished") {
@@ -80,7 +77,6 @@
         }
         determineColor();
     </script>
-
     <link href="https://fonts.googleapis.com/css?family=Righteous|Barlow+Condensed|Open+Sans" rel="stylesheet">
 </head>
 <body>
@@ -98,22 +94,22 @@
         <div class="test-grid">
             <div></div>
             <div class="test-grid-title">linux-4.4.186</div>
-            <div class="cpu-number-label">8 CPU -</div>
+            <div class="y-axis-label">8 CPU -</div>
             <div id="vmlinux-4.4.186 kvm classic 8 init"></div>
             <div id="vmlinux-4.4.186 atomic classic 8 init"></div>
             <div id="vmlinux-4.4.186 simple classic 8 init"></div>
             <div id="vmlinux-4.4.186 o3 classic 8 init"></div>
-            <div class="cpu-number-label">4 CPU -</div>
+            <div class="y-axis-label">4 CPU -</div>
             <div id="vmlinux-4.4.186 kvm classic 4 init"></div>
             <div id="vmlinux-4.4.186 atomic classic 4 init"></div>
             <div id="vmlinux-4.4.186 simple classic 4 init"></div>
             <div id="vmlinux-4.4.186 o3 classic 4 init"></div>
-            <div class="cpu-number-label">2 CPU -</div>
+            <div class="y-axis-label">2 CPU -</div>
             <div id="vmlinux-4.4.186 kvm classic 2 init"></div>
             <div id="vmlinux-4.4.186 atomic classic 2 init"></div>
             <div id="vmlinux-4.4.186 simple classic 2 init"></div>
             <div id="vmlinux-4.4.186 o3 classic 2 init"></div>
-            <div class="cpu-number-label">1 CPU -</div>
+            <div class="y-axis-label">1 CPU -</div>
             <div id="vmlinux-4.4.186 kvm classic 1 init"></div>
             <div id="vmlinux-4.4.186 atomic classic 1 init"></div>
             <div id="vmlinux-4.4.186 simple classic 1 init"></div>
@@ -127,22 +123,22 @@
         <div class="test-grid">
             <div></div>
             <div class="test-grid-title">linux-4.9.186</div>
-            <div class="cpu-number-label">8 CPU -</div>
+            <div class="y-axis-label">8 CPU -</div>
             <div id="vmlinux-4.9.186 kvm classic 8 init"></div>
             <div id="vmlinux-4.9.186 atomic classic 8 init"></div>
             <div id="vmlinux-4.9.186 simple classic 8 init"></div>
             <div id="vmlinux-4.9.186 o3 classic 8 init"></div>
-            <div class="cpu-number-label">4 CPU -</div>
+            <div class="y-axis-label">4 CPU -</div>
             <div id="vmlinux-4.9.186 kvm classic 4 init"></div>
             <div id="vmlinux-4.9.186 atomic classic 4 init"></div>
             <div id="vmlinux-4.9.186 simple classic 4 init"></div>
             <div id="vmlinux-4.9.186 o3 classic 4 init"></div>
-            <div class="cpu-number-label">2 CPU -</div>
+            <div class="y-axis-label">2 CPU -</div>
             <div id="vmlinux-4.9.186 kvm classic 2 init"></div>
             <div id="vmlinux-4.9.186 atomic classic 2 init"></div>
             <div id="vmlinux-4.9.186 simple classic 2 init"></div>
             <div id="vmlinux-4.9.186 o3 classic 2 init"></div>
-            <div class="cpu-number-label">1 CPU -</div>
+            <div class="y-axis-label">1 CPU -</div>
             <div id="vmlinux-4.9.186 kvm classic 1 init"></div>
             <div id="vmlinux-4.9.186 atomic classic 1 init"></div>
             <div id="vmlinux-4.9.186 simple classic 1 init"></div>
@@ -156,22 +152,22 @@
         <div class="test-grid">
             <div></div>
             <div class="test-grid-title">linux-4.14.134</div>
-            <div class="cpu-number-label">8 CPU -</div>
+            <div class="y-axis-label">8 CPU -</div>
             <div id="vmlinux-4.14.134 kvm classic 8 init"></div>
             <div id="vmlinux-4.14.134 atomic classic 8 init"></div>
             <div id="vmlinux-4.14.134 simple classic 8 init"></div>
             <div id="vmlinux-4.14.134 o3 classic 8 init"></div>
-            <div class="cpu-number-label">4 CPU -</div>
+            <div class="y-axis-label">4 CPU -</div>
             <div id="vmlinux-4.14.134 kvm classic 4 init"></div>
             <div id="vmlinux-4.14.134 atomic classic 4 init"></div>
             <div id="vmlinux-4.14.134 simple classic 4 init"></div>
             <div id="vmlinux-4.14.134 o3 classic 4 init"></div>
-            <div class="cpu-number-label">2 CPU -</div>
+            <div class="y-axis-label">2 CPU -</div>
             <div id="vmlinux-4.14.134 kvm classic 2 init"></div>
             <div id="vmlinux-4.14.134 atomic classic 2 init"></div>
             <div id="vmlinux-4.14.134 simple classic 2 init"></div>
             <div id="vmlinux-4.14.134 o3 classic 2 init"></div>
-            <div class="cpu-number-label">1 CPU -</div>
+            <div class="y-axis-label">1 CPU -</div>
             <div id="vmlinux-4.14.134 kvm classic 1 init"></div>
             <div id="vmlinux-4.14.134 atomic classic 1 init"></div>
             <div id="vmlinux-4.14.134 simple classic 1 init"></div>
@@ -185,22 +181,22 @@
         <div class="test-grid">
             <div></div>
             <div class="test-grid-title">linux-4.19.83</div>
-            <div class="cpu-number-label">8 CPU -</div>
+            <div class="y-axis-label">8 CPU -</div>
             <div id="vmlinux-4.19.83 kvm classic 8 init"></div>
             <div id="vmlinux-4.19.83 atomic classic 8 init"></div>
             <div id="vmlinux-4.19.83 simple classic 8 init"></div>
             <div id="vmlinux-4.19.83 o3 classic 8 init"></div>
-            <div class="cpu-number-label">4 CPU -</div>
+            <div class="y-axis-label">4 CPU -</div>
             <div id="vmlinux-4.19.83 kvm classic 4 init"></div>
             <div id="vmlinux-4.19.83 atomic classic 4 init"></div>
             <div id="vmlinux-4.19.83 simple classic 4 init"></div>
             <div id="vmlinux-4.19.83 o3 classic 4 init"></div>
-            <div class="cpu-number-label">2 CPU -</div>
+            <div class="y-axis-label">2 CPU -</div>
             <div id="vmlinux-4.19.83 kvm classic 2 init"></div>
             <div id="vmlinux-4.19.83 atomic classic 2 init"></div>
             <div id="vmlinux-4.19.83 simple classic 2 init"></div>
             <div id="vmlinux-4.19.83 o3 classic 2 init"></div>
-            <div class="cpu-number-label">1 CPU -</div>
+            <div class="y-axis-label">1 CPU -</div>
             <div id="vmlinux-4.19.83 kvm classic 1 init"></div>
             <div id="vmlinux-4.19.83 atomic classic 1 init"></div>
             <div id="vmlinux-4.19.83 simple classic 1 init"></div>
@@ -214,22 +210,22 @@
         <div class="test-grid">
             <div></div>
             <div class="test-grid-title">linux-5.2.3</div>
-            <div class="cpu-number-label">8 CPU -</div>
+            <div class="y-axis-label">8 CPU -</div>
             <div id="vmlinux-5.2.3 kvm classic 8 init"></div>
             <div id="vmlinux-5.2.3 atomic classic 8 init"></div>
             <div id="vmlinux-5.2.3 simple classic 8 init"></div>
             <div id="vmlinux-5.2.3 o3 classic 8 init"></div>
-            <div class="cpu-number-label">4 CPU -</div>
+            <div class="y-axis-label">4 CPU -</div>
             <div id="vmlinux-5.2.3 kvm classic 4 init"></div>
             <div id="vmlinux-5.2.3 atomic classic 4 init"></div>
             <div id="vmlinux-5.2.3 simple classic 4 init"></div>
             <div id="vmlinux-5.2.3 o3 classic 4 init"></div>
-            <div class="cpu-number-label">2 CPU -</div>
+            <div class="y-axis-label">2 CPU -</div>
             <div id="vmlinux-5.2.3 kvm classic 2 init"></div>
             <div id="vmlinux-5.2.3 atomic classic 2 init"></div>
             <div id="vmlinux-5.2.3 simple classic 2 init"></div>
             <div id="vmlinux-5.2.3 o3 classic 2 init"></div>
-            <div class="cpu-number-label">1 CPU -</div>
+            <div class="y-axis-label">1 CPU -</div>
             <div id="vmlinux-5.2.3 kvm classic 1 init"></div>
             <div id="vmlinux-5.2.3 atomic classic 1 init"></div>
             <div id="vmlinux-5.2.3 simple classic 1 init"></div>
@@ -248,22 +244,22 @@
         <div class="test-grid">
             <div></div>
             <div class="test-grid-title">linux-4.4.186</div>
-            <div class="cpu-number-label">8 CPU -</div>
+            <div class="y-axis-label">8 CPU -</div>
             <div id="vmlinux-4.4.186 kvm classic 8 systemd"></div>
             <div id="vmlinux-4.4.186 atomic classic 8 systemd"></div>
             <div id="vmlinux-4.4.186 simple classic 8 systemd"></div>
             <div id="vmlinux-4.4.186 o3 classic 8 systemd"></div>
-            <div class="cpu-number-label">4 CPU -</div>
+            <div class="y-axis-label">4 CPU -</div>
             <div id="vmlinux-4.4.186 kvm classic 4 systemd"></div>
             <div id="vmlinux-4.4.186 atomic classic 4 systemd"></div>
             <div id="vmlinux-4.4.186 simple classic 4 systemd"></div>
             <div id="vmlinux-4.4.186 o3 classic 4 systemd"></div>
-            <div class="cpu-number-label">2 CPU -</div>
+            <div class="y-axis-label">2 CPU -</div>
             <div id="vmlinux-4.4.186 kvm classic 2 systemd"></div>
             <div id="vmlinux-4.4.186 atomic classic 2 systemd"></div>
             <div id="vmlinux-4.4.186 simple classic 2 systemd"></div>
             <div id="vmlinux-4.4.186 o3 classic 2 systemd"></div>
-            <div class="cpu-number-label">1 CPU -</div>
+            <div class="y-axis-label">1 CPU -</div>
             <div id="vmlinux-4.4.186 kvm classic 1 systemd"></div>
             <div id="vmlinux-4.4.186 atomic classic 1 systemd"></div>
             <div id="vmlinux-4.4.186 simple classic 1 systemd"></div>
@@ -277,22 +273,22 @@
         <div class="test-grid">
             <div></div>
             <div class="test-grid-title">linux-4.9.186</div>
-            <div class="cpu-number-label">8 CPU -</div>
+            <div class="y-axis-label">8 CPU -</div>
             <div id="vmlinux-4.9.186 kvm classic 8 systemd"></div>
             <div id="vmlinux-4.9.186 atomic classic 8 systemd"></div>
             <div id="vmlinux-4.9.186 simple classic 8 systemd"></div>
             <div id="vmlinux-4.9.186 o3 classic 8 systemd"></div>
-            <div class="cpu-number-label">4 CPU -</div>
+            <div class="y-axis-label">4 CPU -</div>
             <div id="vmlinux-4.9.186 kvm classic 4 systemd"></div>
             <div id="vmlinux-4.9.186 atomic classic 4 systemd"></div>
             <div id="vmlinux-4.9.186 simple classic 4 systemd"></div>
             <div id="vmlinux-4.9.186 o3 classic 4 systemd"></div>
-            <div class="cpu-number-label">2 CPU -</div>
+            <div class="y-axis-label">2 CPU -</div>
             <div id="vmlinux-4.9.186 kvm classic 2 systemd"></div>
             <div id="vmlinux-4.9.186 atomic classic 2 systemd"></div>
             <div id="vmlinux-4.9.186 simple classic 2 systemd"></div>
             <div id="vmlinux-4.9.186 o3 classic 2 systemd"></div>
-            <div class="cpu-number-label">1 CPU -</div>
+            <div class="y-axis-label">1 CPU -</div>
             <div id="vmlinux-4.9.186 kvm classic 1 systemd"></div>
             <div id="vmlinux-4.9.186 atomic classic 1 systemd"></div>
             <div id="vmlinux-4.9.186 simple classic 1 systemd"></div>
@@ -306,22 +302,22 @@
         <div class="test-grid">
             <div></div>
             <div class="test-grid-title">linux-4.14.134</div>
-            <div class="cpu-number-label">8 CPU -</div>
+            <div class="y-axis-label">8 CPU -</div>
             <div id="vmlinux-4.14.134 kvm classic 8 systemd"></div>
             <div id="vmlinux-4.14.134 atomic classic 8 systemd"></div>
             <div id="vmlinux-4.14.134 simple classic 8 systemd"></div>
             <div id="vmlinux-4.14.134 o3 classic 8 systemd"></div>
-            <div class="cpu-number-label">4 CPU -</div>
+            <div class="y-axis-label">4 CPU -</div>
             <div id="vmlinux-4.14.134 kvm classic 4 systemd"></div>
             <div id="vmlinux-4.14.134 atomic classic 4 systemd"></div>
             <div id="vmlinux-4.14.134 simple classic 4 systemd"></div>
             <div id="vmlinux-4.14.134 o3 classic 4 systemd"></div>
-            <div class="cpu-number-label">2 CPU -</div>
+            <div class="y-axis-label">2 CPU -</div>
             <div id="vmlinux-4.14.134 kvm classic 2 systemd"></div>
             <div id="vmlinux-4.14.134 atomic classic 2 systemd"></div>
             <div id="vmlinux-4.14.134 simple classic 2 systemd"></div>
             <div id="vmlinux-4.14.134 o3 classic 2 systemd"></div>
-            <div class="cpu-number-label">1 CPU -</div>
+            <div class="y-axis-label">1 CPU -</div>
             <div id="vmlinux-4.14.134 kvm classic 1 systemd"></div>
             <div id="vmlinux-4.14.134 atomic classic 1 systemd"></div>
             <div id="vmlinux-4.14.134 simple classic 1 systemd"></div>
@@ -335,22 +331,22 @@
         <div class="test-grid">
             <div></div>
             <div class="test-grid-title">linux-4.19.83</div>
-            <div class="cpu-number-label">8 CPU -</div>
+            <div class="y-axis-label">8 CPU -</div>
             <div id="vmlinux-4.19.83 kvm classic 8 systemd"></div>
             <div id="vmlinux-4.19.83 atomic classic 8 systemd"></div>
             <div id="vmlinux-4.19.83 simple classic 8 systemd"></div>
             <div id="vmlinux-4.19.83 o3 classic 8 systemd"></div>
-            <div class="cpu-number-label">4 CPU -</div>
+            <div class="y-axis-label">4 CPU -</div>
             <div id="vmlinux-4.19.83 kvm classic 4 systemd"></div>
             <div id="vmlinux-4.19.83 atomic classic 4 systemd"></div>
             <div id="vmlinux-4.19.83 simple classic 4 systemd"></div>
             <div id="vmlinux-4.19.83 o3 classic 4 systemd"></div>
-            <div class="cpu-number-label">2 CPU -</div>
+            <div class="y-axis-label">2 CPU -</div>
             <div id="vmlinux-4.19.83 kvm classic 2 systemd"></div>
             <div id="vmlinux-4.19.83 atomic classic 2 systemd"></div>
             <div id="vmlinux-4.19.83 simple classic 2 systemd"></div>
             <div id="vmlinux-4.19.83 o3 classic 2 systemd"></div>
-            <div class="cpu-number-label">1 CPU -</div>
+            <div class="y-axis-label">1 CPU -</div>
             <div id="vmlinux-4.19.83 kvm classic 1 systemd"></div>
             <div id="vmlinux-4.19.83 atomic classic 1 systemd"></div>
             <div id="vmlinux-4.19.83 simple classic 1 systemd"></div>
@@ -364,22 +360,22 @@
         <div class="test-grid">
             <div></div>
             <div class="test-grid-title">linux-5.2.3</div>
-            <div class="cpu-number-label">8 CPU -</div>
+            <div class="y-axis-label">8 CPU -</div>
             <div id="vmlinux-5.2.3 kvm classic 8 systemd"></div>
             <div id="vmlinux-5.2.3 atomic classic 8 systemd"></div>
             <div id="vmlinux-5.2.3 simple classic 8 systemd"></div>
             <div id="vmlinux-5.2.3 o3 classic 8 systemd"></div>
-            <div class="cpu-number-label">4 CPU -</div>
+            <div class="y-axis-label">4 CPU -</div>
             <div id="vmlinux-5.2.3 kvm classic 4 systemd"></div>
             <div id="vmlinux-5.2.3 atomic classic 4 systemd"></div>
             <div id="vmlinux-5.2.3 simple classic 4 systemd"></div>
             <div id="vmlinux-5.2.3 o3 classic 4 systemd"></div>
-            <div class="cpu-number-label">2 CPU -</div>
+            <div class="y-axis-label">2 CPU -</div>
             <div id="vmlinux-5.2.3 kvm classic 2 systemd"></div>
             <div id="vmlinux-5.2.3 atomic classic 2 systemd"></div>
             <div id="vmlinux-5.2.3 simple classic 2 systemd"></div>
             <div id="vmlinux-5.2.3 o3 classic 2 systemd"></div>
-            <div class="cpu-number-label">1 CPU -</div>
+            <div class="y-axis-label">1 CPU -</div>
             <div id="vmlinux-5.2.3 kvm classic 1 systemd"></div>
             <div id="vmlinux-5.2.3 atomic classic 1 systemd"></div>
             <div id="vmlinux-5.2.3 simple classic 1 systemd"></div>
@@ -398,22 +394,22 @@
         <div class="test-grid">
             <div></div>
             <div class="test-grid-title">linux-4.4.186</div>
-            <div class="cpu-number-label">8 CPU -</div>
+            <div class="y-axis-label">8 CPU -</div>
             <div id="vmlinux-4.4.186 kvm ruby 8 init"></div>
             <div id="vmlinux-4.4.186 atomic ruby 8 init"></div>
             <div id="vmlinux-4.4.186 simple ruby 8 init"></div>
             <div id="vmlinux-4.4.186 o3 ruby 8 init"></div>
-            <div class="cpu-number-label">4 CPU -</div>
+            <div class="y-axis-label">4 CPU -</div>
             <div id="vmlinux-4.4.186 kvm ruby 4 init"></div>
             <div id="vmlinux-4.4.186 atomic ruby 4 init"></div>
             <div id="vmlinux-4.4.186 simple ruby 4 init"></div>
             <div id="vmlinux-4.4.186 o3 ruby 4 init"></div>
-            <div class="cpu-number-label">2 CPU -</div>
+            <div class="y-axis-label">2 CPU -</div>
             <div id="vmlinux-4.4.186 kvm ruby 2 init"></div>
             <div id="vmlinux-4.4.186 atomic ruby 2 init"></div>
             <div id="vmlinux-4.4.186 simple ruby 2 init"></div>
             <div id="vmlinux-4.4.186 o3 ruby 2 init"></div>
-            <div class="cpu-number-label">1 CPU -</div>
+            <div class="y-axis-label">1 CPU -</div>
             <div id="vmlinux-4.4.186 kvm ruby 1 init"></div>
             <div id="vmlinux-4.4.186 atomic ruby 1 init"></div>
             <div id="vmlinux-4.4.186 simple ruby 1 init"></div>
@@ -427,22 +423,22 @@
         <div class="test-grid">
             <div></div>
             <div class="test-grid-title">linux-4.9.186</div>
-            <div class="cpu-number-label">8 CPU -</div>
+            <div class="y-axis-label">8 CPU -</div>
             <div id="vmlinux-4.9.186 kvm ruby 8 init"></div>
             <div id="vmlinux-4.9.186 atomic ruby 8 init"></div>
             <div id="vmlinux-4.9.186 simple ruby 8 init"></div>
             <div id="vmlinux-4.9.186 o3 ruby 8 init"></div>
-            <div class="cpu-number-label">4 CPU -</div>
+            <div class="y-axis-label">4 CPU -</div>
             <div id="vmlinux-4.9.186 kvm ruby 4 init"></div>
             <div id="vmlinux-4.9.186 atomic ruby 4 init"></div>
             <div id="vmlinux-4.9.186 simple ruby 4 init"></div>
             <div id="vmlinux-4.9.186 o3 ruby 4 init"></div>
-            <div class="cpu-number-label">2 CPU -</div>
+            <div class="y-axis-label">2 CPU -</div>
             <div id="vmlinux-4.9.186 kvm ruby 2 init"></div>
             <div id="vmlinux-4.9.186 atomic ruby 2 init"></div>
             <div id="vmlinux-4.9.186 simple ruby 2 init"></div>
             <div id="vmlinux-4.9.186 o3 ruby 2 init"></div>
-            <div class="cpu-number-label">1 CPU -</div>
+            <div class="y-axis-label">1 CPU -</div>
             <div id="vmlinux-4.9.186 kvm ruby 1 init"></div>
             <div id="vmlinux-4.9.186 atomic ruby 1 init"></div>
             <div id="vmlinux-4.9.186 simple ruby 1 init"></div>
@@ -456,22 +452,22 @@
         <div class="test-grid">
             <div></div>
             <div class="test-grid-title">linux-4.14.134</div>
-            <div class="cpu-number-label">8 CPU -</div>
+            <div class="y-axis-label">8 CPU -</div>
             <div id="vmlinux-4.14.134 kvm ruby 8 init"></div>
             <div id="vmlinux-4.14.134 atomic ruby 8 init"></div>
             <div id="vmlinux-4.14.134 simple ruby 8 init"></div>
             <div id="vmlinux-4.14.134 o3 ruby 8 init"></div>
-            <div class="cpu-number-label">4 CPU -</div>
+            <div class="y-axis-label">4 CPU -</div>
             <div id="vmlinux-4.14.134 kvm ruby 4 init"></div>
             <div id="vmlinux-4.14.134 atomic ruby 4 init"></div>
             <div id="vmlinux-4.14.134 simple ruby 4 init"></div>
             <div id="vmlinux-4.14.134 o3 ruby 4 init"></div>
-            <div class="cpu-number-label">2 CPU -</div>
+            <div class="y-axis-label">2 CPU -</div>
             <div id="vmlinux-4.14.134 kvm ruby 2 init"></div>
             <div id="vmlinux-4.14.134 atomic ruby 2 init"></div>
             <div id="vmlinux-4.14.134 simple ruby 2 init"></div>
             <div id="vmlinux-4.14.134 o3 ruby 2 init"></div>
-            <div class="cpu-number-label">1 CPU -</div>
+            <div class="y-axis-label">1 CPU -</div>
             <div id="vmlinux-4.14.134 kvm ruby 1 init"></div>
             <div id="vmlinux-4.14.134 atomic ruby 1 init"></div>
             <div id="vmlinux-4.14.134 simple ruby 1 init"></div>
@@ -485,22 +481,22 @@
         <div class="test-grid">
             <div></div>
             <div class="test-grid-title">linux-4.19.83</div>
-            <div class="cpu-number-label">8 CPU -</div>
+            <div class="y-axis-label">8 CPU -</div>
             <div id="vmlinux-4.19.83 kvm ruby 8 init"></div>
             <div id="vmlinux-4.19.83 atomic ruby 8 init"></div>
             <div id="vmlinux-4.19.83 simple ruby 8 init"></div>
             <div id="vmlinux-4.19.83 o3 ruby 8 init"></div>
-            <div class="cpu-number-label">4 CPU -</div>
+            <div class="y-axis-label">4 CPU -</div>
             <div id="vmlinux-4.19.83 kvm ruby 4 init"></div>
             <div id="vmlinux-4.19.83 atomic ruby 4 init"></div>
             <div id="vmlinux-4.19.83 simple ruby 4 init"></div>
             <div id="vmlinux-4.19.83 o3 ruby 4 init"></div>
-            <div class="cpu-number-label">2 CPU -</div>
+            <div class="y-axis-label">2 CPU -</div>
             <div id="vmlinux-4.19.83 kvm ruby 2 init"></div>
             <div id="vmlinux-4.19.83 atomic ruby 2 init"></div>
             <div id="vmlinux-4.19.83 simple ruby 2 init"></div>
             <div id="vmlinux-4.19.83 o3 ruby 2 init"></div>
-            <div class="cpu-number-label">1 CPU -</div>
+            <div class="y-axis-label">1 CPU -</div>
             <div id="vmlinux-4.19.83 kvm ruby 1 init"></div>
             <div id="vmlinux-4.19.83 atomic ruby 1 init"></div>
             <div id="vmlinux-4.19.83 simple ruby 1 init"></div>
@@ -514,22 +510,22 @@
         <div class="test-grid">
             <div></div>
             <div class="test-grid-title">linux-5.2.3</div>
-            <div class="cpu-number-label">8 CPU -</div>
+            <div class="y-axis-label">8 CPU -</div>
             <div id="vmlinux-5.2.3 kvm ruby 8 init"></div>
             <div id="vmlinux-5.2.3 atomic ruby 8 init"></div>
             <div id="vmlinux-5.2.3 simple ruby 8 init"></div>
             <div id="vmlinux-5.2.3 o3 ruby 8 init"></div>
-            <div class="cpu-number-label">4 CPU -</div>
+            <div class="y-axis-label">4 CPU -</div>
             <div id="vmlinux-5.2.3 kvm ruby 4 init"></div>
             <div id="vmlinux-5.2.3 atomic ruby 4 init"></div>
             <div id="vmlinux-5.2.3 simple ruby 4 init"></div>
             <div id="vmlinux-5.2.3 o3 ruby 4 init"></div>
-            <div class="cpu-number-label">2 CPU -</div>
+            <div class="y-axis-label">2 CPU -</div>
             <div id="vmlinux-5.2.3 kvm ruby 2 init"></div>
             <div id="vmlinux-5.2.3 atomic ruby 2 init"></div>
             <div id="vmlinux-5.2.3 simple ruby 2 init"></div>
             <div id="vmlinux-5.2.3 o3 ruby 2 init"></div>
-            <div class="cpu-number-label">1 CPU -</div>
+            <div class="y-axis-label">1 CPU -</div>
             <div id="vmlinux-5.2.3 kvm ruby 1 init"></div>
             <div id="vmlinux-5.2.3 atomic ruby 1 init"></div>
             <div id="vmlinux-5.2.3 simple ruby 1 init"></div>
@@ -548,22 +544,22 @@
         <div class="test-grid">
             <div></div>
             <div class="test-grid-title">linux-4.4.186</div>
-            <div class="cpu-number-label">8 CPU -</div>
+            <div class="y-axis-label">8 CPU -</div>
             <div id="vmlinux-4.4.186 kvm ruby 8 systemd"></div>
             <div id="vmlinux-4.4.186 atomic ruby 8 systemd"></div>
             <div id="vmlinux-4.4.186 simple ruby 8 systemd"></div>
             <div id="vmlinux-4.4.186 o3 ruby 8 systemd"></div>
-            <div class="cpu-number-label">4 CPU -</div>
+            <div class="y-axis-label">4 CPU -</div>
             <div id="vmlinux-4.4.186 kvm ruby 4 systemd"></div>
             <div id="vmlinux-4.4.186 atomic ruby 4 systemd"></div>
             <div id="vmlinux-4.4.186 simple ruby 4 systemd"></div>
             <div id="vmlinux-4.4.186 o3 ruby 4 systemd"></div>
-            <div class="cpu-number-label">2 CPU -</div>
+            <div class="y-axis-label">2 CPU -</div>
             <div id="vmlinux-4.4.186 kvm ruby 2 systemd"></div>
             <div id="vmlinux-4.4.186 atomic ruby 2 systemd"></div>
             <div id="vmlinux-4.4.186 simple ruby 2 systemd"></div>
             <div id="vmlinux-4.4.186 o3 ruby 2 systemd"></div>
-            <div class="cpu-number-label">1 CPU -</div>
+            <div class="y-axis-label">1 CPU -</div>
             <div id="vmlinux-4.4.186 kvm ruby 1 systemd"></div>
             <div id="vmlinux-4.4.186 atomic ruby 1 systemd"></div>
             <div id="vmlinux-4.4.186 simple ruby 1 systemd"></div>
@@ -577,22 +573,22 @@
         <div class="test-grid">
             <div></div>
             <div class="test-grid-title">linux-4.9.186</div>
-            <div class="cpu-number-label">8 CPU -</div>
+            <div class="y-axis-label">8 CPU -</div>
             <div id="vmlinux-4.9.186 kvm ruby 8 systemd"></div>
             <div id="vmlinux-4.9.186 atomic ruby 8 systemd"></div>
             <div id="vmlinux-4.9.186 simple ruby 8 systemd"></div>
             <div id="vmlinux-4.9.186 o3 ruby 8 systemd"></div>
-            <div class="cpu-number-label">4 CPU -</div>
+            <div class="y-axis-label">4 CPU -</div>
             <div id="vmlinux-4.9.186 kvm ruby 4 systemd"></div>
             <div id="vmlinux-4.9.186 atomic ruby 4 systemd"></div>
             <div id="vmlinux-4.9.186 simple ruby 4 systemd"></div>
             <div id="vmlinux-4.9.186 o3 ruby 4 systemd"></div>
-            <div class="cpu-number-label">2 CPU -</div>
+            <div class="y-axis-label">2 CPU -</div>
             <div id="vmlinux-4.9.186 kvm ruby 2 systemd"></div>
             <div id="vmlinux-4.9.186 atomic ruby 2 systemd"></div>
             <div id="vmlinux-4.9.186 simple ruby 2 systemd"></div>
             <div id="vmlinux-4.9.186 o3 ruby 2 systemd"></div>
-            <div class="cpu-number-label">1 CPU -</div>
+            <div class="y-axis-label">1 CPU -</div>
             <div id="vmlinux-4.9.186 kvm ruby 1 systemd"></div>
             <div id="vmlinux-4.9.186 atomic ruby 1 systemd"></div>
             <div id="vmlinux-4.9.186 simple ruby 1 systemd"></div>
@@ -606,22 +602,22 @@
         <div class="test-grid">
             <div></div>
             <div class="test-grid-title">linux-4.14.134</div>
-            <div class="cpu-number-label">8 CPU -</div>
+            <div class="y-axis-label">8 CPU -</div>
             <div id="vmlinux-4.14.134 kvm ruby 8 systemd"></div>
             <div id="vmlinux-4.14.134 atomic ruby 8 systemd"></div>
             <div id="vmlinux-4.14.134 simple ruby 8 systemd"></div>
             <div id="vmlinux-4.14.134 o3 ruby 8 systemd"></div>
-            <div class="cpu-number-label">4 CPU -</div>
+            <div class="y-axis-label">4 CPU -</div>
             <div id="vmlinux-4.14.134 kvm ruby 4 systemd"></div>
             <div id="vmlinux-4.14.134 atomic ruby 4 systemd"></div>
             <div id="vmlinux-4.14.134 simple ruby 4 systemd"></div>
             <div id="vmlinux-4.14.134 o3 ruby 4 systemd"></div>
-            <div class="cpu-number-label">2 CPU -</div>
+            <div class="y-axis-label">2 CPU -</div>
             <div id="vmlinux-4.14.134 kvm ruby 2 systemd"></div>
             <div id="vmlinux-4.14.134 atomic ruby 2 systemd"></div>
             <div id="vmlinux-4.14.134 simple ruby 2 systemd"></div>
             <div id="vmlinux-4.14.134 o3 ruby 2 systemd"></div>
-            <div class="cpu-number-label">1 CPU -</div>
+            <div class="y-axis-label">1 CPU -</div>
             <div id="vmlinux-4.14.134 kvm ruby 1 systemd"></div>
             <div id="vmlinux-4.14.134 atomic ruby 1 systemd"></div>
             <div id="vmlinux-4.14.134 simple ruby 1 systemd"></div>
@@ -635,22 +631,22 @@
         <div class="test-grid">
             <div></div>
             <div class="test-grid-title">linux-4.19.83</div>
-            <div class="cpu-number-label">8 CPU -</div>
+            <div class="y-axis-label">8 CPU -</div>
             <div id="vmlinux-4.19.83 kvm ruby 8 systemd"></div>
             <div id="vmlinux-4.19.83 atomic ruby 8 systemd"></div>
             <div id="vmlinux-4.19.83 simple ruby 8 systemd"></div>
             <div id="vmlinux-4.19.83 o3 ruby 8 systemd"></div>
-            <div class="cpu-number-label">4 CPU -</div>
+            <div class="y-axis-label">4 CPU -</div>
             <div id="vmlinux-4.19.83 kvm ruby 4 systemd"></div>
             <div id="vmlinux-4.19.83 atomic ruby 4 systemd"></div>
             <div id="vmlinux-4.19.83 simple ruby 4 systemd"></div>
             <div id="vmlinux-4.19.83 o3 ruby 4 systemd"></div>
-            <div class="cpu-number-label">2 CPU -</div>
+            <div class="y-axis-label">2 CPU -</div>
             <div id="vmlinux-4.19.83 kvm ruby 2 systemd"></div>
             <div id="vmlinux-4.19.83 atomic ruby 2 systemd"></div>
             <div id="vmlinux-4.19.83 simple ruby 2 systemd"></div>
             <div id="vmlinux-4.19.83 o3 ruby 2 systemd"></div>
-            <div class="cpu-number-label">1 CPU -</div>
+            <div class="y-axis-label">1 CPU -</div>
             <div id="vmlinux-4.19.83 kvm ruby 1 systemd"></div>
             <div id="vmlinux-4.19.83 atomic ruby 1 systemd"></div>
             <div id="vmlinux-4.19.83 simple ruby 1 systemd"></div>
@@ -664,22 +660,22 @@
         <div class="test-grid">
             <div></div>
             <div class="test-grid-title">linux-5.2.3</div>
-            <div class="cpu-number-label">8 CPU -</div>
+            <div class="y-axis-label">8 CPU -</div>
             <div id="vmlinux-5.2.3 kvm ruby 8 systemd"></div>
             <div id="vmlinux-5.2.3 atomic ruby 8 systemd"></div>
             <div id="vmlinux-5.2.3 simple ruby 8 systemd"></div>
             <div id="vmlinux-5.2.3 o3 ruby 8 systemd"></div>
-            <div class="cpu-number-label">4 CPU -</div>
+            <div class="y-axis-label">4 CPU -</div>
             <div id="vmlinux-5.2.3 kvm ruby 4 systemd"></div>
             <div id="vmlinux-5.2.3 atomic ruby 4 systemd"></div>
             <div id="vmlinux-5.2.3 simple ruby 4 systemd"></div>
             <div id="vmlinux-5.2.3 o3 ruby 4 systemd"></div>
-            <div class="cpu-number-label">2 CPU -</div>
+            <div class="y-axis-label">2 CPU -</div>
             <div id="vmlinux-5.2.3 kvm ruby 2 systemd"></div>
             <div id="vmlinux-5.2.3 atomic ruby 2 systemd"></div>
             <div id="vmlinux-5.2.3 simple ruby 2 systemd"></div>
             <div id="vmlinux-5.2.3 o3 ruby 2 systemd"></div>
-            <div class="cpu-number-label">1 CPU -</div>
+            <div class="y-axis-label">1 CPU -</div>
             <div id="vmlinux-5.2.3 kvm ruby 1 systemd"></div>
             <div id="vmlinux-5.2.3 atomic ruby 1 systemd"></div>
             <div id="vmlinux-5.2.3 simple ruby 1 systemd"></div>

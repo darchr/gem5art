@@ -1,7 +1,7 @@
 html {
     height: 100%;
-    width: auto;
-    margin: auto;
+    width: 100%;
+    margin: 0 0 0 0;
     overflow-y: scroll;
     overflow-x: hidden;
 }
@@ -20,8 +20,8 @@ header {
 main {
     background-color: white;
     text-align: center;
-    margin: 15vh 0 36vw 0;
-    width: 64vw;
+    margin: 15vh 34vw 0 0;
+    width: 66vw;
 }
 
 h1 {
@@ -46,7 +46,7 @@ img {
 
 .detailsBar {
     height: 100%;
-    width: 35vw;
+    width: 33vw;
     position: fixed;
     top: 0;
     right: 0;
@@ -71,7 +71,7 @@ img {
     color: black;
 }
 
-.cpu-number-label {
+.y-axis-label {
     font-family: "Open Sans", sans-serif;
     font-size: 1vw;
     line-height: 3vh;
@@ -96,17 +96,16 @@ img {
     text-align: center;
     border: thick solid black;
     color: white;
-    width: 60vw;
-    margin-left: 1vw;
-    margin-right: 1vw;
+    width: 63vw;
+    margin: auto;
 }
 
 .test-grid {
     display: grid;
     grid-gap: 2px;
     margin: 1vmin auto 1vmin;
-    grid-template-columns: auto 1.5vw 1.5vw 1.5vw 1.5vw;
-    grid-template-rows: 3vh 2.5vh 2.5vh 2.5vh 2.5vh auto;
+    grid-template-columns: auto 2vw 2vw 2vw 2vw;
+    grid-template-rows: 3vh 3vh 3vh 3vh 3vh auto;
 }
 
 .test-grid-title {
