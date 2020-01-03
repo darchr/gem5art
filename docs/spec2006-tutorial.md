@@ -13,7 +13,8 @@ The scripts in this tutorial work with gem5art-* v0.3.1.
 ### SPEC CPU 2006 Benchmarks  
 **Important:** The usage of this tutorial is just for the purpose of demonstration. 
 Those benchmarks [have been retired](https://www.spec.org/cpu2006/) [1]. 
-More details about those benchmarks are [here](https://dl.acm.org/citation.cfm?id=1186737) [2].  
+More details about those benchmarks are [here](https://dl.acm.org/citation.cfm?id=1186737) [2]. 
+The Appendix II section of this tutorial shows how to use the SPEC 2006 scripts to run SPEC 2017 experiments.
 
 Examples of the usage of SPEC CPU 2006 benchmark in the literature are [here](https://ieeexplore.ieee.org/abstract/document/4378787) [3] and in the book [4]. 
 Another example of the usage of SPEC CPU benchmarks is [here](https://cacm.acm.org/magazines/2019/2/234352-a-new-golden-age-for-computer-architecture/fulltext) [5].
@@ -570,7 +571,7 @@ if __name__ == "__main__":
                     cpu, benchmark, size, # params
                     timeout = 5*24*60*60 # 5 days
                 )
-                run_gem5_instance.apply_async((run,))
+                run_gem5_instance.apply_async((run,)) # TODO: update this script to gem5art-0.4.1
 
 ```
 The above launch function will run the all the available benchmarks with kvm, atomic, timing, and o3 cpus. 
@@ -650,3 +651,21 @@ Build errors:
 450.soplex
 483.xalancbmk
 ```
+
+## Appendix II. Transtition to SPEC 2017
+As mentioned earlier, SPEC 2006 benchmark suite has been retired, and the newer version, SPEC 2017, is available. 
+This section will show how to reuse the scripts made for SPEC 2006 to run SPEC 2017 experiments. 
+Changes are minimal, ie. changing `2006` to `2017`, updating the location of the ISO file, changing SPEC 2006 run command (`runspec`) to SPEC 2017 run command (`runcpu`), and manipulating the SPEC 2017 config.  
+### Updating Disk Image Scripts
+The disk image scripts to generate the SPEC 2017 disk image [could be found here](https://github.com/darchr/gem5art/tree/master/docs/disks/spec2017).  
+[The changes could be found here.](https://github.com/darchr/gem5art/commit/70019fd0196d946a65efd96bb9b2b692c0dd04be)  
+
+**Note:** In the example SPEC 2017 config, the workloads are compiled using the flag `-march=native`. 
+However, since workloads are compiled while the disk image is being building by packer, the binaries would be built accordingly to the configuration of the CPU simulated by packer. 
+This is definitely not ideal to run those binaries on gem5, which is not guaranteed to support all instructions of all hardware. 
+Hence, the `-march=native` flag is removed. 
+Other tuning flags should be manually added.
+### Updating the Launch Script
+The new launch script [could be found here](https://github.com/darchr/gem5art/blob/master/docs/launch_spec2017_experiments.py). 
+Names of SPEC 2017 workloads are updated.
+
