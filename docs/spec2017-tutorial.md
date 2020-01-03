@@ -578,58 +578,58 @@ python3 launch_spec2017_experiment.py
 ## Getting the Results  
 TODO
 
-## Apprendix I. Working SPEC 2017 Benchmarks x CPU Model Matrix
+## Appendix I. Working SPEC 2017 Benchmarks x CPU Model Matrix
 All benchmarks are compiled in the above set up as of December 2019. 
 The following are compiled benchmarks:  
 
 | Benchmarks             | KVM/test       | KVM/ref        | O3CPU/test     | AtomicCPU/test | TimingSimpleCPU/test |
 |------------------------|----------------|----------------|----------------|----------------|----------------------|
-| 503.bwaves_r           |        Success |        Success |              ? |     gem5 error |                     ?|
-| 507.cactuBSSN_r        |        Success |        Success |              ? |     gem5 error |                     ?|
-| 508.namd_r             |        Success |        Success |              ? |     gem5 error |                     ?|
-| 510.parest_r           |        Success |        Success |              ? |     gem5 error |                     ?|
-| 511.povray_r           |        Success |        Success |              ? |     gem5 error |                     ?|
-| 519.lbm_r              |        Success |        Success |              ? |     gem5 error |                     ?|
-| 521.wrf_r              |        Success |        Success |              ? |     gem5 error |                     ?|
-| 526.blender_r          |        Success |        Success |              ? |     gem5 error |                     ?|
-| 527.cam4_r             |        Success |        Success |              ? |     gem5 error |                     ?|
-| 538.imagick_r          |        Success |        Success |              ? |     gem5 error |                     ?|
-| 544.nab_r              |        Success |        Success |              ? |     gem5 error |                     ?|
-| 549.fotonik3d_r        |        Success |        Success |              ? |     gem5 error |                     ?|
-| 554.roms_r             |        Success |        Success |              ? |     gem5 error |                     ?|
-| 997.specrand_fr        |        Success |        Success |              ? |     gem5 error |                     ?|
-| 603.bwaves_s           |        Success |        Success |              ? |     gem5 error |                     ?|
-| 607.cactuBSSN_s        |        Success |        Success |              ? |     gem5 error |                     ?|
-| 619.lbm_s              |        Success |        Success |              ? |     gem5 error |                     ?|
-| 621.wrf_s              |        Success |        Success |              ? |     gem5 error |                     ?|
-| 627.cam4_s             | Workload segfault | Workload segfault |              ? |     gem5 error |                     ?|
-| 628.pop2_s             |        Success |        Success |              ? |     gem5 error |                     ?|
-| 638.imagick_s          |        Success |        Success |              ? |     gem5 error |                     ?|
-| 644.nab_s              |        Success |        Success |              ? |     gem5 error |                     ?|
-| 649.fotonik3d_s        |        Success |        Success |              ? |     gem5 error |                     ?|
-| 654.roms_s             |        Success |        Success |              ? |     gem5 error |                     ?|
-| 996.specrand_fs        |        Success |        Success |              ? |     gem5 error |                     ?|
-| 500.perlbench_r        |        Success |        Success |              ? |     gem5 error |                     ?|
-| 502.gcc_r              |        Success |        Success |              ? |     gem5 error |                     ?|
-| 505.mcf_r              |        Success |        Success |              ? |     gem5 error |                     ?|
-| 520.omnetpp_r          |        Success |        Success |              ? |     gem5 error |                     ?|
-| 523.xalancbmk_r        |        Success |        Success |              ? |     gem5 error |                     ?|
-| 525.x264_r             |        Success |        Success |              ? |     gem5 error |                     ?|
-| 531.deepsjeng_r        |        Success |        Success |              ? |     gem5 error |                     ?|
-| 541.leela_r            |        Success |        Success |              ? |     gem5 error |                     ?|
-| 548.exchange2_r        |        Success |        Success |              ? |     gem5 error |                     ?|
-| 557.xz_r               |        Success |        Success |              ? |     gem5 error |                     ?|
-| 999.specrand_ir        |        Success |        Success |              ? |     gem5 error |                     ?|
-| 600.perlbench_s        |        Success |        Success |              ? |     gem5 error |                     ?|
-| 602.gcc_s              |        Success |        Success |              ? |     gem5 error |                     ?|
-| 605.mcf_s              |        Success |        Success |              ? |     gem5 error |                     ?|
-| 620.omnetpp_s          |        Success |        Success |              ? |              ? |                     ?|
-| 623.xalancbmk_s        |        Success |        Success |              ? |     gem5 error |                     ?|
-| 625.x264_s             |        Success |        Success |              ? |     gem5 error |                     ?|
-| 631.deepsjeng_s        |        Success |        Success |              ? |     gem5 error |                     ?|
-| 641.leela_s            |        Success |        Success |              ? |     gem5 error |                     ?|
-| 648.exchange2_s        |        Success |        Success |              ? |     gem5 error |                     ?|
-| 657.xz_s               |        Success |        Success |              ? |     gem5 error |                     ?|
-| 998.specrand_is        |        Success |        Success |              ? |     gem5 error |                     ?|
+| 503.bwaves_r           |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 507.cactuBSSN_r        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 508.namd_r             |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 510.parest_r           |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 511.povray_r           |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 519.lbm_r              |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 521.wrf_r              |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 526.blender_r          |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 527.cam4_r             |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 538.imagick_r          |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 544.nab_r              |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 549.fotonik3d_r        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 554.roms_r             |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 997.specrand_fr        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 603.bwaves_s           |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 607.cactuBSSN_s        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 619.lbm_s              |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 621.wrf_s              |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 627.cam4_s             | Workload segfault | Workload segfault |      gem5 error |     gem5 error |                     ?|
+| 628.pop2_s             |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 638.imagick_s          |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 644.nab_s              |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 649.fotonik3d_s        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 654.roms_s             |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 996.specrand_fs        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 500.perlbench_r        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 502.gcc_r              |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 505.mcf_r              |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 520.omnetpp_r          |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 523.xalancbmk_r        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 525.x264_r             |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 531.deepsjeng_r        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 541.leela_r            |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 548.exchange2_r        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 557.xz_r               |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 999.specrand_ir        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 600.perlbench_s        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 602.gcc_s              |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 605.mcf_s              |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 620.omnetpp_s          |        Success |        Success |     gem5 error |              ? |                     ?|
+| 623.xalancbmk_s        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 625.x264_s             |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 631.deepsjeng_s        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 641.leela_s            |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 648.exchange2_s        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 657.xz_s               |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 998.specrand_is        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
 
 
