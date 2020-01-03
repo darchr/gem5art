@@ -1,3 +1,8 @@
+---
+Authors:
+  - Hoa Nguyen
+---
+
 # Tutorial: Run SPEC CPU 2006 Benchmarks in Full System Mode with gem5art  
 
 ## Introduction  
@@ -8,7 +13,8 @@ The scripts in this tutorial work with gem5art-* v0.3.1.
 ### SPEC CPU 2006 Benchmarks  
 **Important:** The usage of this tutorial is just for the purpose of demonstration. 
 Those benchmarks [have been retired](https://www.spec.org/cpu2006/) [1]. 
-More details about those benchmarks are [here](https://dl.acm.org/citation.cfm?id=1186737) [2].  
+More details about those benchmarks are [here](https://dl.acm.org/citation.cfm?id=1186737) [2]. 
+The Appendix II section of this tutorial shows how to use the SPEC 2006 scripts to run SPEC 2017 experiments.
 
 Examples of the usage of SPEC CPU 2006 benchmark in the literature are [here](https://ieeexplore.ieee.org/abstract/document/4378787) [3] and in the book [4]. 
 Another example of the usage of SPEC CPU benchmarks is [here](https://cacm.acm.org/magazines/2019/2/234352-a-new-golden-age-for-computer-architecture/fulltext) [5].
@@ -565,7 +571,7 @@ if __name__ == "__main__":
                     cpu, benchmark, size, # params
                     timeout = 5*24*60*60 # 5 days
                 )
-                run_gem5_instance.apply_async((run,))
+                run_gem5_instance.apply_async((run,)) # TODO: update this script to gem5art-0.4.1
 
 ```
 The above launch function will run the all the available benchmarks with kvm, atomic, timing, and o3 cpus. 
@@ -584,7 +590,11 @@ python3 launch_spec_experiment.py
 ```
 
 ## Getting the Results  
-TODO
+The results folder of each benchmark has a folder named `speclogs`, which contains the logs of the run spec commands. There are two logs in this folder: `CPU2006.001.log` and `CPU2006.002.log`. The former is the log of compiling SPEC benchmarks, which is generated when we compile SPEC benchmarks while we create the disk image. The latter is the log of the benchmark run. So, we only interest in `CPU2006.002.log`.  
+
+If the benchmark run is successful, there will be a line starting with `Success: 1x` followed by `benchmark_name`. We will look for this line in each `CPU2006.002.log` file.  
+
+[This Python notebook shows how the Appendix I. Working SPEC 2006 Benchmarks x CPU Model table is generated](https://github.com/darchr/gem5art-experiments/blob/master/spec2006-experiments/results.ipynb).
 
 ## References
 [1]  “Standard Performance Evaluation Corporation,” *SPEC CPU® 2006*. [Online]. Available: https://www.spec.org/cpu2006/. [Accessed: 12-Nov-2019].
@@ -598,39 +608,40 @@ TODO
 [5] J. L. Hennessy and D. A. Patterson, “A new golden age for computer architecture,” *Communications of the ACM*, vol. 62, no. 2, pp. 48–60, 2019.  
  
 
-## Apprendix I. Working SPEC 2006 Benchmarks x CPU Model matrix
+## Appendix I. Working SPEC 2006 Benchmarks x CPU Model table
 Not all benchmarks are compiled in the above set up as of November 2019. 
 The following are compiled benchmarks:  
 
-| Benchmarks             | KVM/test       | KVM/ref        | O3CPU/test     | AtomicCPU/test | TimingSimpleCPU/test |
-|------------------------|----------------|----------------|----------------|----------------|----------------------|
-| 401.bzip2              |              ? |              ? |              ? |              ? |                     ?|
-| 403.gcc                |              ? |              ? |              ? |              ? |                     ?|
-| 410.bwaves             |              ? |              ? |              ? |              ? |                     ?|
-| 416.gamess             |              ? |              ? |              ? |              ? |                     ?|
-| 429.mcf                |              ? |              ? |              ? |              ? |                     ?|
-| 433.milc               |              ? |              ? |              ? |              ? |                     ?|
-| 434.zeusmp             |              ? |              ? |              ? |              ? |                     ?|
-| 435.gromacs            |              ? |              ? |              ? |              ? |                     ?|
-| 436.cactusADM          |              ? |              ? |              ? |              ? |                     ?|
-| 437.leslie3d           |              ? |              ? |              ? |              ? |                     ?|
-| 444.namd               |              ? |              ? |              ? |              ? |                     ?|
-| 445.gobmk              |              ? |              ? |              ? |              ? |                     ?|
-| 453.povray             |              ? |              ? |              ? |              ? |                     ?|
-| 454.calculix           |              ? |              ? |              ? |              ? |                     ?|
-| 456.hmmer              |              ? |              ? |              ? |              ? |                     ?|
-| 458.sjeng              |              ? |              ? |              ? |              ? |                     ?|
-| 459.GemsFDTD           |              ? |              ? |              ? |              ? |                     ?|
-| 462.libquantum         |              ? |              ? |              ? |              ? |                     ?|
-| 464.h264ref            |              ? |              ? |              ? |              ? |                     ?|
-| 465.tonto              |              ? |              ? |              ? |              ? |                     ?|
-| 470.lbm                |              ? |              ? |              ? |              ? |                     ?|
-| 471.omnetpp            |              ? |              ? |              ? |              ? |                     ?|
-| 473.astar              |              ? |              ? |              ? |              ? |                     ?|
-| 481.wrf                |              ? |              ? |              ? |              ? |                     ?|
-| 482.sphinx3            |              ? |              ? |              ? |              ? |                     ?|
-| 998.specrand           |              ? |              ? |              ? |              ? |                     ?|
-| 999.specrand           |              ? |              ? |              ? |              ? |                     ?|
+| Benchmarks         | KVM/test        | KVM/ref         | AtomicCPU/test  | O3CPU/test      | TimingSimpleCPU/test |
+|--------------------|-----------------|-----------------|-----------------|-----------------|----------------------|
+| 401.bzip2          | Success         | Success         | Success         | Success         | Success              |
+| 403.gcc            | Success         | Success         | Success         | Success         | Success              |
+| 410.bwaves         | Success         | Success         | Success         | Success         | Success              |
+| 416.gamess         | Error           | Error           | Error           | Error           | Error                |
+| 429.mcf            | Success         | Success         | Success         | Success         | No SPEC logs         |
+| 433.milc           | Success         | Success         | Success         | Success         | Success              |
+| 434.zeusmp         | Success         | Success         | Success         | No SPEC logs    | Success              |
+| 435.gromacs        | Success         | Success         | Success         | Success         | Success              |
+| 436.cactusADM      | Success         | Success         | Success         | Success         | Success              |
+| 437.leslie3d       | Success         | Success         | Success         | Success         | Success              |
+| 444.namd           | Success         | Success         | Success         | Success         | Success              |
+| 445.gobmk          | Success         | Success         | Success         | No SPEC logs    | Success              |
+| 453.povray         | Success         | Success         | Success         | Success         | Success              |
+| 454.calculix       | Success         | Success         | Success         | Success         | Success              |
+| 456.hmmer          | Success         | Success         | Success         | Success         | Success              |
+| 458.sjeng          | Success         | Success         | Success         | Success         | Success              |
+| 459.GemsFDTD       | Success         | Success         | Success         | Success         | Success              |
+| 462.libquantum     | Success         | Success         | Success         | Success         | Success              |
+| 464.h264ref        | Success         | Success         | Success         | No SPEC logs    | Success              |
+| 465.tonto          | Success         | Success         | Success         | Success         | Success              |
+| 470.lbm            | Success         | Success         | Success         | Success         | Success              |
+| 471.omnetpp        | Success         | Success         | Success         | Success         | Success              |
+| 473.astar          | Success         | Success         | Success         | No SPEC logs    | Success              |
+| 481.wrf            | Error           | Error           | Error           | Error           | Error                |
+| 482.sphinx3        | Success         | Success         | Success         | Success         | Success              |
+| 998.specrand       | Success         | Success         | Success         | Success         | Success              |
+| 999.specrand       | Success         | Success         | Success         | Success         | Success              |
+
 
 Benchmarks that are not available:
 ```
@@ -640,3 +651,21 @@ Build errors:
 450.soplex
 483.xalancbmk
 ```
+
+## Appendix II. Transtition to SPEC 2017
+As mentioned earlier, SPEC 2006 benchmark suite has been retired, and the newer version, SPEC 2017, is available. 
+This section will show how to reuse the scripts made for SPEC 2006 to run SPEC 2017 experiments. 
+Changes are minimal, ie. changing `2006` to `2017`, updating the location of the ISO file, changing SPEC 2006 run command (`runspec`) to SPEC 2017 run command (`runcpu`), and manipulating the SPEC 2017 config.  
+### Updating Disk Image Scripts
+The disk image scripts to generate the SPEC 2017 disk image [could be found here](https://github.com/darchr/gem5art/tree/master/docs/disks/spec2017).  
+[The changes could be found here.](https://github.com/darchr/gem5art/commit/70019fd0196d946a65efd96bb9b2b692c0dd04be)  
+
+**Note:** In the example SPEC 2017 config, the workloads are compiled using the flag `-march=native`. 
+However, since workloads are compiled while the disk image is being building by packer, the binaries would be built accordingly to the configuration of the CPU simulated by packer. 
+This is definitely not ideal to run those binaries on gem5, which is not guaranteed to support all instructions of all hardware. 
+Hence, the `-march=native` flag is removed. 
+Other tuning flags should be manually added.
+### Updating the Launch Script
+The new launch script [could be found here](https://github.com/darchr/gem5art/blob/master/docs/launch_spec2017_experiments.py). 
+Names of SPEC 2017 workloads are updated.
+
