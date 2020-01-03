@@ -61,11 +61,11 @@
                   This is an optional argument specifying the reports of
                   the benchmark run is not copied to the output folder.
                   The reports are copied by default.
-        ** --no-listeners:
-                  This is an optional argument specifying gem5 not to open
+        ** --allow-listeners:
+                  This is an optional argument specifying gem5 to open
                   listening ports. Usually, the ports are opened for debugging
                   purposes. 
-                  By default, we let gem5 decide the availability of the ports.
+                  By default, the ports are off.
                   
     Outputs:
     * TODO: simple performance statistics
@@ -112,10 +112,10 @@ def parse_arguments():
                         action = "store_true",
                         help = "Not copy SPEC run logs to the host system;"
                                "Logs are copied by default")
-    parser.add_argument("-z", "--no-listeners", default = False,
+    parser.add_argument("-z", "--allow-listeners", default = False,
                         action = "store_true",
-                        help = "Turn off ports;"
-                               "The ports are on by default")
+                        help = "Turn on ports;"
+                               "The ports are off by default")
     return parser.parse_args()
 
 def getDetailedCPUModel(cpu_name):
@@ -246,7 +246,7 @@ if __name__ == "__m5_main__":
                                        benchmark_size, output_dir)
 
     # needed for long running jobs
-    if no_listeners:
+    if not allow_listeners:
         m5.disableAllListeners()
 
     # instantiate all of the objects we've created above
