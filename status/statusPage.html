@@ -2,112 +2,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="stylesheet" type="text/css" href="style.css"/>
     <meta charset="UTF-8">
     <title>Gem5Art</title>
-    <style>
-        html {
-            height: 100%;
-            margin: auto;
-            width: 100%;
-            overflow: scroll;
-        }
-
-        header {
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 10vh;
-            background-color: black;
-            display: flex;
-            flex-flow: row wrap;
-            position: fixed;
-        }
-
-        main {
-            background-color: white;
-            text-align: center;
-            margin: 15vh auto 0;
-        }
-
-        h1 {
-            font-family: "Righteous", sans-serif;
-            font-size: 2vw;
-            color: white;
-            margin-bottom: auto;
-        }
-
-        h2 {
-            font-family: "Open Sans", sans-serif;
-            font-size: 2vh;
-            color: black;
-            margin-right: auto;
-            margin-left: auto;
-        }
-
-        img {
-            height: 9vmin;
-            margin: auto 5vmax auto 2vmax;
-        }
-
-        .test-type-label {
-            font-family: "Open Sans", sans-serif;
-            font-size: 1.5vh;
-            text-align: left;
-            writing-mode: vertical-rl;
-            text-orientation: mixed;
-            color: black;
-        }
-
-        .cpu-number-label {
-            font-family: "Open Sans", sans-serif;
-            font-size: 1vw;
-            line-height: 3vh;
-            color: black;
-        }
-
-        .test-grid-title {
-            color: black;
-            font-family: "Open Sans", sans-serif;
-            font-size: 1.5vmin;
-            text-align: center;
-            grid-column-start: 2;
-            grid-column-end: 6;
-            grid-row-start: 1;
-            grid-row-end: 2;
-        }
-
-        .color-code {
-            font-family: "Open Sans", sans-serif;
-            word-spacing: 5em;
-            margin-top: 1vmin;
-            font-size: 2vmin;
-            grid-column-start: 1;
-            grid-column-end: 7;
-            grid-row-start: 0;
-            grid-row-end: 1;
-        }
-
-        .box-of-test-grids {
-            display: grid;
-            grid-template-rows: auto auto;
-            grid-template-columns: auto auto auto auto auto;
-            width: 90vw;
-            text-align: center;
-            margin-right: auto;
-            margin-left: auto;
-            margin-bottom: 3vmin;
-            border: thick solid black;
-            color: white;
-        }
-
-        .test-grid {
-            display: grid;
-            grid-gap: 2px;
-            margin: 1vmin auto 1vmin;
-            grid-template-columns: auto 3vw 3vw 3vw 3vw;
-            grid-template-rows: 3vh 5vh 5vh 5vh 5vh auto;
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="style.css">
     <script>
         //IF THE BOXES ARE ALL BLANK IT IS PROBABLY BECAUSE YOU PUT THE WRONG PATH TO THE JSON FILE! PUT THE CORRECT PATH HERE:
         const JSONPath = "./data.json";
@@ -126,31 +24,35 @@
             rawFile.send(null);
         }
 
-        function getHoverText(object) {
+        function getDetails(object) {
             let title = "";
-            title += "id: " + object['_id'] + "\n";
-            title += "gem5 binary: " + object['gem5_binary'] + "\n";
-            title += "run script: " + object['run_script'] + "\n";
-            title += "gem5 artifact: " + object['gem5_artifact'] + "\n";
-            title += "gem5 git artifact: " + object['gem5_git_artifact'] + "\n";
-            title += "run script git artifact: " + object['run_script_git_artifact'] + "\n";
-            title += "timeout: " + object['timeout'] + "\n";
-            title += "gem5_name: " + object['gem5_name'] + ",  script_name: " + object['script_name'] + ",   running: " + object['running'] + "\n";
-            title += "enqueue_time: " + object['enqueue_time'] + "\n";
-            title += "start_time: " + object['start_time'] + ",  end_time: " + object['end_time'] + "\n";
-            title += "return_code: " + object['return_code'] + "\n";
-            title += "kill_reason: " + object['kill_reason'] + "\n";
-            title += "pid: " + object['pid'] + ",  task_id: " + object['task_id'] + "\n";
-            title += "results: " + object['results'] + "\n";
-            title += "linux_binary: " + object['linux_binary'] + "\n";
-            title += "disk_image: " + object['disk_image'] + "\n";
-            title += "linux_binary_artifact: " + object['linux_binary_artifact'] + "\n";
-            title += "disk_image_artifact: " + object['linux_binary_artifact'] + "\n";
-            title += "disk_name: " + object['disk_name'] + "\n";
-            title += "string: " + object['string'] + "\n";
-            title += "hash: " + object['hash'] + "\n";
-            title += "type: " + object['type'] + "\n";
-            title += "current_time: " + object['current_time'];
+            title += "Id: " + object['_id'] + "<br>";
+            title += "Gem5 Binary: " + object['gem5_binary'] + "<br>";
+            title += "Run Script: " + object['run_script'] + "<br>";
+            title += "Gem5 Artifact: " + object['gem5_artifact'] + "<br>";
+            title += "Gem5 Git Artifact: " + object['gem5_git_artifact'] + "<br>";
+            title += "Run Script Git Artifact: " + object['run_script_git_artifact'] + "<br>";
+            title += "Timeout: " + object['timeout'] + "<br>";
+            title += "Gem5_name: " + object['gem5_name'] + "<br>";
+            title += "Script_name: " + object['script_name'] + "<br>";
+            title += "Running: " + object['running'] + "<br>";
+            title += "Enqueue_time: " + object['enqueue_time'] + "<br>";
+            title += "Start_time: " + object['start_time'] + "<br>";
+            title += "End_time: " + object['end_time'] + "<br>";
+            title += "Return_code: " + object['return_code'] + "<br>";
+            title += "Kill_reason: " + object['kill_reason'] + "<br>";
+            title += "PId: " + object['pid'] + "<br>";
+            title += "Task_id: " + object['task_id'] + "<br>";
+            title += "Results: " + object['results'] + "<br>";
+            title += "Linux_binary: " + object['linux_binary'] + "<br>";
+            title += "Disk_image: " + object['disk_image'] + "<br>";
+            title += "Linux_binary_artifact: " + object['linux_binary_artifact'] + "<br>";
+            title += "Disk_image_artifact: " + object['linux_binary_artifact'] + "<br>";
+            title += "Disk_name: " + object['disk_name'] + "<br>";
+            title += "String: " + object['string'] + "<br>";
+            title += "Hash: " + object['hash'] + "<br>";
+            title += "Type: " + object['type'] + " <br>";
+            title += "Current_time: " + object['current_time'];
             return title;
         }
 
@@ -162,7 +64,9 @@
                 for (let i in parsedJSON) {
                     let idToTest = parsedJSON[i]['linux_name'] + " " + parsedJSON[i]['params'][0] + " " + parsedJSON[i]['params'][1] + " " + parsedJSON[i]['params'][2] + " " + parsedJSON[i]['params'][3];
                     if (document.getElementById(idToTest)) {
-                        document.getElementById(idToTest).title = getHoverText(parsedJSON[i]);
+                        document.getElementById(idToTest).onmouseover = function () {
+                            document.getElementsByClassName("detailsBarText")[0].innerHTML = getDetails(parsedJSON[i]);
+                        };
                         if (parsedJSON[i]['status'] === "Finished") {
                             document.getElementById(idToTest).style.backgroundColor = "forestgreen";
                         } else if (parsedJSON[i]['status'] === "Failed" && parsedJSON[i]['kill_reason'] === "timeout") {
@@ -174,12 +78,10 @@
                 }
             });
         }
-
         determineColor();
     </script>
 
-    <link href="https://fonts.googleapis.com/css?family=Righteous" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Righteous|Barlow+Condensed|Open+Sans" rel="stylesheet">
 </head>
 <body>
 <header>
@@ -790,5 +692,8 @@
         </div>
     </div>
 </main>
+<div class="detailsBar">
+    <div class="detailsBarText"></div>
+</div>
 </body>
 </html>
