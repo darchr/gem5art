@@ -1,14 +1,14 @@
 # Tutorial: Run Full System Linux Boot Tests
 
 ## Introduction
-This tutorial explains how to use gem5art to run experiments with gem5. The specific experiment we will be doing is to test the linux kernel boot for various kernel versions and simulator configurations.
+This tutorial explains how to use gem5art to run experiments with gem5. The specific experiment we will be doing is to test the booting of various linux kernel versions and simulator configurations.
 The main steps to perform such an experiment using gem5art include: setting up the environment, building gem5, creating a disk image, compiling linux kernels, preparing gem5 run script, creating a job launch script (which will also register all of the required artifacts) and finally running this script.
 
 This tutorial follows the following directory structure:
 
 - configs-boot-tests: the base gem5 configuration to be used to run full-system simulations
 - disk-image: contains packer script and template files used to build a disk image. The built disk image will be stored in the same folder
-- gem5: gem5 source code. This points to darchr/gem5 repo
+- gem5: gem5 source code. This points to the googlesource repo of gem5
 - linux-configs: different linux kernel configurations
 - linux-stable: linux kernel source code used for full-system experiments
 - results: directory to store the results of the experiments (generated once gem5 jobs are executed)
@@ -33,7 +33,7 @@ git init
 git remote add origin https://your-remote-add/boot-tests.git
 ```
 
-We also need to add a .gitignore file in our git repo, to not track files we don't care about:
+We also need to add a .gitignore file in our git repo, to ignore tracking files we don't care about:
 
 ```sh
 *.pyc
@@ -49,10 +49,7 @@ gem5
 linux-stable/
 ```
 
-Through the use of boot-tests git repo, we will try to keep track of changes in those files which are not included in any git repo otherwise.
-boot-tests will also serve as the directory from where we will run everything.
-
-gem5art relies on Python 3, so we suggest creating a virtual environment before using gem5art.
+gem5art relies on Python 3, so we suggest creating a virtual environment (inside boot-tests) before using gem5art.
 
 ```sh
 virtualenv -p python3 venv
@@ -67,17 +64,46 @@ pip install gem5art-artifact gem5art-run gem5art-tasks
 
 ## Building gem5
 
-Clone gem5 and build it:
+Next, we have to clone gem5 and build it. If you want to use the exact gem5 source that was used at the time of creating this tutorial you will have to checkout the relevant commit. If you want to try with the current version of gem5 at the time of reading this tutorial, you can ignore the git checkout command.
+See the commands below:
 
 ```sh
 git clone https://gem5.googlesource.com/public/gem5
+git checkout d40f0bc579fb8b10da7181
 cd gem5
 scons build/X86/gem5.opt -j8
 ```
-You can also add your changes to gem5 source before building it. Make sure to commit any changes you make to gem5 repo.
-Also make sure to build the m5 utility which will be moved to the disk image eventually.
+You can also add your changes to gem5 source before building it. Make sure to commit any changes you make to gem5 repo and documenting it while registering gem5 artifact in the launch script.
+We will look at the details of our launch script later on, but following is how we can register gem5 source and binary artifacts that we just created.
+
+```python
+gem5_repo = Artifact.registerArtifact(
+    command = 'git clone https://gem5.googlesource.com/public/gem5',
+    typ = 'git repo',
+    name = 'gem5',
+    path =  'gem5/',
+    cwd = './',
+    documentation = 'cloned gem5 master branch from googlesource (Nov 18, 2019)'
+)
+
+gem5_binary = Artifact.registerArtifact(
+    command = '''cd gem5;
+    git checkout d40f0bc579fb8b10da7181;
+    scons build/X86/gem5.opt -j8
+    ''',
+    typ = 'gem5 binary',
+    name = 'gem5',
+    cwd = 'gem5/',
+    path =  'gem5/build/X86/gem5.opt',
+    inputs = [gem5_repo,],
+    documentation = 'gem5 binary based on googlesource (Nov 18, 2019)'
+```
+
+Note, that the use of git checkout command in the `command` field of the gem5_binary artifact (along with the `documentation` field) will be helpful later on to figure out exactly which gem5 source was used to create this gem5 binary.
+
+Also make sure to build the m5 utility at this point which will be moved to the disk image eventually.
 m5 utility allows to trigger simulation tasks from inside the simulated system.
-For example, it can be used dump simuation statistics when the simulated system triggers to do so.
+For example, it can be used to dump simulation statistics when the simulated system triggers to do so.
 We will need m5 mainly to exit the simulation when the simulated system boots linux.
 
 ```sh
@@ -105,34 +131,34 @@ cd disk-image/
 wget https://releases.hashicorp.com/packer/1.4.3/packer_1.4.3_linux_amd64.zip
 unzip packer_1.4.3_linux_amd64.zip
 ```
-Now, to build the disk image, inside boot-exit folder, run:
+Now, to build the disk image, inside the disk-image folder, run:
 
 ```
-../packer validate boot-exit.json
+./packer validate boot-exit/boot-exit.json
 
-../packer build boot-exit.json
+./packer build boot-exit/boot-exit.json
 ```
 
 ## Compiling the linux kernel
 
-In this tutorial, we want to experiment with different linux kernels to examine the state of gem5's ability to boot different linux kernels. We picked the latest stable kernel (v5.3.12) and the last four LTS (long term support) releases which include: v4.19.83, v4.14.134, v4.9.186, and v4.4.186.
+In this tutorial, we want to experiment with different linux kernels to examine the state of gem5's ability to boot different linux kernels. We picked one of the latest stable kernels (v5.2.3) and the last four LTS (long term support) releases which include: v4.19.83, v4.14.134, v4.9.186, and v4.4.186.
 
-Let's use an example of kernel v5.3.12 to see how to compile the kernel.
+Let's use an example of kernel v5.2.3 to see how to compile the kernel.
 First, add a folder linux-configs to store linux kernel config files. The configuration files of interest are available [here](https://github.com/darchr/gem5art/blob/master/docs/linux-configs/).
-Then, we will get the linux source and checkout the required linux version (e.g. v5.3.12 in this case).
+Then, we will get the linux source and checkout the required linux version (e.g. v5.2.3 in this case).
 
 ```
 git clone https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
 mv linux linux-stable
 cd linux-stable
-git checkout v{version-no: e.g. 5.3.12}
+git checkout v{version-no: e.g. 5.2.3}
 ```
 Compile the linux kernel from its source (and an appropriate config file from linux-configs/):
 
 ```
-cp ../linux-configs/config.{version-no: e.g. 5.3.12} .config
+cp ../linux-configs/config.{version-no: e.g. 5.2.3} .config
 make -j8
-cp vmlinux vmlinux-{version-no: e.g. 5.3.12}
+cp vmlinux vmlinux-{version-no: e.g. 5.2.3}
 ```
 
 Repeat the above process for other kernel versions that we want to use in this experiment.
@@ -219,7 +245,7 @@ gem5_repo = Artifact.registerArtifact(
     name = 'gem5',
     path =  'gem5/',
     cwd = './',
-    documentation = 'git repo with gem5 master branch on Sep 23rd'
+    documentation = 'cloned gem5 master branch from googlesource (Nov 18, 2019)'
 )
 
 m5_binary = Artifact.registerArtifact(
@@ -233,7 +259,7 @@ m5_binary = Artifact.registerArtifact(
 )
 
 disk_image = Artifact.registerArtifact(
-    command = 'packer build template.json',
+    command = './packer build boot-exit/boot-exit.json',
     typ = 'disk image',
     name = 'boot-disk',
     cwd = 'disk-image',
@@ -243,13 +269,16 @@ disk_image = Artifact.registerArtifact(
 )
 
 gem5_binary = Artifact.registerArtifact(
-    command = 'scons build/X86/gem5.opt',
+    command = '''cd gem5;
+    git checkout d40f0bc579fb8b10da7181;
+    scons build/X86/gem5.opt -j8
+    ''',
     typ = 'gem5 binary',
     name = 'gem5',
     cwd = 'gem5/',
     path =  'gem5/build/X86/gem5.opt',
     inputs = [gem5_repo,],
-    documentation = 'default gem5 x86'
+    documentation = 'gem5 binary based on googlesource (Nov 18, 2019)'
 )
 
 linux_repo = Artifact.registerArtifact(
@@ -262,7 +291,7 @@ linux_repo = Artifact.registerArtifact(
     documentation = 'linux kernel source code repo from Sep 23rd'
 )
 
-linuxes = ['5.3.12', '4.19.83', '4.14.134', '4.9.186', '4.4.186']
+linuxes = ['5.2.3', '4.19.83', '4.14.134', '4.9.186', '4.4.186']
 linux_binaries = {
     version: Artifact.registerArtifact(
                 name = f'vmlinux-{version}',
@@ -299,17 +328,20 @@ if __name__ == "__main__":
                         run = gem5Run.createFSRun(
                             'gem5/build/X86/gem5.opt',
                             'configs-boot-tests/run_exit.py',
+                            'results/run_exit/vmlinux-{}/boot-exit/{}/{}/{}/{}'.
+                            format(linux, cpu, mem, num_cpu, boot_type),
                             gem5_binary, gem5_repo, experiments_repo,
                             os.path.join('linux-stable', 'vmlinux'+'-'+linux),
                             'disk-image/boot-exit/boot-exit-image/boot-exit',
                             linux_binaries[linux], disk_image,
-                            cpu, mem, num_cpu, boot_type
+                            cpu, mem, num_cpu, boot_type,
+                            timeout = 6*60*60 #6 hours
                             )
                         run_gem5_instance.apply_async((run,))
 ```
 The above lines are responsible for looping through all possible combinations of variables involved in this experiment.
 For each combination, a gem5Run object is created and eventually passed to run_gem5_instance to be
-executed asynchronously using Celery.
+executed asynchronously using Celery. Moreover, the results directory path is constructed based on the simulator configuration parameters and passed as the third argument to createFSRun(). Here, we are using a timeout of 6 hours, after which the particular gem5 job will be killed (assuming that gem5 should complete the booting process of linux kernel on the given hardware resources). You can configure this time according to your settings.
 
 The complete launch script is available [here:](https://github.com/darchr/gem5art/blob/master/docs/launch_boot_tests.py).
 Finally, make sure you are in python virtual env and then run the script:
@@ -317,3 +349,40 @@ Finally, make sure you are in python virtual env and then run the script:
 ```python
 python launch_boot_tests.py
 ```
+
+## Results
+
+Once you start running these experiments, you can access the database to check their status or to find results.
+There are different ways to do this. For example, you can use the getRuns method of gem5art as discussed in the Runs section [previously](run.html#searching-the-database-to-find-runs).
+
+You can also directly access the database and access the run artifacts as follows:
+
+```python
+
+#!/usr/bin/env python3
+from pymongo import MongoClient
+
+db = MongoClient().artifact_database
+
+linuxes = ['5.2.3', '4.19.83', '4.14.134', '4.9.186', '4.4.186']
+boot_types = ['init', 'systemd']
+num_cpus = ['1', '2', '4', '8']
+cpu_types = ['kvm', 'atomic', 'simple', 'o3']
+mem_types = ['ruby']
+
+for linux in linuxes:
+    for boot_type in boot_types:
+        for cpu in cpu_types:
+            for num_cpu in num_cpus:
+                for mem in mem_types:
+                    for i in db.artifacts.find({'outdir':'/fasthome/aakahlow/boot_tests/results/run_exit/vmlinux-{}/boot-exit/{}/{}/{}/{}'.format(linux, cpu, mem, num_cpu, boot_type)}):print(i)
+```
+
+Following plots show the status of linux booting based on the results of the experiments of this tutorial:
+
+![](boot_classic_init)
+![](boot_classic_systemd)
+![](boot_ruby_init)
+![](boot_ruby_systemd)
+
+You can look [here](https://github.com/darchr/gem5art-experiments/blob/master/boot-experiments/boot_tests_gem5art.ipynb) for the detailed results.

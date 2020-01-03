@@ -27,8 +27,8 @@
 # Authors: Jason Lowe-Power, Ayaz Akram
 
 """ Script to run NAS parallel benchmarks with gem5.
-    The script expects kernel, diskimage, benchmark to run
-    and number of cpus as arguments.
+    The script expects kernel, diskimage, cpu (kvm or atomic),
+    benchmark to run and number of cpus as arguments.
 
     If your application has ROI annotations, this script will count the total
     number of instructions executed in the ROI. It also tracks how much
@@ -56,21 +56,27 @@ def writeBenchScript(dir, bench):
     file_name = '{}/run_{}'.format(dir, bench)
     bench_file = open(file_name,"w+")
     bench_file.write('/home/gem5/NPB3.3-OMP/bin/{} \n'.format(bench))
+
+    # sleeping for sometime makes sure
+    # that the benchmark's output has been
+    # printed to the console
+    bench_file.write('sleep 5 \n')
     bench_file.write('m5 exit \n')
     bench_file.close()
     return file_name
 
 if __name__ == "__m5_main__":
     (opts, args) = SimpleOpts.parse_args()
-    kernel, disk, benchmark, num_cpus = args
+    kernel, disk, cpu, benchmark, num_cpus = args
+
+    if not cpu in ['atomic', 'kvm']:
+        m5.fatal("cpu not supported")
+
     # create the system we are going to simulate
     system = MySystem(kernel, disk, int(num_cpus), opts, no_kvm=False)
 
-    # For workitems to work correctly
-    # This will cause the simulator to exit simulation when the first work
-    # item is reached and when the first work item is finished.
-    system.work_begin_exit_count = 1
-    system.work_end_exit_count = 1
+    # Exit from guest on workbegin/workend
+    system.exit_on_work_items = True
 
     # Create and pass a script to the simulated system to run the reuired
     # benchmark
@@ -93,42 +99,50 @@ if __name__ == "__m5_main__":
 
     globalStart = time.time()
 
-
     print("Running the simulation")
+    print("Using cpu: {}".format(cpu))
     exit_event = m5.simulate()
 
-    # While there is still something to do in the guest keep executing.
-    # This is needed since we exit for the ROI begin/end
-    foundROI = False
-    while exit_event.getCause() != "m5_exit instruction encountered":
-        # If the user pressed ctrl-c on the host, then we really should exit
-        if exit_event.getCause() == "user interrupt received":
-            print("User interrupt. Exiting")
-            break
+    if exit_event.getCause() == "workbegin":
+        # Reached the start of ROI
+        # start of ROI is marked by an
+        # m5_work_begin() call
+        print("Resetting stats at the start of ROI!")
+        m5.stats.reset()
+        start_tick = m5.curTick()
+        start_insts = system.totalInsts()
+        # switching to atomic cpu if argument cpu == atomic
+        if cpu == 'atomic':
+            system.switchCpus(system.cpu, system.atomicCpu)
+    else:
+        print("Unexpected termination of simulation !")
+        exit()
 
-        print("Exited because", exit_event.getCause())
+    # Simulate the ROI
+    exit_event = m5.simulate()
 
-        if exit_event.getCause() == "a thread reached the max instruction count":
-          break
+    # Reached the end of ROI
+    # Finish executing the benchmark with kvm cpu
 
-        if exit_event.getCause() == "work started count reach":
-            start_tick = m5.curTick()
-            start_insts = system.totalInsts()
-            foundROI = True
-        elif exit_event.getCause() == "work items exit count reached":
-            end_tick = m5.curTick()
-            end_insts = system.totalInsts()
+    print("Dump stats at the end of the ROI!")
+    m5.stats.dump()
+    end_tick = m5.curTick()
+    end_insts = system.totalInsts()
+    m5.stats.reset()
 
-        print("Continuing")
-        exit_event = m5.simulate()
+    # switch cpu back to kvm if atomic was used for ROI
+    if cpu == 'atomic':
+        system.switchCpus(system.atomicCpu, system.cpu)
 
+    # Simulate the remaning part of the benchmark
+    exit_event = m5.simulate()
+
+    print("Done with the simulation")
     print()
-    print("Performance statistics")
+    print("Performance statistics:")
 
+    print("Simulated time in ROI: %.2fs" % ((end_tick-start_tick)/1e12))
+    print("Instructions executed in ROI: %d" % ((end_insts-start_insts)))
     print("Ran a total of", m5.curTick()/1e12, "simulated seconds")
     print("Total wallclock time: %.2fs, %.2f min" % \
                 (time.time()-globalStart, (time.time()-globalStart)/60))
-
-    if foundROI:
-        print("Simulated time in ROI: %.2fs" % ((end_tick-start_tick)/1e12))
-        print("Instructions executed in ROI: %d" % ((end_insts-start_insts)))
