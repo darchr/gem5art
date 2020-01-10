@@ -68,8 +68,9 @@ Tutorials
 
    boot-tutorial.md
    npb-tutorial.md
-   spec2006-tutorial.md
    microbench-tutorial.md
+   spec2006-tutorial.md
+   spec2017-tutorial.md
 
 Indices and tables
 ==================

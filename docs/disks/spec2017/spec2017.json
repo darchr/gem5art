@@ -34,7 +34,7 @@
             "iso_checksum_type": "{{ user `iso_checksum_type` }}",
             "iso_urls": [ "{{ user `iso_url` }}" ],
             "memory": "{{ user `vm_memory`}}",
-            "output_directory": "spec2006/{{ user `image_name` }}-image",
+            "output_directory": "spec2017/{{ user `image_name` }}-image",
             "qemuargs": 
             [
                 [ "-cpu", "host" ],
@@ -62,12 +62,12 @@
         },
         {
             "type": "file",
-            "source": "spec2006/runscript.sh",
+            "source": "spec2017/runscript.sh",
             "destination": "/home/gem5/"
         },
         {
             "type": "file",
-            "source": "spec2006/CPU2006v1.0.1.iso",
+            "source": "spec2017/cpu2017-1.1.0.iso",
             "destination": "/home/gem5/"
         },
         {
@@ -75,8 +75,8 @@
             "execute_command": "echo '{{ user `ssh_password` }}' | {{.Vars}} sudo -E -S bash '{{.Path}}'",
             "scripts": 
             [
-                "spec2006/post-installation.sh",
-                "spec2006/install-spec2006.sh"
+                "spec2017/post-installation.sh",
+                "spec2017/install-spec2017.sh"
             ]
         }
     ],
@@ -98,7 +98,7 @@
         "ssh_username": "gem5",
         "vm_cpus": "16",
         "vm_memory": "8192",
-        "image_name": "spec2006"
+        "image_name": "spec2017"
   }
 
 }
