@@ -20,5 +20,9 @@ sed -i "s/\/opt\/rh\/devtoolset-7\/root\/usr/\/usr/g" /home/gem5/spec2017/config
 # Use sed command to remove the march=native flag when compiling
 sed -i "s/-march=native//g" /home/gem5/spec2017/config/myconfig.x86.cfg
 
+# Prevent runcpu from calling sysinfo
+# https://www.spec.org/cpu2017/Docs/config.html#sysinfo-program
+sed -i "s/command_add_redirect = 1/sysinfo_program =\ncommand_add_redirect = 1/g" /home/gem5/spec2017/config/myconfig.x86.cfg
+
 # build all SPEC workloads
 runcpu --config=myconfig.x86.cfg --define build_ncpus=$(nproc) --action=build all
