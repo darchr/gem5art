@@ -26,3 +26,6 @@ sed -i "s/command_add_redirect = 1/sysinfo_program =\ncommand_add_redirect = 1/g
 
 # build all SPEC workloads
 runcpu --config=myconfig.x86.cfg --define build_ncpus=$(nproc) --action=build all
+
+# remove the log files to avoid copying out large files
+rm -f /home/gem5/spec2017/result/*
