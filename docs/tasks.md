@@ -20,6 +20,13 @@ It will autoscale from 0 to desired number of workers.
 
 <!--Then, you can write a script (e.g., `launch_tests.py`) which will first create all of the required artifacts and will call the `run` task defined in gem5art.-->
 
+Celery relies on a message broker `RabbitMQ` for communication between the client and workers.
+If not already installed, you need to install `RabbitMQ` on your system (before running celery) using:
+
+```sh
+apt-get install rabbitmq-server
+```
+
 ## Monitoring Celery
 You can monitor the celery cluster doing the following:
 

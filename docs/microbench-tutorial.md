@@ -134,7 +134,15 @@ If not already running/created, you can create a database using:
 ```sh
 `docker run -p 27017:27017 -v <absolute path to the created directory>:/data/db --name mongo-<some tag> -d mongo`
 ```
-in a newly created directory and run celery server using:
+in a newly created directory.
+
+If not already installed, install `RabbitMQ` on your system (before running celery) using:
+
+```sh
+apt-get install rabbitmq-server
+```
+
+Now, run celery server using:
 
 ```sh
 celery -E -A gem5art.tasks.celery worker --autoscale=[number of workers],0
