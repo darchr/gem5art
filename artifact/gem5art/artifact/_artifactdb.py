@@ -30,6 +30,7 @@
 from abc import ABC, abstractmethod
 
 import gridfs # type: ignore
+from pathlib import Path
 from pymongo import MongoClient # type: ignore
 from typing import Any, Dict, Iterable, Union, Type
 from uuid import UUID
@@ -118,7 +119,7 @@ class ArtifactMongoDB(ArtifactDB):
         assert artifact['_id'] == key
         self.artifacts.insert_one(artifact)
 
-    def upload(self, key: UUID, path: str) -> None:
+    def upload(self, key: UUID, path: Path) -> None:
         """Upload the file at path to the database with _id of key"""
         with open(path, 'rb') as f:
             self.fs.upload_from_stream_with_id(key, path, f)
@@ -143,7 +144,7 @@ class ArtifactMongoDB(ArtifactDB):
             # This is a hash.
             return self.artifacts.find_one({'hash': key}, limit = 1)
 
-    def downloadFile(self, key: UUID, path: str) -> None:
+    def downloadFile(self, key: UUID, path: Path) -> None:
         """Download the file with the _id key to the path. Will overwrite the
         file if it currently exists."""
         with open(path, 'wb') as f:
