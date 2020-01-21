@@ -554,13 +554,13 @@ def getRunsByNameLike(name: str, fs_only: bool = False,
 
     if not fs_only:
         seruns = _db.artifacts.find({'type':'gem5 run',
-                                     'name': {'$regex': '/{}/'.format(name)}},
+                                     'name': {'$regex': name}},
                                     limit=limit)
         for run in seruns:
             yield gem5Run.loadFromDict(run)
 
     fsruns = _db.artifacts.find({'type':'gem5 run fs',
-                                 'name': {'$regex': '/{}/'.format(name)}},
+                                 'name': {'$regex': name}},
                                 limit=limit)
     for run in fsruns:
         yield gem5Run.loadFromDict(run)
