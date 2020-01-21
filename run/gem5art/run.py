@@ -48,7 +48,7 @@ import zipfile
 from gem5art import artifact
 from gem5art.artifact import Artifact
 
-_db: artifact.ArtifactDB = artifact.getDBConnection()
+_db: artifact._artifactdb.ArtifactDB = artifact.getDBConnection()
 
 class gem5Run:
     """
@@ -513,11 +513,11 @@ def getRuns(fs_only: bool = False, limit: int = 0) -> Iterable[gem5Run]:
     """
 
     if not fs_only:
-        runs = _db.artifacts.find({'type':'gem5 run'}, limit=limit)
+        runs = _db.searchByType('gem5 run', limit=limit)
         for run in runs:
             yield gem5Run.loadFromDict(run)
 
-    fsruns = _db.artifacts.find({'type':'gem5 run fs'}, limit=limit)
+    fsruns = _db.searchByType('gem5 run fs', limit=limit)
     for run in fsruns:
         yield gem5Run.loadFromDict(run)
 
@@ -532,13 +532,12 @@ def getRunsByName(name: str, fs_only: bool = False,
     """
 
     if not fs_only:
-        seruns = _db.artifacts.find({'type':'gem5 run', 'name': name},
-                                    limit=limit)
+        seruns = _db.searchByNameType(name, 'gem5 run', limit=limit)
         for run in seruns:
             yield gem5Run.loadFromDict(run)
 
-    fsruns = _db.artifacts.find({'type':'gem5 run fs', 'name': name},
-                                limit=limit)
+    fsruns = _db.searchByNameType(name, 'gem5 run fs', limit=limit)
+
     for run in fsruns:
         yield gem5Run.loadFromDict(run)
 
@@ -553,14 +552,12 @@ def getRunsByNameLike(name: str, fs_only: bool = False,
     """
 
     if not fs_only:
-        seruns = _db.artifacts.find({'type':'gem5 run',
-                                     'name': {'$regex': name}},
-                                    limit=limit)
+        seruns = _db.searchByLikeNameType(name, 'gem5 run', limit=limit)
+
         for run in seruns:
             yield gem5Run.loadFromDict(run)
 
-    fsruns = _db.artifacts.find({'type':'gem5 run fs',
-                                 'name': {'$regex': name}},
-                                limit=limit)
+    fsruns = _db.searchByLikeNameType(name, 'gem5 run fs', limit=limit)
+
     for run in fsruns:
         yield gem5Run.loadFromDict(run)

@@ -272,8 +272,12 @@ class Artifact:
     def __hash__(self) -> int:
         return self._id.int
 
-def _getByType(typ: str, limit: int) -> Iterator[Artifact]:
-    data = _db.artifacts.find({'type':typ}, limit=limit)
+def _getByType(typ: str, limit: int = 0) -> Iterator[Artifact]:
+    """Returns a generator of Artifacts with matching `type` from the db.
+
+    Limit specifies the maximum number of results to return.
+    """
+    data = _db.searchByType(typ, limit=limit)
 
     for d in data:
         yield Artifact(d)
@@ -308,7 +312,7 @@ def getByName(name: str, limit: int = 0) -> Iterator[Artifact]:
 
     Limit specifies the maximum number of results to return.
     """
-    data = _db.artifacts.find({'name': name}, limit=limit)
+    data = _db.searchByName(name, limit=limit)
 
     for d in data:
         yield Artifact(d)
