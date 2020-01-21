@@ -38,6 +38,7 @@ experiment is reproducible and the output is saved to the database.
 import hashlib
 import json
 import os
+from pathlib import Path
 import signal
 import subprocess
 import time
@@ -59,8 +60,8 @@ class gem5Run:
     hash: str
     type: str
     name: str
-    gem5_binary: str
-    run_script: str
+    gem5_binary: Path
+    run_script: Path
     gem5_artifact: Artifact
     gem5_git_artifact: Artifact
     run_script_git_artifact: Artifact
@@ -72,10 +73,11 @@ class gem5Run:
     linux_name: str
     disk_name: str
     string: str
-    outdir: str
 
-    linux_binary: str
-    disk_image: str
+    outdir: Path
+
+    linux_binary: Path
+    disk_image: Path
     linux_binary_artifact: Artifact
     disk_image_artifact: Artifact
 
@@ -97,9 +99,9 @@ class gem5Run:
     @classmethod
     def _create(cls,
                 name: str,
-                gem5_binary: str,
-                run_script: str,
-                outdir: str,
+                gem5_binary: Path,
+                run_script: Path,
+                outdir: Path,
                 gem5_artifact: Artifact,
                 gem5_git_artifact: Artifact,
                 run_script_git_artifact: Artifact,
@@ -120,12 +122,12 @@ class gem5Run:
 
         run._id = uuid4()
 
-        run.outdir = os.path.abspath(outdir)
+        run.outdir = outdir.resolve() # ensure this is absolute
 
         # Assumes **/<gem5_name>/gem5.<anything>
-        run.gem5_name = os.path.split(os.path.split(run.gem5_binary)[0])[1]
+        run.gem5_name = run.gem5_binary.parent.name
         # Assumes **/<script_name>.py
-        run.script_name = os.path.split(run.run_script)[1].split('.')[0]
+        run.script_name = run.run_script.stem
 
         # Info about the actual run
         run.running = False
@@ -173,9 +175,9 @@ class gem5Run:
         of this class.
         """
 
-        run = cls._create(name, gem5_binary, run_script, outdir, gem5_artifact,
-                          gem5_git_artifact, run_script_git_artifact, params,
-                          timeout)
+        run = cls._create(name, Path(gem5_binary), Path(run_script),
+                          Path(outdir), gem5_artifact, gem5_git_artifact,
+                          run_script_git_artifact, params, timeout)
 
         run.artifacts = [gem5_artifact, gem5_git_artifact,
                          run_script_git_artifact]
@@ -185,9 +187,9 @@ class gem5Run:
         run.string += ' '.join(run.params)
 
         run.command = [
-            run.gem5_binary,
-            '-re', '--outdir={}'.format(run.outdir),
-            run.run_script]
+            str(run.gem5_binary),
+            '-re', f'--outdir={run.outdir}',
+            str(run.run_script)]
         run.command += list(params)
 
         run.hash = run._getHash()
@@ -232,18 +234,18 @@ class gem5Run:
         of this class.
         """
 
-        run = cls._create(name, gem5_binary, run_script, outdir, gem5_artifact,
-                          gem5_git_artifact, run_script_git_artifact, params,
-                          timeout)
-        run.linux_binary = linux_binary
-        run.disk_image = disk_image
+        run = cls._create(name, Path(gem5_binary), Path(run_script),
+                          Path(outdir), gem5_artifact, gem5_git_artifact,
+                          run_script_git_artifact, params, timeout)
+        run.linux_binary = Path(linux_binary)
+        run.disk_image = Path(disk_image)
         run.linux_binary_artifact = linux_binary_artifact
         run.disk_image_artifact = disk_image_artifact
 
         # Assumes **/<linux_name>
-        run.linux_name = os.path.split(run.linux_binary)[1]
+        run.linux_name = run.linux_binary.name
         # Assumes **/<disk_name>
-        run.disk_name = os.path.split(run.disk_image)[1]
+        run.disk_name = run.disk_image.name
 
         run.artifacts = [gem5_artifact, gem5_git_artifact,
                          run_script_git_artifact, linux_binary_artifact,
@@ -254,10 +256,10 @@ class gem5Run:
         run.string += ' '.join(run.params)
 
         run.command = [
-            run.gem5_binary,
-            '-re', '--outdir={}'.format(run.outdir),
-            run.run_script, run.linux_binary,
-            run.disk_image]
+            str(run.gem5_binary),
+            '-re', f'--outdir={run.outdir}',
+            str(run.run_script), str(run.linux_binary),
+            str(run.disk_image)]
         run.command += list(params)
 
         run.hash = run._getHash()
@@ -308,14 +310,14 @@ class gem5Run:
         """
         for v in self.artifacts:
             if v.type == 'git repo':
-                new = artifact.artifact.getGit(os.path.join(cwd, v.path))['hash']
+                new = artifact.artifact.getGit(cwd / v.path)['hash']
                 old = v.git['hash']
             else:
-                new = artifact.artifact.getHash(os.path.join(cwd, v.path))
+                new = artifact.artifact.getHash(cwd / v.path)
                 old = v.hash
 
             if new != v.hash:
-                status = f"Failed artifact check for {os.path.join(cwd, v.path)}"
+                status = f"Failed artifact check for {cwd / v.path}"
                 return False
 
         return True
@@ -328,8 +330,8 @@ class gem5Run:
         Returns true if the gem5 instance specified in args has a kernel panic
         Note: this gets around the problem that gem5 doesn't exit on panics.
         """
-        term_path = os.path.join(self.outdir, 'system.pc.com_1.device')
-        if not os.path.exists(term_path):
+        term_path = self.outdir / 'system.pc.com_1.device'
+        if not term_path.exists():
             return False
 
         with open(term_path, 'rb') as f:
@@ -358,6 +360,8 @@ class gem5Run:
         for k,v in d.items():
             if isinstance(v, Artifact):
                 d[k] = v._id
+            if isinstance(v, Path):
+                d[k] = str(v)
 
         return d
 
@@ -369,7 +373,7 @@ class gem5Run:
         artifacts + the runscript + parameters
         """
         to_hash = [art._id.bytes for art in self.artifacts]
-        to_hash.append(self.run_script.encode())
+        to_hash.append(str(self.run_script).encode())
         to_hash.append(' '.join(self.params).encode())
 
         return hashlib.md5(b''.join(to_hash)).hexdigest()
@@ -385,7 +389,7 @@ class gem5Run:
     def dumpJson(self, filename: str) -> None:
         """Dump all info into a json file"""
         d = self._convertForJson(self._getSerializable())
-        with open(os.path.join(self.outdir, filename), 'w') as f:
+        with open(self.outdir / filename, 'w') as f:
             json.dump(d, f)
 
     def dumpsJson(self) -> str:
@@ -485,19 +489,17 @@ class gem5Run:
         """Zip up the output directory and store the results in the database.
         """
 
-        with zipfile.ZipFile(os.path.join(self.outdir, 'results.zip'), 'w',
+        with zipfile.ZipFile(self.outdir / 'results.zip', 'w',
                              zipfile.ZIP_DEFLATED) as zipf:
-            for root, dirs, files in os.walk(self.outdir):
-                if root == self.outdir:
-                    files = list(filter(lambda f: f != 'results.zip', files))
-                for f in files:
-                    zipf.write(os.path.join(root, f), '{}/{}'.format(root.replace(self.outdir,os.path.basename(self.outdir)),f))
+            for path in self.outdir.glob("**/*"):
+                if path.name == 'results.zip': continue
+                zipf.write(path, path.relative_to(self.outdir.parent))
 
         self.results = Artifact.registerArtifact(
                 command = f'zip results.zip -r {self.outdir}',
                 name = self.name,
                 typ = 'directory',
-                path =  os.path.join(self.outdir, 'results.zip'),
+                path =  self.outdir / 'results.zip',
                 cwd = './',
                 documentation = 'Compressed version of the results directory'
         )
