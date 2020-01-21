@@ -31,4 +31,4 @@
 
 from .artifact import Artifact
 from .artifact import getByName, getDiskImages, getLinuxBinaries, getgem5Binaries
-from ._artifactdb import ArtifactDB, getDBConnection
+from ._artifactdb import getDBConnection

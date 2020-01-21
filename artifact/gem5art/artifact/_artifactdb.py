@@ -27,13 +27,73 @@
 #
 # Authors: Jason Lowe-Power
 
+from abc import ABC, abstractmethod
+
 import gridfs # type: ignore
 from pymongo import MongoClient # type: ignore
-from typing import Any, Dict, Union
+from typing import Any, Dict, Iterable, Union
 from uuid import UUID
 
+class ArtifactDB(ABC):
+    """
+    Abstract base class for all artifact DBs.
+    """
 
-class ArtifactDB:
+    @abstractmethod
+    def put(self, key: UUID, artifact: Dict[str,Union[str,UUID]]) -> None:
+        """Insert the artifact into the database with the key"""
+        pass
+
+    @abstractmethod
+    def upload(self, key: UUID, path: str) -> None:
+        """Upload the file at path to the database with _id of key"""
+        pass
+
+    @abstractmethod
+    def __contains__(self, key: Union[UUID, str]) -> bool:
+        """Key can be a UUID or a string. Returns true if item in DB"""
+        pass
+
+    @abstractmethod
+    def get(self, key: Union[UUID,str]) -> Dict[str,str]:
+        """Key can be a UUID or a string. Returns a dictionary to construct
+        an artifact.
+        """
+        pass
+
+    @abstractmethod
+    def downloadFile(self, key: UUID, path: str) -> None:
+        """Download the file with the _id key to the path. Will overwrite the
+        file if it currently exists."""
+        pass
+
+    def searchByName(self, name: str, limit: int) -> Iterable[Dict[str, Any]]:
+        """Returns an iterable of all artifacts in the database that match
+        some name. Note: Not all DB implementations will implement this
+        function"""
+        raise NotImplementedError()
+
+    def searchByType(self, typ: str, limit: int) -> Iterable[Dict[str, Any]]:
+        """Returns an iterable of all artifacts in the database that match
+        some type. Note: Not all DB implementations will implement this
+        function"""
+        raise NotImplementedError()
+
+    def searchByNameType(self, name: str, typ: str, limit: int) -> Iterable[Dict[str, Any]]:
+        """Returns an iterable of all artifacts in the database that match
+        some name and type. Note: Not all DB implementations will implement
+        this function"""
+        raise NotImplementedError()
+
+    def searchByLikeNameType(self, name: str, typ: str, limit: int) -> Iterable[Dict[str, Any]]:
+        """Returns an iterable of all artifacts in the database that match
+        some type and a regex name. Note: Not all DB implementations will implement
+        this function"""
+        raise NotImplementedError()
+
+
+
+class ArtifactMongoDB(ArtifactDB):
     """
     This is a mongodb database connector for storing Artifacts (as defined in
     artifact.py).
@@ -89,10 +149,47 @@ class ArtifactDB:
         with open(path, 'wb') as f:
             self.fs.download_to_stream(key, f)
 
+
+    def searchByName(self, name: str, limit: int) -> Iterable[Dict[str, Any]]:
+        """Returns an iterable of all artifacts in the database that match
+        some name."""
+        for d in self.artifacts.find({'name': name}, limit=limit):
+            yield d
+
+    def searchByType(self, typ: str, limit: int) -> Iterable[Dict[str, Any]]:
+        """Returns an iterable of all artifacts in the database that match
+        some type."""
+        for d in self.artifacts.find({'type':typ}, limit=limit):
+            yield d
+
+    def searchByNameType(self, name: str, typ: str, limit: int) -> Iterable[Dict[str, Any]]:
+        """Returns an iterable of all artifacts in the database that match
+        some name and type."""
+        for d in self.artifacts.find({'type':typ, 'name': name}, limit=limit):
+            yield d
+
+    def searchByLikeNameType(self, name: str, typ: str, limit: int) -> Iterable[Dict[str, Any]]:
+        """Returns an iterable of all artifacts in the database that match
+        some type and a regex name."""
+
+        data = self.artifacts.find({'type':typ,
+                                    'name': {'$regex': '{}'.format(name)}
+                                   },
+                                   limit=limit)
+        for d in data:
+            yield d
+
+_db = None
+
 def getDBConnection() -> ArtifactDB:
     """Returns the database connection
 
     Eventually, this should likely read from a config file to get the database
     information. However, for now, we'll use mongodb defaults
     """
-    return ArtifactDB()
+    global _db
+
+    if not _db:
+        _db = ArtifactMongoDB()
+
+    return _db

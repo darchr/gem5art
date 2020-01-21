@@ -150,7 +150,7 @@ Python 3.6.8 (default, Oct  7 2019, 12:59:55)
 [GCC 8.3.0] on linux
 Type "help", "copyright", "credits" or "license" for more information.
 >>> from gem5art.artifact import *
->>> db = ArtifactDB()
+>>> db = getDBConnection()
 >>> for i in getDiskImages(limit=2): print(i)
 ...
 ubuntu
