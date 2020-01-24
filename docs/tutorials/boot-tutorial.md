@@ -123,7 +123,7 @@ First create a disk-image folder where we will keep all disk image related files
 mkdir disk-image
 ```
 
-We will follow the similar directory structure as discussed in [Disk Images](disks.md) section.
+We will follow the similar directory structure as discussed in [Disk Images](../main-doc/disks.md) section.
 Add a folder named shared for config files which will be shared among all disk images (and will be kept to their defaults) and one folder named boot-exit which is specific to the disk image needed to run experiments of this tutorial.
 Add three files [boot-exit.json](https://github.com/darchr/gem5art/blob/master/docs/disks/boot-exit/boot-exit.json), [exit.sh](https://github.com/darchr/gem5art/blob/master/docs/disks/boot-exit/exit.sh) and [post-installation.sh](https://github.com/darchr/gem5art/blob/master/docs/disks/boot-exit/post-installation.sh) in boot-exit/ and [preseed.cfg](https://github.com/darchr/gem5art/blob/master/docs/disks/shared/preseed.cfg) and [serial-getty@.service](https://github.com/darchr/gem5art/blob/master/docs/disks/shared/serial-getty@.service) in shared/
 
@@ -171,8 +171,8 @@ Repeat the above process for other kernel versions that we want to use in this e
 ## gem5 run scripts
 
 Next, we need to add gem5 run scripts. We will do that in a folder named configs-boot-tests.
-Get the run script named run_exit.py from [here](https://github.com/darchr/gem5art/blob/master/docs/configs-boot-tests/run_exit.py), and other system configuration files from
-[here](https://github.com/darchr/gem5art/blob/master/docs/configs-boot-tests/system/).
+Get the run script named run_exit.py from [here](https://github.com/darchr/gem5art/blob/master/docs/gem5-configs/configs-boot-tests/run_exit.py), and other system configuration files from
+[here](https://github.com/darchr/gem5art/blob/master/docs/gem5-configs/configs-boot-tests/system/).
 The run script (run_exit.py) takes the following arguments:
 - kernel: compiled kernel to be used for simulation
 - disk: built disk image to be used for simulation
@@ -355,7 +355,7 @@ The above lines are responsible for looping through all possible combinations of
 For each combination, a gem5Run object is created and eventually passed to run_gem5_instance to be
 executed asynchronously using Celery. Moreover, the results directory path is constructed based on the simulator configuration parameters and passed as the third argument to createFSRun(). Here, we are using a timeout of 6 hours, after which the particular gem5 job will be killed (assuming that gem5 should complete the booting process of linux kernel on the given hardware resources). You can configure this time according to your settings.
 
-The complete launch script is available [here:](https://github.com/darchr/gem5art/blob/master/docs/launch_boot_tests.py).
+The complete launch script is available [here:](https://github.com/darchr/gem5art/blob/master/docs/launch-scripts/launch_boot_tests.py).
 Finally, make sure you are in python virtual env and then run the script:
 
 ```python
@@ -365,7 +365,7 @@ python launch_boot_tests.py
 ## Results
 
 Once you start running these experiments, you can access the database to check their status or to find results.
-There are different ways to do this. For example, you can use the getRuns method of gem5art as discussed in the Runs section [previously](run.html#searching-the-database-to-find-runs).
+There are different ways to do this. For example, you can use the getRuns method of gem5art as discussed in the Runs section [previously](../main-doc/run.html#searching-the-database-to-find-runs).
 
 You can also directly access the database and access the run artifacts as follows:
 
@@ -392,9 +392,9 @@ for linux in linuxes:
 
 Following plots show the status of linux booting based on the results of the experiments of this tutorial:
 
-![](boot_classic_init)
-![](boot_classic_systemd)
-![](boot_ruby_init)
-![](boot_ruby_systemd)
+![](../images/boot_classic_init)
+![](../images/boot_classic_systemd)
+![](../images/boot_ruby_init)
+![](../images/boot_ruby_systemd)
 
 You can look [here](https://github.com/darchr/gem5art-experiments/blob/master/boot-experiments/boot_tests_gem5art.ipynb) for the detailed results.

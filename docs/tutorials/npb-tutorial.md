@@ -122,7 +122,7 @@ First create a disk-image folder where we will keep all disk image related files
 mkdir disk-image
 ```
 
-We will follow the similar directory structure as discussed in [Disk Images](disks.md) section.
+We will follow the similar directory structure as discussed in [Disk Images](../main-doc/disks.md) section.
 Add a folder named shared for config files which will be shared among all disk images (and will be kept to their defaults) and one folder named npb which will contain files configured for NPB disk image. Add [preseed.cfg](https://github.com/darchr/gem5art/blob/master/docs/disks/shared/preseed.cfg) and [serial-getty@.service](https://github.com/darchr/gem5art/blob/master/docs/disks/shared/serial-getty@.service) in shared/.
 
 In npb/ we will add the benchmark source first, which will eventually be transferred to the disk image through our npb.json file.
@@ -348,8 +348,8 @@ cp vmlinux vmlinux-4.19.83
 ## gem5 run scripts
 
 Next, we need to add gem5 run scripts. We will do that in a folder named configs-npb-tests.
-Get the run script named run_npb.py from [here](https://github.com/darchr/gem5art/blob/master/docs/configs-npb-tests/run_npb.py), and other system configuration files from
-[here](https://github.com/darchr/gem5art/blob/master/docs/configs-npb-tests/system/).
+Get the run script named run_npb.py from [here](https://github.com/darchr/gem5art/blob/master/docs/gem5-configs/configs-npb-tests/run_npb.py), and other system configuration files from
+[here](https://github.com/darchr/gem5art/blob/master/docs/gem5-configs/configs-npb-tests/system/).
 The run script (run_npb.py) takes the following arguments:
 - kernel: compiled kernel to be used for simulation
 - disk: built disk image to be used for simulation
@@ -499,7 +499,7 @@ linux_binary = Artifact.registerArtifact(
 )
 ```
 
-Once, all of the artifacts are registered, the next step is to launch all gem5 jobs. To do that, add the following lines in your script (complete launch script is available [here](https://github.com/darchr/gem5art/blob/master/docs/launch_npb_tests.py)):
+Once, all of the artifacts are registered, the next step is to launch all gem5 jobs. To do that, add the following lines in your script:
 
 ```python
 if __name__ == "__main__":
@@ -533,7 +533,7 @@ For each combination, a gem5Run object is created and eventually passed to run_g
 executed asynchronously using Celery.
 We are running class A,B,C and D of NPB with KVM cpu and only class A with atomic cpu. Moreover, we are using a timeout value of 24 hours (which hopefully will be a reasonable number to finish most of the gem5 jobs).
 
-The complete launch script is available [here:](https://github.com/darchr/gem5art/blob/master/docs/launch_npb_tests.py).
+The complete launch script is available [here:](https://github.com/darchr/gem5art/blob/master/docs/launch-scripts/launch_npb_tests.py).
 Finally, make sure you are in python virtual env and then run the script:
 
 ```python
@@ -545,12 +545,11 @@ python launch_npb_tests.py
 Once you run the launch script, the declared artifacts will be registered by gem5art and stored in the database.
 Celery will run as many jobs in parallel as allowed by the user (at the time of starting the server).
 As soon as a gem5 job finishes, a compressed version of the results will be stored in the database as well.
-User can also query the database using the methods discussed in the [Artifacts](artifacts.md), [Runs](runs.md) sections and [boot-test](boot-tutorial.md) tutorial previously.
+User can also query the database using the methods discussed in the [Artifacts](../main-doc/artifacts.md), [Runs](../main-doc/runs.md) sections and [boot-test](boot-tutorial.md) tutorial previously.
 
 The status of working of the NAS parallel benchmarks on gem5 based on the results from the experiments of this tutorial is following:
 
-![](npb_kvm)
-![](npb_atomic)
+![](../images/npb_kvm)
+![](../images/npb_atomic)
 
 Details of these results can be found [here](https://github.com/darchr/gem5art-experiments/blob/master/npb-experiments/npb_gem5art.ipynb).
-

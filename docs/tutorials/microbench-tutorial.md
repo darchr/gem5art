@@ -118,8 +118,8 @@ make RISCV
 ## gem5 run scripts
 
 Now, we will add the gem5 run and configuration scripts to a new folder named configs-micro-tests.
-Get the run script named run_micro.py from [here](https://github.com/darchr/gem5art/blob/master/docs/configs-micro-tests/run_micro.py), and other system configuration file from
-[here](https://github.com/darchr/gem5art/blob/master/docs/configs-micro-tests/system.py).
+Get the run script named run_micro.py from [here](https://github.com/darchr/gem5art/blob/master/docs/gem5-configs/configs-micro-tests/run_micro.py), and other system configuration file from
+[here](https://github.com/darchr/gem5art/blob/master/docs/gem5-configs/configs-micro-tests/system.py).
 The run script (run_micro.py) takes the following arguments:
 - **cpu:** cpu type [**TimingSimple:** timing simple cpu model, **DerivO3:** O3 cpu model]
 - **memory:** memory type [**Inf:** 0ns latency memory, **SingleCycle:** 1ns latency memory, **SlowMemory:** 100ns latency memory. All types have infinite bandwidth. Caches are only enabled for SlowMemory.]
@@ -249,7 +249,7 @@ if __name__ == "__main__":
 ```
 
 Note that, in contrast to previous tutorials ([boot](boot-tutorial.md), [npb](npb-tutorial.md)), we are using createSERun here as we want to run gem5 in SE mode.
-Full launch script is available [here](https://github.com/darchr/gem5art/blob/master/docs/launch_micro_tests.py).
+Full launch script is available [here](https://github.com/darchr/gem5art/blob/master/docs/launch-scripts/launch_micro_tests.py).
 
 Once you run this launch script (as shown below), your gem5 experiments to simulate execution of microbenchmarks on different cpu and memory types will start running.
 
