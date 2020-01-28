@@ -64,6 +64,21 @@ current status of gem5 run, kill_reason (if the run is finished) etc.
 
 While the user can write their own run_script to use with gem5 (with any command line arguments), currently when gem5Run object is created for a full-system experiment using createFSRun method, it is assumed that the path to the linux_binary and disk_image is passed to the run_script on the command line (as arguments of the createFSRun method),
 
+
+## Run Already in the Database
+
+When starting a run with gem5art, it might complain that the run already exists in the database.
+Basically, before launching a gem5 job, gem5art checks if this run matches an existing run in the database.
+In order to uniquely identify a run, a single hash is made out of:
+
+  - the runscript
+  - the parameters passed to the runscript
+  - the artifacts of the run object which, for an SE run, include: gem5 binary artifact, gem5 source git artifact, run    script (experiments repo) artifact. For an FS run, the list of artifacts also include linux binary artifact and       disk image artifacts in addition to the artifacts of an SE run.
+
+If this hash already exists in the database, gem5art will not launch a new job based on this run object as a run with same parameters would have already been executed.
+In case, user still wants to launch this job, the user will have to remove the existing run object from the database.
+
+
 ## Searching the Database to find Runs
 
 Once you start running the experiments with gem5 and want to know the status of those runs, you can look at the gem5Run artifacts in the database.
