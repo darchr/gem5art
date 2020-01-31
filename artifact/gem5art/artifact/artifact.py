@@ -40,7 +40,6 @@ from uuid import UUID, uuid4
 
 from ._artifactdb import getDBConnection
 
-_db = getDBConnection()
 
 def getHash(path: str) -> str:
     """
@@ -117,6 +116,7 @@ class Artifact:
     cwd: str
     inputs: List['Artifact']
 
+
     @classmethod
     def registerArtifact(cls,
                          command: str,
@@ -132,6 +132,8 @@ class Artifact:
         This assume either it's not in the database or it is the exact same as
         when it was added to the database
         """
+
+        _db = getDBConnection()
 
         # Dictionary with all of the kwargs for construction.
         data: Dict[str, Any] = {}
@@ -189,6 +191,7 @@ class Artifact:
         """Constructs the object from the database based on a UUID or
         dictionary from the database
         """
+        _db = getDBConnection()
         if isinstance(other, str):
             other = UUID(other)
         if isinstance(other, UUID):
@@ -277,6 +280,7 @@ def _getByType(typ: str, limit: int = 0) -> Iterator[Artifact]:
 
     Limit specifies the maximum number of results to return.
     """
+    _db = getDBConnection()
     data = _db.searchByType(typ, limit=limit)
 
     for d in data:
@@ -312,6 +316,7 @@ def getByName(name: str, limit: int = 0) -> Iterator[Artifact]:
 
     Limit specifies the maximum number of results to return.
     """
+    _db = getDBConnection()
     data = _db.searchByName(name, limit=limit)
 
     for d in data:
