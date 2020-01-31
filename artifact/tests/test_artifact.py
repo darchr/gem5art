@@ -32,7 +32,7 @@
 import hashlib
 from os.path import exists
 import unittest
-from uuid import uuid4
+from uuid import uuid4, UUID
 import sys
 import io
 
@@ -40,7 +40,46 @@ from gem5art import artifact
 from gem5art.artifact._artifactdb import ArtifactDB, getDBConnection
 
 
-_db = getDBConnection(type = 'Mock')
+class MockDB(ArtifactDB):
+    """
+    This is a Mock DB,
+    used to run unit tests
+    """
+    def __init__(self):
+        self.db = {}
+        self.hashes = {}
+
+    def put(self, key, metadata):
+        print('putting an entry in the mock database')
+        self.db[key] = metadata
+        self.hashes[metadata['hash']] = key
+
+    def __contains__(self, key):
+        if isinstance(key, UUID):
+            return key in self.db.keys()
+        else:
+            # This is a hash
+            return key in self.hashes
+
+    def get(self, key):
+        if isinstance(key, UUID):
+            return self.db[key]
+        else:
+            # This is a hash
+            return self.db[self.hashes[key]]
+
+    def upload(self, key, path):
+        pass
+
+    def downloadFile(self, key, path):
+        pass
+
+
+# This needs to be a global variable so
+# that this getDBConnection is the first
+# call to create a DB connection
+_db = getDBConnection(typ = MockDB)
+
 
 class TestGit(unittest.TestCase):
     def test_keys(self):
@@ -148,6 +187,7 @@ class TestArtifactSimilarity(unittest.TestCase):
         self.artifactA._checkSimilar(self.artifactD)
         sys.stdout = sys.__stdout__
         self.assertFalse("WARNING:" in capturedOutput.getvalue())
+
 
 class TestRegisterArtifact(unittest.TestCase):
 
