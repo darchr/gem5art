@@ -179,9 +179,45 @@ class ArtifactMongoDB(ArtifactDB):
         for d in data:
             yield d
 
+
+class MockDB(ArtifactDB):
+    """
+    This is a Mock DB,
+    used to run unit tests
+    """
+    def __init__(self):
+        self.db = {}
+        self.hashes = {}
+
+    def put(self, key, metadata):
+        print('putting an entry in the mock database')
+        self.db[key] = metadata
+        self.hashes[metadata['hash']] = key
+
+    def __contains__(self, key):
+        if isinstance(key, UUID):
+            return key in self.db.keys()
+        else:
+            # This is a hash
+            return key in self.hashes
+
+    def get(self, key):
+        if isinstance(key, UUID):
+            return self.db[key]
+        else:
+            # This is a hash
+            return self.db[self.hashes[key]]
+
+    def upload(self, key, path):
+        pass
+
+    def downloadFile(self, key, path):
+        pass
+
+
 _db = None
 
-def getDBConnection() -> ArtifactDB:
+def getDBConnection(type = 'Mongo') -> ArtifactDB:
     """Returns the database connection
 
     Eventually, this should likely read from a config file to get the database
@@ -190,6 +226,9 @@ def getDBConnection() -> ArtifactDB:
     global _db
 
     if not _db:
-        _db = ArtifactMongoDB()
+        if type == 'Mongo':
+            _db = ArtifactMongoDB()
+        elif type == 'Mock':
+            _db = MockDB()
 
     return _db
