@@ -37,6 +37,10 @@ import sys
 import io
 
 from gem5art import artifact
+from gem5art.artifact._artifactdb import ArtifactDB, getDBConnection
+
+
+_db = getDBConnection(type = 'Mock')
 
 class TestGit(unittest.TestCase):
     def test_keys(self):
@@ -144,6 +148,40 @@ class TestArtifactSimilarity(unittest.TestCase):
         self.artifactA._checkSimilar(self.artifactD)
         sys.stdout = sys.__stdout__
         self.assertFalse("WARNING:" in capturedOutput.getvalue())
+
+class TestRegisterArtifact(unittest.TestCase):
+
+    def setUp(self):
+
+        # Create and register an artifact
+        self.testArtifactA = artifact.Artifact.registerArtifact(
+            name = 'artifact-A',
+            typ = 'type-A',
+            documentation = 'This is a description of artifact A',
+            command = 'ls -l',
+            path = './',
+            cwd = './',
+            )
+
+        # Create an artifact without pushing it to the database
+        self.testArtifactB = artifact.Artifact({
+            '_id': uuid4(),
+            'name': 'artifact-B',
+            'type': 'type-B',
+            'documentation': "This is a description of artifact B",
+            'command': ['vim test_artifact.py'],
+            'path': './tests/test_artifact.py',
+            'hash': hashlib.md5().hexdigest(),
+            'git': artifact.artifact.getGit('.'),
+            'cwd': '/',
+            'inputs': [],
+        })
+
+    # test to see if an artifact is in the database
+    def test_in_database(self):
+        self.assertTrue(self.testArtifactA.hash in _db)
+        self.assertFalse(self.testArtifactB.hash in _db)
+
 
 if __name__ == '__main__':
     unittest.main()
