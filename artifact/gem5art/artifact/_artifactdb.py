@@ -179,7 +179,7 @@ class ArtifactMongoDB(ArtifactDB):
         for d in data:
             yield d
 
-db = None
+_db = None
 
 def getDBConnection(typ = ArtifactMongoDB) -> ArtifactDB:
     """Returns the database connection
@@ -187,9 +187,9 @@ def getDBConnection(typ = ArtifactMongoDB) -> ArtifactDB:
     Eventually, this should likely read from a config file to get the database
     information. However, for now, we'll use mongodb defaults
     """
-    global db
+    global _db
 
-    if not db:
-        db = typ()
+    if not _db:
+        _db = typ()
 
-    return db
+    return _db
