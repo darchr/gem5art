@@ -14,8 +14,10 @@ Each gem5 experiment is wrapped inside a run object which is eventually executed
 Next are two methods (for SE (system-emulation) and FS (full-system) modes of gem5) from gem5Run class which give an idea of the required arguments from a user's perspective to create a gem5Run object:
 
 ```python
+
 @classmethod
 def createSERun(cls,
+                name: str,
                 gem5_binary: str,
                 run_script: str,
                 outdir: str,
@@ -26,8 +28,10 @@ def createSERun(cls,
                 timeout: int = 60*15) -> 'gem5Run':
 .......
 
+
 @classmethod
 def createFSRun(cls,
+                name: str,
                 gem5_binary: str,
                 run_script: str,
                 outdir: str,
@@ -41,10 +45,12 @@ def createFSRun(cls,
                 *params: str,
                 timeout: int = 60*15) -> 'gem5Run':
 .......
+
 ```
 
 For the user it is important to understand different arguments passed to run objects:
 
+- name: name of the run, can act as a tag to search the database to find the required runs (it is expected that user will use a unique name for different experiments)
 - gem5_binary: path to the actual gem5 binary to be used
 - run_script: path to the python run script that will be used with gem5 binary
 - outdir: path to the directory where gem5 results should be written
@@ -73,7 +79,7 @@ In order to uniquely identify a run, a single hash is made out of:
 
   - the runscript
   - the parameters passed to the runscript
-  - the artifacts of the run object which, for an SE run, include: gem5 binary artifact, gem5 source git artifact, run    script (experiments repo) artifact. For an FS run, the list of artifacts also include linux binary artifact and       disk image artifacts in addition to the artifacts of an SE run.
+  - the artifacts of the run object which, for an SE run, include: gem5 binary artifact, gem5 source git artifact, run script (experiments repo) artifact. For an FS run, the list of artifacts also include linux binary artifact and disk image artifacts in addition to the artifacts of an SE run.
 
 If this hash already exists in the database, gem5art will not launch a new job based on this run object as a run with same parameters would have already been executed.
 In case, user still wants to launch this job, the user will have to remove the existing run object from the database.
