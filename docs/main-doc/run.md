@@ -97,9 +97,22 @@ for i in gem5art.run.getRuns(fs_only=False, limit=100):print(i)
 
 The documentation on [getRuns](run.html#gem5art.run.getRuns) is available at the bottom of this page.
 
+## Searching the Database to find Runs with Specific Names
+
+As discussed above, while creating a FS or SE mode Run object, the user has to pass a name field to recognize
+a particular set of runs (or experiments).
+We expect that the user will take care to use a name string which fully characterizes a set of experiments and can be thought of as a `Nonce`.
+For example, if we are running experiments to test linux kernel boot on gem5, we can use a name field `boot_tests_v1` or `boot_tests_[month_year]` (where mont_year correspond to the month and year when the experiments were run).
+
+Later on, the same name can be used to search for relevant gem5 runs in the database.
+For this purpose, gem5art provides a method `getRunsByName`, which can be used as follow:
+
+```python
+import gem5art.run
+for i in gem5art.run.getRunsByName(name='boot_tests_v1', fs_only=True, limit=100):print(i)
 ```
-TO DO: Add examples of new getRuns methods as well.
-```
+
+The documentation on `getRunsByName` is available [here](run.html#gem5art.run.getRunsByName).
 
 ## Runs API Documentation
 ```eval_rst
