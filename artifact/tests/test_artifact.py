@@ -32,11 +32,54 @@
 import hashlib
 from os.path import exists
 import unittest
-from uuid import uuid4
+from uuid import uuid4, UUID
 import sys
 import io
 
 from gem5art import artifact
+from gem5art.artifact._artifactdb import ArtifactDB, getDBConnection
+
+
+class MockDB(ArtifactDB):
+    """
+    This is a Mock DB,
+    used to run unit tests
+    """
+    def __init__(self):
+        self.db = {}
+        self.hashes = {}
+
+    def put(self, key, metadata):
+        print('putting an entry in the mock database')
+        self.db[key] = metadata
+        self.hashes[metadata['hash']] = key
+
+    def __contains__(self, key):
+        if isinstance(key, UUID):
+            return key in self.db.keys()
+        else:
+            # This is a hash
+            return key in self.hashes
+
+    def get(self, key):
+        if isinstance(key, UUID):
+            return self.db[key]
+        else:
+            # This is a hash
+            return self.db[self.hashes[key]]
+
+    def upload(self, key, path):
+        pass
+
+    def downloadFile(self, key, path):
+        pass
+
+
+# This needs to be a global variable so
+# that this getDBConnection is the first
+# call to create a DB connection
+_db = getDBConnection(typ = MockDB)
+
 
 class TestGit(unittest.TestCase):
     def test_keys(self):
@@ -144,6 +187,41 @@ class TestArtifactSimilarity(unittest.TestCase):
         self.artifactA._checkSimilar(self.artifactD)
         sys.stdout = sys.__stdout__
         self.assertFalse("WARNING:" in capturedOutput.getvalue())
+
+
+class TestRegisterArtifact(unittest.TestCase):
+
+    def setUp(self):
+
+        # Create and register an artifact
+        self.testArtifactA = artifact.Artifact.registerArtifact(
+            name = 'artifact-A',
+            typ = 'type-A',
+            documentation = 'This is a description of artifact A',
+            command = 'ls -l',
+            path = './',
+            cwd = './',
+            )
+
+        # Create an artifact without pushing it to the database
+        self.testArtifactB = artifact.Artifact({
+            '_id': uuid4(),
+            'name': 'artifact-B',
+            'type': 'type-B',
+            'documentation': "This is a description of artifact B",
+            'command': ['vim test_artifact.py'],
+            'path': './tests/test_artifact.py',
+            'hash': hashlib.md5().hexdigest(),
+            'git': artifact.artifact.getGit('.'),
+            'cwd': '/',
+            'inputs': [],
+        })
+
+    # test to see if an artifact is in the database
+    def test_in_database(self):
+        self.assertTrue(self.testArtifactA.hash in _db)
+        self.assertFalse(self.testArtifactB.hash in _db)
+
 
 if __name__ == '__main__':
     unittest.main()

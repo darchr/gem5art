@@ -31,7 +31,7 @@ from abc import ABC, abstractmethod
 
 import gridfs # type: ignore
 from pymongo import MongoClient # type: ignore
-from typing import Any, Dict, Iterable, Union
+from typing import Any, Dict, Iterable, Union, Type
 from uuid import UUID
 
 class ArtifactDB(ABC):
@@ -181,7 +181,7 @@ class ArtifactMongoDB(ArtifactDB):
 
 _db = None
 
-def getDBConnection() -> ArtifactDB:
+def getDBConnection(typ: Type[ArtifactDB] = ArtifactMongoDB) -> ArtifactDB:
     """Returns the database connection
 
     Eventually, this should likely read from a config file to get the database
@@ -190,6 +190,6 @@ def getDBConnection() -> ArtifactDB:
     global _db
 
     if not _db:
-        _db = ArtifactMongoDB()
+        _db = typ()
 
     return _db
