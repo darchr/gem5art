@@ -74,8 +74,8 @@ See the commands below:
 
 ```sh
 git clone https://gem5.googlesource.com/public/gem5
-git checkout d40f0bc579fb8b10da7181
 cd gem5
+git checkout d40f0bc579fb8b10da7181
 scons build/X86/gem5.opt -j8
 ```
 You can also add your changes to gem5 source before building it. Make sure to commit any changes you make to gem5 repo and documenting it while registering gem5 artifact in the launch script.
