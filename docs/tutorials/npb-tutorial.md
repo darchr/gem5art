@@ -23,7 +23,7 @@ Pseudo Applications:
 
 There are different classes (A,B,C,D,E and F) of the workloads based on the data size that is used with the benchmarks. Detailed discussion of the data sizes is available [here](https://www.nas.nasa.gov/publications/npb_problem_sizes.html).
 
-This tutorial follows the following directory structure:
+This tutorial follows the following directory structure (inside the main directory):
 
 - configs-npb-tests: gem5 run and configuration scripts to run NPB
 - disk-image: contains packer script and template files used to build a disk image.
@@ -91,7 +91,7 @@ git clone https://gem5.googlesource.com/public/gem5
 Before building gem5, we need to apply some changes to the source.
 These changes are needed to run gem5 in KVM mode on Intel platforms and also to run some gem5 magic instructions in KVM mode.
 We will get these changes from darchr/gem5 (GitHub).
-Run the following to apply changes and build gem5:
+Run the following to apply these changes and build gem5:
 
 ```sh
 cd gem5
@@ -516,6 +516,7 @@ for cpu in cpus:
                 if cpu == 'atomic' and clas != 'A':
                     continue
                 run = gem5Run.createFSRun(
+                    'npb_tests',
                     'gem5/build/X86/gem5.opt',
                     'configs-npb-tests/run_npb.py',
                     f'''results/run_npb/{bm}/{clas}/{cpu}/{num_cpu}''',
@@ -526,7 +527,7 @@ for cpu in cpus:
                     cpu, bm.replace('.x', f'.{clas}.x'), num_cpu,
                     timeout = 24*60*60 #24 hours
                     )
-                run_gem5_instance.apply_async((run,))
+                run_gem5_instance.apply_async((run, os.getcwd()))
 ```
 The above lines are responsible for looping through all possible combinations of variables involved in this experiment.
 For each combination, a gem5Run object is created and eventually passed to run_gem5_instance to be

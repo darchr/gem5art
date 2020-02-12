@@ -14,8 +14,10 @@ Each gem5 experiment is wrapped inside a run object which is eventually executed
 Next are two methods (for SE (system-emulation) and FS (full-system) modes of gem5) from gem5Run class which give an idea of the required arguments from a user's perspective to create a gem5Run object:
 
 ```python
+
 @classmethod
 def createSERun(cls,
+                name: str,
                 gem5_binary: str,
                 run_script: str,
                 outdir: str,
@@ -26,8 +28,10 @@ def createSERun(cls,
                 timeout: int = 60*15) -> 'gem5Run':
 .......
 
+
 @classmethod
 def createFSRun(cls,
+                name: str,
                 gem5_binary: str,
                 run_script: str,
                 outdir: str,
@@ -41,10 +45,12 @@ def createFSRun(cls,
                 *params: str,
                 timeout: int = 60*15) -> 'gem5Run':
 .......
+
 ```
 
 For the user it is important to understand different arguments passed to run objects:
 
+- name: name of the run, can act as a tag to search the database to find the required runs (it is expected that user will use a unique name for different experiments)
 - gem5_binary: path to the actual gem5 binary to be used
 - run_script: path to the python run script that will be used with gem5 binary
 - outdir: path to the directory where gem5 results should be written
@@ -73,7 +79,7 @@ In order to uniquely identify a run, a single hash is made out of:
 
   - the runscript
   - the parameters passed to the runscript
-  - the artifacts of the run object which, for an SE run, include: gem5 binary artifact, gem5 source git artifact, run    script (experiments repo) artifact. For an FS run, the list of artifacts also include linux binary artifact and       disk image artifacts in addition to the artifacts of an SE run.
+  - the artifacts of the run object which, for an SE run, include: gem5 binary artifact, gem5 source git artifact, run script (experiments repo) artifact. For an FS run, the list of artifacts also include linux binary artifact and disk image artifacts in addition to the artifacts of an SE run.
 
 If this hash already exists in the database, gem5art will not launch a new job based on this run object as a run with same parameters would have already been executed.
 In case, user still wants to launch this job, the user will have to remove the existing run object from the database.
@@ -91,9 +97,22 @@ for i in gem5art.run.getRuns(fs_only=False, limit=100):print(i)
 
 The documentation on [getRuns](run.html#gem5art.run.getRuns) is available at the bottom of this page.
 
+## Searching the Database to find Runs with Specific Names
+
+As discussed above, while creating a FS or SE mode Run object, the user has to pass a name field to recognize
+a particular set of runs (or experiments).
+We expect that the user will take care to use a name string which fully characterizes a set of experiments and can be thought of as a `Nonce`.
+For example, if we are running experiments to test linux kernel boot on gem5, we can use a name field `boot_tests_v1` or `boot_tests_[month_year]` (where mont_year correspond to the month and year when the experiments were run).
+
+Later on, the same name can be used to search for relevant gem5 runs in the database.
+For this purpose, gem5art provides a method `getRunsByName`, which can be used as follow:
+
+```python
+import gem5art.run
+for i in gem5art.run.getRunsByName(name='boot_tests_v1', fs_only=True, limit=100):print(i)
 ```
-TO DO: Add examples of new getRuns methods as well.
-```
+
+The documentation on `getRunsByName` is available [here](run.html#gem5art.run.getRunsByName).
 
 ## Runs API Documentation
 ```eval_rst

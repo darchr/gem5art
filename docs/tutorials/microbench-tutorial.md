@@ -75,8 +75,8 @@ This becomes necessary as we need to connect cpu's icache and dcache ports to me
 You can download and apply the patch as follows:
 
 ```sh
-wget https://github.com/darchr/gem5/commit/38d07ab0251ea8f5181abc97a534bb60157b2b5d.patch
-git am 38d07ab0251ea8f5181abc97a534bb60157b2b5d.patch --reject
+wget https://github.com/darchr/gem5/commit/f0a358ee08aba1563c7b5277866095b4cbb7c36d.patch
+git am f0a358ee08aba1563c7b5277866095b4cbb7c36d.patch --reject
 ```
 
 Now, to build gem5:
@@ -239,16 +239,18 @@ if __name__ == "__main__":
         for cpu in cpu_types:
             for mem in mem_types:
                 run = gem5Run.createSERun(
+                    'microbench_tests',
                     'gem5/build/X86/gem5.opt',
                     'configs-micro-tests/run_micro.py',
                     'results/X86/run_micro/{}/{}/{}'.format(bm,cpu,mem),
                     gem5_binary,gem5_repo,experiments_repo,
                     cpu,mem,os.path.join('microbench',bm,'bench.X86'))
-                run_gem5_instance.apply_async((run,))
+                run_gem5_instance.apply_async((run, os.getcwd()))
 
 ```
 
 Note that, in contrast to previous tutorials ([boot](boot-tutorial.md), [npb](npb-tutorial.md)), we are using createSERun here as we want to run gem5 in SE mode.
+The details of the arguments needed by `createSERun()` can be found [here](../main-doc/run.html#gem5art.run.gem5Run.createSERun)).
 Full launch script is available [here](https://github.com/darchr/gem5art/blob/master/docs/launch-scripts/launch_micro_tests.py).
 
 Once you run this launch script (as shown below), your gem5 experiments to simulate execution of microbenchmarks on different cpu and memory types will start running.
@@ -258,4 +260,3 @@ python launch_micro_tests.py
 ```
 
 Later, you can access the database to see the status of these jobs and optionally do further analysis.
-

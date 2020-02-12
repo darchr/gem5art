@@ -27,7 +27,7 @@ However, it can also be used to share artifacts with others doing similar experi
 
 The database is also used to store results from [gem5 runs](main-doc/run).
 Given all of the input artifacts, these [runs](run.html#runs-api-documentation) have enough information to reproduce exactly the same experimental output.
-Additionally, there is metadata associated with each gem5 run (e.g., the script name, script parameters, gem5 binary name, etc.) which are useful for aggregating results from many experiments.
+Additionally, there is metadata associated with each gem5 run (e.g., the experiment name, the script name, script parameters, gem5 binary name, etc.) which are useful for aggregating results from many experiments.
 
 These experimental aggregates are useful for testing gem5 as well as conducting research.
 We will be using this data by aggregating the data from 100s or 1000s of gem5 experiments to determine the state of gem5's codebase at any particular time.
