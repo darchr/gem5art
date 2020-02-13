@@ -212,7 +212,7 @@ class TestRegisterArtifact(unittest.TestCase):
             'command': ['vim test_artifact.py'],
             'path': './tests/test_artifact.py',
             'hash': hashlib.md5().hexdigest(),
-            'git': artifact.artifact.getGit('.'),
+            'git': artifact.artifact.getGit(Path('.')),
             'cwd': '/',
             'inputs': [],
         })
