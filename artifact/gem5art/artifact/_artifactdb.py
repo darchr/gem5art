@@ -46,7 +46,7 @@ class ArtifactDB(ABC):
         pass
 
     @abstractmethod
-    def upload(self, key: UUID, path: str) -> None:
+    def upload(self, key: UUID, path: Path) -> None:
         """Upload the file at path to the database with _id of key"""
         pass
 
@@ -63,7 +63,7 @@ class ArtifactDB(ABC):
         pass
 
     @abstractmethod
-    def downloadFile(self, key: UUID, path: str) -> None:
+    def downloadFile(self, key: UUID, path: Path) -> None:
         """Download the file with the _id key to the path. Will overwrite the
         file if it currently exists."""
         pass
