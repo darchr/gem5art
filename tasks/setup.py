@@ -39,7 +39,7 @@ with open(Path(__file__).parent / 'README.md', encoding='utf-8') as f:
 
 setup(
     name = "gem5art-tasks",
-    version = "0.4.1",
+    version = "1.0.0",
     description = "A celery app for gem5art",
     long_description = long_description,
     long_description_content_type='text/markdown',
