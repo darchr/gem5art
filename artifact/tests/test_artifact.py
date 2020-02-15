@@ -30,7 +30,7 @@
 """Tests for the Artifact object and associated functions"""
 
 import hashlib
-from os.path import exists
+from pathlib import Path
 import unittest
 from uuid import uuid4, UUID
 import sys
@@ -83,12 +83,12 @@ _db = getDBConnection(typ = MockDB)
 
 class TestGit(unittest.TestCase):
     def test_keys(self):
-        git = artifact.artifact.getGit('.')
+        git = artifact.artifact.getGit(Path('.'))
         self.assertSetEqual(set(git.keys()), set(['origin', 'hash', 'name']),
                             "git keys wrong")
 
     def test_origin(self):
-        git = artifact.artifact.getGit('.')
+        git = artifact.artifact.getGit(Path('.'))
         self.assertTrue(git['origin'].endswith('gem5art'),
                         "Origin should end with gem5art")
 
@@ -103,14 +103,14 @@ class TestArtifact(unittest.TestCase):
             'command': ['ls', '-l'],
             'path': '/',
             'hash': hashlib.md5().hexdigest(),
-            'git': artifact.artifact.getGit('.'),
+            'git': artifact.artifact.getGit(Path('.')),
             'cwd': '/',
             'inputs': [],
         })
 
     def test_dirs(self):
-        self.assertTrue(exists(self.artifact.cwd))
-        self.assertTrue(exists(self.artifact.path))
+        self.assertTrue(self.artifact.cwd.exists())
+        self.assertTrue(self.artifact.path.exists())
 
 class TestArtifactSimilarity(unittest.TestCase):
 
@@ -123,7 +123,7 @@ class TestArtifactSimilarity(unittest.TestCase):
             'command': ['ls', '-l'],
             'path': '/',
             'hash': hashlib.md5().hexdigest(),
-            'git': artifact.artifact.getGit('.'),
+            'git': artifact.artifact.getGit(Path('.')),
             'cwd': '/',
             'inputs': [],
         })
@@ -136,7 +136,7 @@ class TestArtifactSimilarity(unittest.TestCase):
             'command': ['ls', '-l'],
             'path': '/',
             'hash': hashlib.md5().hexdigest(),
-            'git': artifact.artifact.getGit('.'),
+            'git': artifact.artifact.getGit(Path('.')),
             'cwd': '/',
             'inputs': [],
         })
@@ -149,7 +149,7 @@ class TestArtifactSimilarity(unittest.TestCase):
             'command': ['ls', '-l'],
             'path': '/',
             'hash': self.artifactA.hash,
-            'git': artifact.artifact.getGit('.'),
+            'git': artifact.artifact.getGit(Path('.')),
             'cwd': '/',
             'inputs': [],
         })
@@ -162,7 +162,7 @@ class TestArtifactSimilarity(unittest.TestCase):
             'command': ['ls', '-l'],
             'path': '/',
             'hash': hashlib.md5().hexdigest(),
-            'git': artifact.artifact.getGit('.'),
+            'git': artifact.artifact.getGit(Path('.')),
             'cwd': '/',
             'inputs': [],
         })
@@ -212,7 +212,7 @@ class TestRegisterArtifact(unittest.TestCase):
             'command': ['vim test_artifact.py'],
             'path': './tests/test_artifact.py',
             'hash': hashlib.md5().hexdigest(),
-            'git': artifact.artifact.getGit('.'),
+            'git': artifact.artifact.getGit(Path('.')),
             'cwd': '/',
             'inputs': [],
         })
