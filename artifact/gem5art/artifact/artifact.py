@@ -229,8 +229,10 @@ class Artifact:
         return vars(self).__repr__()
 
     def _getSerializable(self) -> Dict[str, Union[str, UUID]]:
-        data = vars(self)
+        data = vars(self).copy()
         data['inputs'] = [input._id for input in self.inputs]
+        data['cwd'] = str(data['cwd'])
+        data['path'] = str(data['path'])
         return data
 
     def __eq__(self, other: object) -> bool:
