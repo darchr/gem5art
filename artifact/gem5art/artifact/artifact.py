@@ -182,12 +182,14 @@ class Artifact:
         else:
             data['_id'] = uuid4()
 
+            # Now that we have a complete object, construct it
+            self = cls(data)
+
             # Upload the file if there is one.
             if self.path.is_file():
                 _db.upload(self._id, self.path)
 
-            # Now that we have a complete object, construct it
-            self = cls(data)
+            # Putting the artifact to the database
             _db.put(self._id, self._getSerializable())
 
 
