@@ -122,7 +122,7 @@ class ArtifactMongoDB(ArtifactDB):
     def upload(self, key: UUID, path: Path) -> None:
         """Upload the file at path to the database with _id of key"""
         with open(path, 'rb') as f:
-            self.fs.upload_from_stream_with_id(key, path, f)
+            self.fs.upload_from_stream_with_id(key, str(path), f)
 
     def __contains__(self, key: Union[UUID, str]) -> bool:
         """Key can be a UUID or a string. Returns true if item in DB"""
