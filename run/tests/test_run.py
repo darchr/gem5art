@@ -30,7 +30,7 @@
 """Tests for gem5Run object"""
 
 import hashlib
-from os.path import exists
+from pathlib import Path
 import os
 import unittest
 from uuid import uuid4
@@ -49,7 +49,7 @@ class TestSERun(unittest.TestCase):
             'command': 'scons build/X86/gem5.opt',
             'path': '/',
             'hash': hashlib.md5().hexdigest(),
-            'git': artifact.getGit('.'),
+            'git': artifact.getGit(Path('.')),
             'cwd': '/',
             'inputs': [],
             })
@@ -62,7 +62,7 @@ class TestSERun(unittest.TestCase):
             'command': 'git clone something',
             'path': '/',
             'hash': hashlib.md5().hexdigest(),
-            'git': artifact.getGit('.'),
+            'git': artifact.getGit(Path('.')),
             'cwd': '/',
             'inputs': [],
             })
@@ -75,7 +75,7 @@ class TestSERun(unittest.TestCase):
             'command': 'git clone something',
             'path': '/',
             'hash': hashlib.md5().hexdigest(),
-            'git': artifact.getGit('.'),
+            'git': artifact.getGit(Path('.')),
             'cwd': '/',
             'inputs': [],
             })
@@ -93,11 +93,11 @@ class TestSERun(unittest.TestCase):
 
     def test_out_dir(self):
         relative_outdir = 'results/run_test/out'
-        self.assertEqual(self.run.outdir[-len(relative_outdir):],
-                relative_outdir)
+        self.assertEqual(self.run.outdir.relative_to(Path('.').resolve()),
+                         Path(relative_outdir))
 
-        self.assertIs(self.run.outdir[0], '/',
-                     "outdir should be absolute directory")
+        self.assertTrue(self.run.outdir.is_absolute(),
+                        "outdir should be absolute directory")
 
     def test_command(self):
         self.assertEqual(self.run.command,

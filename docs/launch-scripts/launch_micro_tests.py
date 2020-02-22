@@ -75,9 +75,10 @@ if __name__ == "__main__":
         for cpu in cpu_types:
             for mem in mem_types:
                 run = gem5Run.createSERun(
+                    'microbench_tests',
                     'gem5/build/X86/gem5.opt',
                     'configs-micro-tests/run_micro.py',
                     'results/X86/run_micro/{}/{}/{}'.format(bm,cpu,mem),
                     gem5_binary,gem5_repo,experiments_repo,
                     cpu,mem,os.path.join('microbench',bm,'bench.X86'))
-                run_gem5_instance.apply_async((run,))
+                run_gem5_instance.apply_async((run, os.getcwd()))

@@ -35,7 +35,6 @@
     wallclock and simulated time.
 """
 
-import os
 import sys
 import time
 import m5

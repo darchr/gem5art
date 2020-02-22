@@ -30,10 +30,7 @@
 """
 """
 
-import errno
-import os
 import sys
-import time
 
 import m5
 import m5.ticks
@@ -91,8 +88,6 @@ if __name__ == "__m5_main__":
 
     # instantiate all of the objects we've created above
     m5.instantiate()
-
-    globalStart = time.time()
 
     print("Running the simulation")
     exit_event = m5.simulate()

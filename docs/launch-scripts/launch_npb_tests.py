@@ -111,6 +111,7 @@ for cpu in cpus:
                 if cpu == 'atomic' and clas != 'A':
                     continue
                 run = gem5Run.createFSRun(
+                    'npb_tests',
                     'gem5/build/X86/gem5.opt',
                     'configs-npb-tests/run_npb.py',
                     f'''results/run_npb/{bm}/{clas}/{cpu}/{num_cpu}''',
@@ -121,4 +122,4 @@ for cpu in cpus:
                     cpu, bm.replace('.x', f'.{clas}.x'), num_cpu,
                     timeout = 24*60*60 #24 hours
                     )
-                run_gem5_instance.apply_async((run,))
+                run_gem5_instance.apply_async((run, os.getcwd()))

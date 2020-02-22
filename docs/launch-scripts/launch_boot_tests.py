@@ -113,6 +113,7 @@ if __name__ == "__main__":
                 for num_cpu in num_cpus:
                     for mem in mem_types:
                         run = gem5Run.createFSRun(
+                            'linux_boot_tests',
                             'gem5/build/X86/gem5.opt',
                             'configs-boot-tests/run_exit.py',
                             'results/run_exit/vmlinux-{}/boot-exit/{}/{}/{}/{}'.
@@ -122,6 +123,6 @@ if __name__ == "__main__":
                             'disk-image/boot-exit/boot-exit-image/boot-exit',
                             linux_binaries[linux], disk_image,
                             cpu, mem, num_cpu, boot_type,
-                            timeout = 6*60*60 #6 hours
+                            timeout = 12*60*60 #12 hours
                             )
-                        run_gem5_instance.apply_async((run,))
+                        run_gem5_instance.apply_async((run, os.getcwd()))

@@ -9,24 +9,24 @@ Authors:
 This tutorial explains how to use gem5art to run experiments with gem5. The specific experiment we will be doing is to test the booting of various linux kernel versions and simulator configurations.
 The main steps to perform such an experiment using gem5art include: setting up the environment, building gem5, creating a disk image, compiling linux kernels, preparing gem5 run script, creating a job launch script (which will also register all of the required artifacts) and finally running this script.
 
-This tutorial follows the following directory structure:
+First, we will talk about the standard directory structure used to run these experiments.
+All of the following files/directories will be created/stored in a base directory:
 
-- configs-boot-tests: the base gem5 configuration to be used to run full-system simulations
+- configs-boot-tests: the base gem5 configurations to be used to run full-system simulations
 - disk-image: contains packer script and template files used to build a disk image. The built disk image will be stored in the same folder
 - gem5: gem5 source code. This points to the googlesource repo of gem5
 - linux-configs: different linux kernel configurations
 - linux-stable: linux kernel source code used for full-system experiments
 - results: directory to store the results of the experiments (generated once gem5 jobs are executed)
-- launch_boot_tests.py:  gem5 jobs launch script (creates all of the needed artifacts as well)
-
+- launch_boot_tests.py: gem5 jobs launch script (creates all of the needed artifacts as well)
 
 ## Setting up the environment
 
-First, we need to create the main directory named boot-tests (from where we will run everything) and turn it into a git repository.
+First, we need to create the main directory (referred above) named boot-tests and turn it into a git repository.
 Through the use of boot-tests git repo, we will try to keep track of changes in those files which are not included in any git repo otherwise.
 An example of such files is gem5 run and config scripts (config-boot-tests).
 We want to make sure that we can keep record of any changes in these scripts, so that a particular run of gem5 can be associated with a particular snapshot of these files.
-All such files, which are not part of other artifacts, will be a part fo the experiments repo artifact (which we will create later in this tutorial).
+All such files, which are not part of other artifacts, will be a part of the experiments repo artifact (which we will create later in this tutorial).
 We also need to add a git remote to this repo pointing to a remote location where we want this repo to be hosted.
 
 Create the main directory named boot-tests and turn it into a git repo:
@@ -105,11 +105,11 @@ gem5_binary = Artifact.registerArtifact(
 ```
 
 Note, that the use of git checkout command in the `command` field of the gem5_binary artifact (along with the `documentation` field) will be helpful later on to figure out exactly which gem5 source was used to create this gem5 binary.
-
+.
 Also make sure to build the m5 utility at this point which will be moved to the disk image eventually.
 m5 utility allows to trigger simulation tasks from inside the simulated system.
 For example, it can be used to dump simulation statistics when the simulated system triggers to do so.
-We will need m5 mainly to exit the simulation when the simulated system boots linux.
+We will mainly need m5 to exit the simulation when the simulated system boots linux.
 
 ```sh
 cd gem5/util/m5/
@@ -125,9 +125,9 @@ mkdir disk-image
 
 We will follow the similar directory structure as discussed in [Disk Images](../main-doc/disks.md) section.
 Add a folder named shared for config files which will be shared among all disk images (and will be kept to their defaults) and one folder named boot-exit which is specific to the disk image needed to run experiments of this tutorial.
-Add three files [boot-exit.json](https://github.com/darchr/gem5art/blob/master/docs/disks/boot-exit/boot-exit.json), [exit.sh](https://github.com/darchr/gem5art/blob/master/docs/disks/boot-exit/exit.sh) and [post-installation.sh](https://github.com/darchr/gem5art/blob/master/docs/disks/boot-exit/post-installation.sh) in boot-exit/ and [preseed.cfg](https://github.com/darchr/gem5art/blob/master/docs/disks/shared/preseed.cfg) and [serial-getty@.service](https://github.com/darchr/gem5art/blob/master/docs/disks/shared/serial-getty@.service) in shared/
+Add three files [boot-exit.json](https://github.com/darchr/gem5art/blob/master/docs/disks/boot-exit/boot-exit.json), [exit.sh](https://github.com/darchr/gem5art/blob/master/docs/disks/boot-exit/exit.sh) and [post-installation.sh](https://github.com/darchr/gem5art/blob/master/docs/disks/boot-exit/post-installation.sh) in boot-exit/ and [preseed.cfg](https://github.com/darchr/gem5art/blob/master/docs/disks/shared/preseed.cfg) and [serial-getty@.service](https://github.com/darchr/gem5art/blob/master/docs/disks/shared/serial-getty@.service) in shared/.
 
-boot-exit.json is our primary .json configuration file. The provisioners and variables section of this file configure the files that need to be transferred to the disk and other things like disk image's name. post-installation.sh (which is a script to run after Ubuntu is installed on the disk image) makes sure that the m5 binary is installed on the system and also moves the contents of our other script (exit.sh, which should be already transferred inside the disk image as configured in boot-exit.json) to .bashrc as exit.sh contains the stuff that we want to be executed as soon as the system boots. exit.sh just contains one command `m5 exit`, which will eventually terminate the simulation.
+boot-exit.json is our primary .json configuration file. The provisioners and variables section of this file configure the files that need to be transferred to the disk and other things like disk image's name. post-installation.sh (which is a script to run after Ubuntu is installed on the disk image) makes sure that the m5 binary is installed on the system and also moves the contents of our other script (exit.sh, which should be already transferred inside the disk image as configured in boot-exit.json) to .bashrc as exit.sh contains the stuff that we want to be executed as soon as the system boots. exit.sh just contains one command `m5 exit`, which will eventually terminate the simulation as the system boots up.
 
 Next, download packer (if not already downloaded) in the disk-image folder:
 
@@ -338,6 +338,7 @@ if __name__ == "__main__":
                 for num_cpu in num_cpus:
                     for mem in mem_types:
                         run = gem5Run.createFSRun(
+                            'linux_boot_tests',
                             'gem5/build/X86/gem5.opt',
                             'configs-boot-tests/run_exit.py',
                             'results/run_exit/vmlinux-{}/boot-exit/{}/{}/{}/{}'.
@@ -347,13 +348,15 @@ if __name__ == "__main__":
                             'disk-image/boot-exit/boot-exit-image/boot-exit',
                             linux_binaries[linux], disk_image,
                             cpu, mem, num_cpu, boot_type,
-                            timeout = 6*60*60 #6 hours
+                            timeout = 12*60*60 #12 hours
                             )
-                        run_gem5_instance.apply_async((run,))
+                        run_gem5_instance.apply_async((run, os.getcwd()))
 ```
 The above lines are responsible for looping through all possible combinations of variables involved in this experiment.
 For each combination, a gem5Run object is created and eventually passed to run_gem5_instance to be
-executed asynchronously using Celery. Moreover, the results directory path is constructed based on the simulator configuration parameters and passed as the third argument to createFSRun(). Here, we are using a timeout of 6 hours, after which the particular gem5 job will be killed (assuming that gem5 should complete the booting process of linux kernel on the given hardware resources). You can configure this time according to your settings.
+executed asynchronously using Celery. Look at the definition of `createFSRun()` [here](../main-doc/run.html#gem5art.run.gem5Run.createFSRun) to understand the use of passed arguments.
+
+Here, we are using a timeout of 12 hours, after which the particular gem5 job will be killed (assuming that gem5 should complete the booting process of linux kernel on the given hardware resources). You can configure this time according to your settings.
 
 The complete launch script is available [here:](https://github.com/darchr/gem5art/blob/master/docs/launch-scripts/launch_boot_tests.py).
 Finally, make sure you are in python virtual env and then run the script:

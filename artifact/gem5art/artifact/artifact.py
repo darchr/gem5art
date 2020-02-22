@@ -33,6 +33,7 @@
 import hashlib
 from inspect import cleandoc
 import os
+from pathlib import Path
 import subprocess
 import time
 from typing import Any, Dict, Iterator, List, Union
@@ -41,7 +42,7 @@ from uuid import UUID, uuid4
 from ._artifactdb import getDBConnection
 
 
-def getHash(path: str) -> str:
+def getHash(path: Path) -> str:
     """
     Returns an md5 hash for the file in self.path.
     """
@@ -55,16 +56,16 @@ def getHash(path: str) -> str:
 
     return md5.hexdigest()
 
-def getGit(path: str) -> Dict[str,str]:
+def getGit(path: Path) -> Dict[str,str]:
     """
     Returns dictionary with origin, current commit, and repo name for the
     base repository for `path`.
     An exception is generated if the repo is dirty or doesn't exist
     """
-    path = os.path.abspath(path)
+    path = path.resolve() # Make absolute
 
-    if os.path.isfile(path):
-        path = os.path.dirname(path)
+    if path.is_file():
+        path = path.parent
 
     command = ['git', 'status', '--porcelain', '--ignore-submodules',
                 '--untracked-files=no']
@@ -109,11 +110,11 @@ class Artifact:
     type: str
     documentation: str
     command: str
-    path: str
+    path: Path
     hash: str
     time: float
     git: Dict[str,str]
-    cwd: str
+    cwd: Path
     inputs: List['Artifact']
 
 
@@ -123,7 +124,7 @@ class Artifact:
                          name: str,
                          cwd: str,
                          typ: str,
-                         path: str,
+                         path: Union[str, Path],
                          documentation: str,
                          inputs: List['Artifact'] = []
                          ) -> 'Artifact':
@@ -150,19 +151,23 @@ class Artifact:
 
         data['time'] = time.time()
 
-        data['path'] = path
-        if os.path.isfile(path):
-            data['hash'] = getHash(path)
+        ppath = Path(path)
+        data['path'] = ppath
+        if ppath.is_file():
+            data['hash'] = getHash(ppath)
             data['git'] = {}
-        elif os.path.isdir(path):
-            data['git'] = getGit(path)
+        elif ppath.is_dir():
+            data['git'] = getGit(ppath)
             data['hash'] = data['git']['hash']
         else:
-            raise Exception("Path {} doesn't exist".format(path))
+            raise Exception("Path {} doesn't exist".format(ppath))
 
-        data['cwd'] = cwd
-        if not os.path.exists(cwd):
-            raise Exception("cwd {} doesn't exits.".format(cwd))
+        pcwd = Path(cwd)
+        data['cwd'] = pcwd
+        if not pcwd.exists():
+            raise Exception("cwd {} doesn't exist.".format(pcwd))
+        if not pcwd.is_dir():
+            raise Exception("cwd {} is not a directory".format(pcwd))
 
         data['inputs'] = [i._id for i in inputs]
 
@@ -182,7 +187,7 @@ class Artifact:
             _db.put(self._id, self._getSerializable())
 
             # Upload the file if there is one.
-            if os.path.isfile(self.path):
+            if self.path.is_file():
                 _db.upload(self._id, self.path)
 
         return self
@@ -206,11 +211,11 @@ class Artifact:
         self.type = other['type']
         self.documentation = other['documentation']
         self.command = other['command']
-        self.path = other['path']
+        self.path = Path(other['path'])
         self.hash = other['hash']
         assert isinstance(other['git'], dict)
         self.git = other['git']
-        self.cwd = other['cwd']
+        self.cwd = Path(other['cwd'])
         self.inputs = [Artifact(i) for i in other['inputs']]
 
     def __str__(self) -> str:
@@ -224,8 +229,10 @@ class Artifact:
         return vars(self).__repr__()
 
     def _getSerializable(self) -> Dict[str, Union[str, UUID]]:
-        data = vars(self)
+        data = vars(self).copy()
         data['inputs'] = [input._id for input in self.inputs]
+        data['cwd'] = str(data['cwd'])
+        data['path'] = str(data['path'])
         return data
 
     def __eq__(self, other: object) -> bool:
