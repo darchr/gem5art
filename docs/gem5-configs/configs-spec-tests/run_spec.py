@@ -66,10 +66,8 @@
                   listening ports. Usually, the ports are opened for debugging
                   purposes. 
                   By default, the ports are off.
-                  
-    Outputs:
-    * TODO: simple performance statistics
 """
+
 import os
 import sys
 
@@ -220,7 +218,7 @@ if __name__ == "__m5_main__":
     linux_kernel_path = args.kernel
     disk_image_path = args.disk
     no_copy_logs = args.no_copy_logs
-    no_listeners = args.no_listeners
+    allow_listeners = args.allow_listeners
 
     output_dir = os.path.join(m5.options.outdir, "speclogs")
 
