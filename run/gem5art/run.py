@@ -485,6 +485,8 @@ class gem5Run:
         # Store current gem5 run in the database
         _db.put(self._id, self._getSerializable())
 
+        print("Done storing the results of {}".format(' '.join(self.command)))
+
     def saveResults(self) -> None:
         """Zip up the output directory and store the results in the database.
         """
