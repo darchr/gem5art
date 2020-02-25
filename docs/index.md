@@ -59,6 +59,7 @@ API documentation
    main-doc/run.md
    main-doc/tasks.md
    main-doc/disks.md
+   main-doc/faq.md
 
 Tutorials
 ---------
