@@ -410,6 +410,7 @@ In the root folder of the experiment,
 mkdir gem5-configs
 cd gem5-configs
 git init
+git remote add origin https://your-remote-add/run-spec-config.git
 ```
 
 Then we copy all the scripts in configs-spec-tests folder to gem5-configs.
@@ -418,13 +419,13 @@ In the root folder of the experiment,
 
 ```sh
 cd gem5-configs
-wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/run_spec.py
+wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/gem5-configs/configs-spec-tests/run_spec.py
 mkdir -p system
 cd system
-wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/system/__init__.py
-wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/system/caches.py
-wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/system/fs_tools.py
-wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/system/system.py
+wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/gem5-configs/configs-spec-tests/system/__init__.py
+wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/gem5-configs/configs-spec-tests/system/caches.py
+wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/gem5-configs/configs-spec-tests/system/fs_tools.py
+wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/gem5-configs/configs-spec-tests/system/system.py
 cd ..
 git add *
 git commit -m "Add run scripts for SPEC2006"
@@ -435,13 +436,13 @@ In launch_spec2006_experiments.py, we make an Artifact object of the Linux kerne
 ```python
 run_script_repo = Artifact.registerArtifact(
     command = '''
-        wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/run_spec.py
+        wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/gem5-configs/configs-spec-tests/run_spec.py
         mkdir -p system
         cd system
-        wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/system/__init__.py
-        wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/system/caches.py
-        wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/system/fs_tools.py
-        wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/system/system.py
+        wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/gem5-configs/configs-spec-tests/system/__init__.py
+        wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/gem5-configs/configs-spec-tests/system/caches.py
+        wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/gem5-configs/configs-spec-tests/system/fs_tools.py
+        wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/gem5-configs/configs-spec-tests/system/system.py
     ''',
     typ = 'git repo',
     name = 'gem5-configs',
@@ -557,6 +558,7 @@ if __name__ == "__main__":
         for size in benchmark_sizes[cpu]:
             for benchmark in benchmarks:
                 run = gem5Run.createFSRun(
+                    'gem5 19 spec 2006 experiment',
                     'gem5/build/X86/gem5.opt', # gem5_binary
                     'gem5-configs/run_spec.py', # run_script
                     'results/{}/{}/{}'.format(cpu, size, benchmark), # relative_outdir
@@ -568,9 +570,9 @@ if __name__ == "__main__":
                     linux_binary, # linux_binary_artifact
                     disk_image, # disk_image_artifact
                     cpu, benchmark, size, # params
-                    timeout = 5*24*60*60 # 5 days
+                    timeout = 5 * 24 * 60 * 60 # 5 days
                 )
-                run_gem5_instance.apply_async((run,)) # TODO: update this script to gem5art-0.4.1
+                run_gem5_instance.apply_async((run,))
 
 ```
 The above launch function will run the all the available benchmarks with kvm, atomic, timing, and o3 cpus.
