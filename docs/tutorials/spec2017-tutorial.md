@@ -583,52 +583,52 @@ The following are compiled benchmarks:
 
 | Benchmarks             | KVM/test       | KVM/ref        | O3CPU/test     | AtomicCPU/test | TimingSimpleCPU/test |
 |------------------------|----------------|----------------|----------------|----------------|----------------------|
-| 503.bwaves_r           |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 507.cactuBSSN_r        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 508.namd_r             |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 510.parest_r           |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 511.povray_r           |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 519.lbm_r              |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 521.wrf_r              |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 526.blender_r          |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 527.cam4_r             |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 538.imagick_r          |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 544.nab_r              |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 549.fotonik3d_r        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 554.roms_r             |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 997.specrand_fr        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 603.bwaves_s           |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 607.cactuBSSN_s        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 619.lbm_s              |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 621.wrf_s              |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 627.cam4_s             | Workload segfault | Workload segfault |      gem5 error |     gem5 error |                     ?|
-| 628.pop2_s             |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 638.imagick_s          |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 644.nab_s              |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 649.fotonik3d_s        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 654.roms_s             |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 996.specrand_fs        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 500.perlbench_r        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 502.gcc_r              |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 505.mcf_r              |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 520.omnetpp_r          |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 523.xalancbmk_r        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 525.x264_r             |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 531.deepsjeng_r        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 541.leela_r            |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 548.exchange2_r        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 557.xz_r               |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 999.specrand_ir        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 600.perlbench_s        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 602.gcc_s              |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 605.mcf_s              |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 620.omnetpp_s          |        Success |        Success |     gem5 error |              ? |                     ?|
-| 623.xalancbmk_s        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 625.x264_s             |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 631.deepsjeng_s        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 641.leela_s            |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 648.exchange2_s        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 657.xz_s               |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 998.specrand_is        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 503.bwaves_r           |              ? |              ? |              ? |              ? |                     ?|
+| 507.cactuBSSN_r        |              ? |              ? |              ? |              ? |                     ?|
+| 508.namd_r             |              ? |              ? |              ? |              ? |                     ?|
+| 510.parest_r           |              ? |              ? |              ? |              ? |                     ?|
+| 511.povray_r           |              ? |              ? |              ? |              ? |                     ?|
+| 519.lbm_r              |              ? |              ? |              ? |              ? |                     ?|
+| 521.wrf_r              |              ? |              ? |              ? |              ? |                     ?|
+| 526.blender_r          |              ? |              ? |              ? |              ? |                     ?|
+| 527.cam4_r             |              ? |              ? |              ? |              ? |                     ?|
+| 538.imagick_r          |              ? |              ? |              ? |              ? |                     ?|
+| 544.nab_r              |              ? |              ? |              ? |              ? |                     ?|
+| 549.fotonik3d_r        |              ? |              ? |              ? |              ? |                     ?|
+| 554.roms_r             |              ? |              ? |              ? |              ? |                     ?|
+| 997.specrand_fr        |              ? |              ? |              ? |              ? |                     ?|
+| 603.bwaves_s           |              ? |              ? |              ? |              ? |                     ?|
+| 607.cactuBSSN_s        |              ? |              ? |              ? |              ? |                     ?|
+| 619.lbm_s              |              ? |              ? |              ? |              ? |                     ?|
+| 621.wrf_s              |              ? |              ? |              ? |              ? |                     ?|
+| 627.cam4_s             |              ? |              ? |              ? |              ? |                     ?|
+| 628.pop2_s             |              ? |              ? |              ? |              ? |                     ?|
+| 638.imagick_s          |              ? |              ? |              ? |              ? |                     ?|
+| 644.nab_s              |              ? |              ? |              ? |              ? |                     ?|
+| 649.fotonik3d_s        |              ? |              ? |              ? |              ? |                     ?|
+| 654.roms_s             |              ? |              ? |              ? |              ? |                     ?|
+| 996.specrand_fs        |              ? |              ? |              ? |              ? |                     ?|
+| 500.perlbench_r        |              ? |              ? |              ? |              ? |                     ?|
+| 502.gcc_r              |              ? |              ? |              ? |              ? |                     ?|
+| 505.mcf_r              |              ? |              ? |              ? |              ? |                     ?|
+| 520.omnetpp_r          |              ? |              ? |              ? |              ? |                     ?|
+| 523.xalancbmk_r        |              ? |              ? |              ? |              ? |                     ?|
+| 525.x264_r             |              ? |              ? |              ? |              ? |                     ?|
+| 531.deepsjeng_r        |              ? |              ? |              ? |              ? |                     ?|
+| 541.leela_r            |              ? |              ? |              ? |              ? |                     ?|
+| 548.exchange2_r        |              ? |              ? |              ? |              ? |                     ?|
+| 557.xz_r               |              ? |              ? |              ? |              ? |                     ?|
+| 999.specrand_ir        |              ? |              ? |              ? |              ? |                     ?|
+| 600.perlbench_s        |              ? |              ? |              ? |              ? |                     ?|
+| 602.gcc_s              |              ? |              ? |              ? |              ? |                     ?|
+| 605.mcf_s              |              ? |              ? |              ? |              ? |                     ?|
+| 620.omnetpp_s          |              ? |              ? |              ? |              ? |                     ?|
+| 623.xalancbmk_s        |              ? |              ? |              ? |              ? |                     ?|
+| 625.x264_s             |              ? |              ? |              ? |              ? |                     ?|
+| 631.deepsjeng_s        |              ? |              ? |              ? |              ? |                     ?|
+| 641.leela_s            |              ? |              ? |              ? |              ? |                     ?|
+| 648.exchange2_s        |              ? |              ? |              ? |              ? |                     ?|
+| 657.xz_s               |              ? |              ? |              ? |              ? |                     ?|
+| 998.specrand_is        |              ? |              ? |              ? |              ? |                     ?|
 
 
