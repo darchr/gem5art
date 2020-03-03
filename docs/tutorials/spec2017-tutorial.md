@@ -578,7 +578,7 @@ python3 launch_spec2017_experiment.py
 ```
 
 ## Appendix I. Working SPEC 2017 Benchmarks x CPU Model Matrix
-All benchmarks are compiled in the above set up as of December 2019.
+All benchmarks are compiled in the above set up as of March 2020.
 The following are compiled benchmarks:
 
 | Benchmarks             | KVM/test       | KVM/ref        | O3CPU/test     | AtomicCPU/test | TimingSimpleCPU/test |
