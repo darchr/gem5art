@@ -386,7 +386,7 @@ linux_binary = Artifact.registerArtifact(
 ### The gem5 Run Script/gem5 Configuration
 In this step, we take a look at the final missing piece: the gem5 run script.
 The script is where we specify the simulated system.
-We offer example scripts in the [configs-spec2017-tests folder](https://github.com/darchr/gem5art/blob/master/docs/gem5-configs/configs-spec2017-tests/).
+We offer example scripts in the [configs-spec-tests folder](https://github.com/darchr/gem5art/blob/master/docs/gem5-configs/configs-spec-tests/).
 
 First, we create a folder named gem5-configs containing all gem5 configs.
 Since gem5art requires a git repo for the run scripts, we will make a local git repo for the run scripts.
@@ -399,7 +399,7 @@ cd gem5-configs
 git init
 ```
 
-Then we copy all the scripts in configs-spec2017-tests folder to gem5-configs.
+Then we copy all the scripts in configs-spec-tests folder to gem5-configs.
 
 In the root folder of the experiment,
 
@@ -438,7 +438,7 @@ run_script_repo = Artifact.registerArtifact(
 )
 ```
 
-The gem5 run script, [run_spec.py](https://github.com/darchr/gem5art/blob/master/docs/configs-spec2017-tests/run_spec.py), takes the following parameters:
+The gem5 run script, [run_spec.py](https://github.com/darchr/gem5art/blob/master/docs/configs-spec-tests/run_spec.py), takes the following parameters:
 * --kernel: (required) the path to vmlinux file.
 * --disk: (required) the path to spec image.
 * --cpu: (required) name of the detailed CPU model.
