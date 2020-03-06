@@ -22,6 +22,13 @@ sed -i "/^CC[\ \t]*=/c\\\nCC = \/usr\/bin\/gcc\n" /home/gem5/spec2006/config/myc
 sed -i "/^CXX[\ \t]*=/c\\\nCXX = \/usr\/bin\/g++\n" /home/gem5/spec2006/config/myconfig.cfg
 sed -i "/^FC[\ \t]*=/c\\\nFC = \/usr\/bin\/gfortran\n" /home/gem5/spec2006/config/myconfig.cfg
 
+# reduce the number of output types
+# by default, spec generates output in various file types
+# this command forces the outputs to be a txt file and stdout output
+# this command replaces the whole 'output_format' line
+# more about /c: https://www.gnu.org/software/sed/manual/sed.html#index-Replacing-selected-lines-with-other-text
+# more about MacOS compatibility: https://stackoverflow.com/a/18627173
+sed -i "/^output_format[\ \t]*=/c\\\noutput_format = txt, Screen\n" /home/gem5/spec2006/config/myconfig.cfg
+
 # build all SPEC workloads
 runspec --config=myconfig.cfg --action=build all
-
