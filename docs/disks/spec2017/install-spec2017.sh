@@ -18,7 +18,7 @@ cp /home/gem5/spec2017/config/Example-gcc-linux-x86.cfg /home/gem5/spec2017/conf
 # this command replaces the whole 'define gcc_dir' line
 # more about /c: https://www.gnu.org/software/sed/manual/sed.html#index-Replacing-selected-lines-with-other-text
 # more about MacOS compatibility: https://stackoverflow.com/a/18627173
-sed -i "/%   define  gcc_dir/c\\\n%   define  gcc_dir        \"/usr\"\n" /home/gem5/spec2017/config/myconfig.x86.cfg
+sed -i "/%[\ \t]*define[\ \t]*gcc_dir/c\\\n%   define  gcc_dir        \"/usr\"\n" /home/gem5/spec2017/config/myconfig.x86.cfg
 
 # use sed command to remove the march=native flag when compiling
 # this is necessary as the packer script runs in kvm mode, so the details of the CPU will be that of the host CPU
@@ -40,7 +40,7 @@ sed -i "s/command_add_redirect = 1/sysinfo_program =\ncommand_add_redirect = 1/g
 # this command replaces the whole 'output_format' line
 # more about /c: https://www.gnu.org/software/sed/manual/sed.html#index-Replacing-selected-lines-with-other-text
 # more about MacOS compatibility: https://stackoverflow.com/a/18627173
-sed -i "/output_format/c\\\noutput_format        = txt\n" /home/gem5/spec2017/config/myconfig.x86.cfg
+sed -i "/^output_format/c\\\noutput_format        = txt\n" /home/gem5/spec2017/config/myconfig.x86.cfg
 
 # build all SPEC workloads
 runcpu --config=myconfig.x86.cfg --define build_ncpus=$(nproc) --action=build all
