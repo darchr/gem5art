@@ -600,7 +600,7 @@ If the benchmark run is successful, there will be a line starting with `Success:
 
 
 ## Appendix I. Working SPEC 2006 Benchmarks x CPU Model table
-Not all benchmarks are compiled in the above set up as of November 2019.
+Not all benchmarks are compiled in the above set up as of March 2020.
 The following are compiled benchmarks:
 
 | Benchmarks         | KVM/test        | KVM/ref         | AtomicCPU/test  | O3CPU/test      | TimingSimpleCPU/test |
