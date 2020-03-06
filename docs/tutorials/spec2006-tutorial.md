@@ -607,31 +607,31 @@ The following are compiled benchmarks:
 |--------------------|-----------------|-----------------|-----------------|-----------------|----------------------|
 | 401.bzip2          | Success         | Success         | Success         | Success         | Success              |
 | 403.gcc            | Success         | Success         | Success         | Success         | Success              |
-| 410.bwaves         | Success         | Success         | Success         | Success         | Success              |
-| 416.gamess         | Error           | Error           | Error           | Error           | Error                |
-| 429.mcf            | Success         | Success         | Success         | Success         | No SPEC logs         |
-| 433.milc           | Success         | Success         | Success         | Success         | Success              |
-| 434.zeusmp         | Success         | Success         | Success         | No SPEC logs    | Success              |
-| 435.gromacs        | Success         | Success         | Success         | Success         | Success              |
+| 410.bwaves         | Success         | Success         | Success         | ?               | Success              |
+| 416.gamess         | Success         | Success         | Success         | Success         | Success              |
+| 429.mcf            | Success         | Success         | Success         | Success         | Success              |
+| 433.milc           | Success         | Success         | Success         | ?               | Success              |
+| 434.zeusmp         | Success         | Success         | Success         | ?               | Success              |
+| 435.gromacs        | Success         | Success         | ?               | Success         | Success              |
 | 436.cactusADM      | Success         | Success         | Success         | Success         | Success              |
-| 437.leslie3d       | Success         | Success         | Success         | Success         | Success              |
-| 444.namd           | Success         | Success         | Success         | Success         | Success              |
-| 445.gobmk          | Success         | Success         | Success         | No SPEC logs    | Success              |
+| 437.leslie3d       | Success         | Success         | ?               | ?               | Success              |
+| 444.namd           | Success         | Success         | Success         | ?               | Success              |
+| 445.gobmk          | Success         | Success         | ?               | ?               | Success              |
 | 453.povray         | Success         | Success         | Success         | Success         | Success              |
 | 454.calculix       | Success         | Success         | Success         | Success         | Success              |
 | 456.hmmer          | Success         | Success         | Success         | Success         | Success              |
 | 458.sjeng          | Success         | Success         | Success         | Success         | Success              |
 | 459.GemsFDTD       | Success         | Success         | Success         | Success         | Success              |
-| 462.libquantum     | Success         | Success         | Success         | Success         | Success              |
-| 464.h264ref        | Success         | Success         | Success         | No SPEC logs    | Success              |
-| 465.tonto          | Success         | Success         | Success         | Success         | Success              |
-| 470.lbm            | Success         | Success         | Success         | Success         | Success              |
+| 462.libquantum     | Success         | Success         | ?               | Success         | Success              |
+| 464.h264ref        | Success         | Success         | ?               | ?               | Success              |
+| 465.tonto          | Success         | Success         | ?               | Success         | Success              |
+| 470.lbm            | Success         | Success         | Success         | ?               | Success              |
 | 471.omnetpp        | Success         | Success         | Success         | Success         | Success              |
-| 473.astar          | Success         | Success         | Success         | No SPEC logs    | Success              |
-| 481.wrf            | Error           | Error           | Error           | Error           | Error                |
-| 482.sphinx3        | Success         | Success         | Success         | Success         | Success              |
+| 473.astar          | Success         | Success         | Success         | ?               | Success              |
+| 481.wrf            | Success         | Success         | ?               | Success         | Success              |
+| 482.sphinx3        | Success         | Success         | Success         | ?               | Success              |
 | 998.specrand       | Success         | Success         | Success         | Success         | Success              |
-| 999.specrand       | Success         | Success         | Success         | Success         | Success              |
+| 999.specrand       | Success         | Success         | Success         | ?               | Success              |
 
 
 Benchmarks that are not available:
