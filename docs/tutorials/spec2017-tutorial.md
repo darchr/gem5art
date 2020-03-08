@@ -583,12 +583,12 @@ The following are compiled benchmarks:
 
 | Benchmarks             | KVM/test       | KVM/ref        | O3CPU/test     | AtomicCPU/test | TimingSimpleCPU/test |
 |------------------------|----------------|----------------|----------------|----------------|----------------------|
-| 500.perlbench_r        |        Success |        Success |              ? |              ? |      One test failed |
+| 500.perlbench_r        |        Success |        Success |              ? | One test failed |      One test failed |
 | 502.gcc_r              |        Success |        Success |        Success |        Success |              Success |
 | 503.bwaves_r           |        Success |        Success |              ? |        Success |              Success |
 | 505.mcf_r              |        Success |        Success |        Success |        Success |              Success |
 | 507.cactuBSSN_r        |        Success |        Success |        Success |        Success |              Success |
-| 508.namd_r             |        Success |        Success |              ? |              ? |              Success |
+| 508.namd_r             |        Success |        Success |              ? |        Success |              Success |
 | 510.parest_r           |        Success |        Success | Workload segfault | Workload segfault | Workload segfault |
 | 511.povray_r           |        Success |        Success |        Success |        Success |              Success |
 | 519.lbm_r              |        Success |        Success |        Success |        Success |              Success |
@@ -606,7 +606,7 @@ The following are compiled benchmarks:
 | 549.fotonik3d_r        |        Success |        Success |        Success |        Success |              Success |
 | 554.roms_r             |        Success |        Success |              ? |        Success |              Success |
 | 557.xz_r               |        Success |        Success |              ? |        Success |              Success |
-| 600.perlbench_s        |        Success |        Success |              ? |              ? |                    ? |
+| 600.perlbench_s        |        Success |        Success |              ? | One test failed |                    ? |
 | 602.gcc_s              |        Success |        Success |        Success |        Success |              Success |
 | 603.bwaves_s           |        Success |        Success |              ? |        Success |              Success |
 | 605.mcf_s              |        Success |        Success |              ? |        Success |                    ? |
@@ -624,7 +624,7 @@ The following are compiled benchmarks:
 | 644.nab_s              |        Success |        Success |        Success |        Success |              Success |
 | 648.exchange2_s        |        Success |        Success |              ? |        Success |              Success |
 | 649.fotonik3d_s        |        Success |        Success |        Success |        Success |              Success |
-| 654.roms_s             |        Success |        Success |        Success |              ? |              Success |
+| 654.roms_s             |        Success |        Success |        Success |        Success |              Success |
 | 657.xz_s               |        Success |        Success |              ? |        Success |              Success |
 | 996.specrand_fs        |        Success |        Success |        Success |        Success |              Success |
 | 997.specrand_fr        |        Success |        Success |        Success |        Success |           gem5 error |
