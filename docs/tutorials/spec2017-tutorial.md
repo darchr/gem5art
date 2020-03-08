@@ -589,7 +589,7 @@ The following are compiled benchmarks:
 | 505.mcf_r              |        Success |        Success |        Success |        Success |              Success |
 | 507.cactuBSSN_r        |        Success |        Success |        Success |        Success |              Success |
 | 508.namd_r             |        Success |        Success |              ? |              ? |              Success |
-| 510.parest_r           |        Success |        Success |              ? | Workload segfault | Workload segfault |
+| 510.parest_r           |        Success |        Success | Workload segfault | Workload segfault | Workload segfault |
 | 511.povray_r           |        Success |        Success |        Success |        Success |              Success |
 | 519.lbm_r              |        Success |        Success |        Success |        Success |              Success |
 | 520.omnetpp_r          |        Success |        Success |              ? |        Success |                    ? |
@@ -616,7 +616,7 @@ The following are compiled benchmarks:
 | 621.wrf_s              |        Success |        Success |              ? |        Success |              Success |
 | 623.xalancbmk_s        |        Success |        Success |        Success |        Success |              Success |
 | 625.x264_s             |        Success |        Success |              ? |        Success |                    ? |
-| 627.cam4_s             | Workload segfault | Workload segfault |              ? | Workload segfault | Workload segfault |
+| 627.cam4_s             | Workload segfault | Workload segfault | Workload segfault | Workload segfault | Workload segfault |
 | 628.pop2_s             |        Success |        Success |              ? |        Success |              Success |
 | 631.deepsjeng_s        |        Success |        Success |              ? |        Success |                    ? |
 | 638.imagick_s          |        Success |        Success |        Success |        Success |              Success |
