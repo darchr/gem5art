@@ -595,7 +595,7 @@ The following are compiled benchmarks:
 | 520.omnetpp_r          |        Success |        Success |              ? |        Success |                    ? |
 | 521.wrf_r              |        Success |        Success |              ? |        Success |              Success |
 | 523.xalancbmk_r        |        Success |        Success |        Success |        Success |                    ? |
-| 525.x264_r             |        Success |        Success |              ? |        Success |                    ? |
+| 525.x264_r             |        Success |        Success |              ? |        Success |              Success |
 | 526.blender_r          |        Success |        Success |        Success |        Success |              Success |
 | 527.cam4_r             |        Success |        Success |              ? |        Success |              Success |
 | 531.deepsjeng_r        |        Success |        Success |        Success |        Success |              Success |
@@ -615,7 +615,7 @@ The following are compiled benchmarks:
 | 620.omnetpp_s          |        Success |        Success |              ? |        Success |              Success |
 | 621.wrf_s              |        Success |        Success |              ? |        Success |              Success |
 | 623.xalancbmk_s        |        Success |        Success |        Success |        Success |              Success |
-| 625.x264_s             |        Success |        Success |              ? |        Success |                    ? |
+| 625.x264_s             |        Success |        Success |              ? |        Success |              Success |
 | 627.cam4_s             | Workload segfault | Workload segfault | Workload segfault | Workload segfault | Workload segfault |
 | 628.pop2_s             |        Success |        Success |              ? |        Success |              Success |
 | 631.deepsjeng_s        |        Success |        Success |              ? |        Success |                    ? |
