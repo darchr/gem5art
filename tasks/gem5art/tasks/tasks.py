@@ -35,5 +35,6 @@ def run_gem5_instance(self, gem5_run, cwd = '.'):
     Runs a gem5 instance with the script and any parameters to the script.
     Note: this is "bound" which means self is the task that is running this.
     """
+    
 
     gem5_run.run(self, cwd = cwd)
