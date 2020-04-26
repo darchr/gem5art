@@ -30,7 +30,6 @@
 from .celery import gem5app
 import multiprocessing as mp
 import time
-from gem5art.run import gem5Run
 
 @gem5app.task(bind=True, serializer='pickle')
 def run_gem5_instance(self, gem5_run, cwd = '.'):
@@ -43,21 +42,20 @@ def run_gem5_instance(self, gem5_run, cwd = '.'):
 
 def run_single_job(run):
     start_time = time.time()
-    print(f"Running {run.command} at {time.time()}")
+    print(f"Running {' '.join(run.command)} at {time.time()}")
     run.run()
     finish_time = time.time()
-    print(f"Finished {run.command} at {time.time()}. Total time = {finish_time - start_time}")
+    print(f"Finished {' '.join(run.command)} at {time.time()}. Total time = {finish_time - start_time}")
 
-def run_gem5_jobs(job_list, num_parallel_jobs = mp.cpu_count() // 2):
+def run_job_pool(job_list, num_parallel_jobs = mp.cpu_count() // 2):
     """
     Runs gem5 jobs in parallel when Celery is not used.
     Creates as many parallel jobs as core count if no explicit
     job count is provided
-    """    
-    start_time = time.time()
-    pool = mp.Pool()
+    Receives a list of run objects created by the launch script
+    """ 
+    pool = mp.Pool(num_parallel_jobs)
     pool.map(run_single_job, job_list)
     pool.close()
     pool.join()
-    end_time = time.time() - start_time
-    print(f"Total time taken to run all jobs = {end_time - start_time}")
+    print(f"All jobs done running!")
