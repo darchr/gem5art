@@ -1,12 +1,14 @@
 ---
 Authors:
-  - Mahyar
+  - Mahyar Samani
 ---
 
 # Tutorial: Run PARSEC Benchmarks with gem5
 
 ## Introduction
-In this tutorial, we will use gem5art to create a disk image for PARSEC benchmarks ([PARSEC](https://parsec.cs.princeton.edu/)) and then run these benchmarks using gem5. PARSEC is mainly designed to represent the applications that require vast amount of shared-memory. 
+
+In this tutorial, we will use gem5art to create a disk image for PARSEC benchmarks ([PARSEC](https://parsec.cs.princeton.edu/)) and then run these benchmarks using gem5. 
+PARSEC is mainly designed to represent the applications that require vast amount of shared-memory. 
 
 Following are their details:
 
@@ -106,7 +108,7 @@ scons build/X86/gem5.opt -j8
 Also make sure to build the m5 utility which will be moved to the disk image eventually.
 m5 utility allows to trigger simulation tasks from inside the simulated system.
 For example, it can be used dump simulation statistics when the simulated system triggers to do so.
-We will need m5 mainly to exit the simulation when the simulated system will be done with the execution of a particular NPB benchmark.
+We will need m5 mainly to exit the simulation when the simulated system will be done with the execution of a particular PARSEC benchmark.
 
 ```sh
 cd gem5/util/m5/
@@ -123,46 +125,69 @@ mkdir disk-image
 We will follow the similar directory structure as discussed in [Disk Images](../main-doc/disks.md) section.
 Add a folder named shared for config files which will be shared among all disk images (and will be kept to their defaults) and one folder named parsec which will contain files configured for PARSEC disk image. Add [preseed.cfg](https://github.com/darchr/gem5art/blob/master/docs/disks/shared/preseed.cfg) and [serial-getty@.service](https://github.com/darchr/gem5art/blob/master/docs/disks/shared/serial-getty@.service) in shared/.
 
-In npb/ we will add the benchmark source first, which will eventually be transferred to the disk image through our npb.json file.
+In parsec/ we will add the benchmark source first, which will eventually be transferred to the disk image through our parsec.json file.
 
 ```sh
-cd disk-image/npb
-git clone https://github.com/darchr/npb-hooks.git
+cd disk-image/parsec-benchmark
+git clone https://github.com/darchr/parsec-benchmark.git
 ```
 
-This source of NPB has ROI (region of interest) annotations for each benchmark which will be used by gem5 to
+This source of PARSEC has ROI (region of interest) annotations for each benchmark which will be used by gem5 to
 separate out simulation statistics of the important parts of a program from the rest of the program.
 Basically, gem5 magic instructions are used before and after the ROI which exit the guest and transfer control to gem5 run script which can then do things like dumping or resetting stats or switching to cpu of interest.
 
-Next, we will add few other files in npb/ which will be used for compilation of NPB inside the disk image and eventually running of these benchmarks with gem5.
-These files will be moved from host to the disk image using npb.json file as we will soon see.
+Next, we will add few other files in parsec/ which will be used for compilation of PARSEC inside the disk image and eventually running of these benchmarks with gem5.
+These files will be moved from host to the disk image using parsec.json file as we will soon see.
 
-First, create a file npb-install.sh, which will be executed inside the disk image (once it is built) and will install NPB on the disk image:
+First, create a file parsec-install.sh, which will be executed inside the disk image (once it is built) and will install PARSEC on the disk image:
 
 ```sh
 # install build-essential (gcc and g++ included) and gfortran
 
-#Compile NPB
+#Compile PARSEC
 
-echo "12345" | sudo apt-get install build-essential gfortran
+cd /home/gem5/
+su gem5
+echo "12345" | sudo -S apt update
 
-cd /home/gem5/NPB3.3-OMP/
+# Allowing services to restart while updating some 
+# libraries.
+sudo apt install -y debconf-utils
+sudo debconf-get-selections | grep restart-without-asking > libs.txt
+sed -i 's/false/true/g' libs.txt
+while read line; do echo $line | sudo debconf-set-selections; done < libs.txt
+sudo rm libs.txt
+##
 
-mkdir bin
+# Installing packages needed to build PARSEC
+sudo apt install -y build-essential 
+sudo apt install -y m4 
+sudo apt install -y git  
+sudo apt install -y python
+sudo apt install -y python-dev
+sudo apt install -y gettext
+sudo apt install -y libx11-dev 
+sudo apt install -y libxext-dev 
+sudo apt install -y xorg-dev 
+sudo apt install -y unzip
+sudo apt install -y texinfo
+sudo apt install -y freeglut3-dev
+## 
 
-make suite HOOKS=1
+# Building PARSEC
+
+echo "12345" | sudo -S chown gem5 -R parsec-benchmark/
+echo "12345" | sudo -S chgrp gem5 -R parsec-benchmark/
+cd parsec-benchmark
+./install.sh
+./get-inputs
+cd .. 
+echo "12345" | sudo -S chown gem5 -R parsec-benchmark/
+echo "12345" | sudo -S chgrp gem5 -R parsec-benchmark/
+##
 ```
-`HOOKS=1` flag in the above make command enables the ROI annotations while compiling NPB workloads.
-We are specifically compiling OpenMP (OMP) version of class A, B, C and D of NPB workloads.
 
-To configure the benchmark build process, the source of NPB which we are using relies on modified make.def and suite.def files (build system files). Look [here](https://github.com/darchr/npb-hooks/blob/master/NPB3.3.1/NPB3.3-OMP/README.install) in order to understand the build process of NAS parallel benchmarks.
-'suite.def' file is used to determine which workloads (and of which class) do we want to compile when we run 'make suite' command (as in the above script).
-You can look at the modified suite.def file [here](https://github.com/darchr/npb-hooks/blob/master/NPB3.3.1/NPB3.3-OMP/config/suite.def).
-
-The make.def file we are using add OMP flags to the compiler flags to compile OMP version of the benchmarks. We also add another flag '-DM5OP_ADDR=0xFFFF0000' to the compiler flags, which makes sure that the gem5 magic instructions added to the benchmarks will also work in KVM mode.
-You can look at the complete file [here](https://github.com/darchr/npb-hooks/blob/master/NPB3.3.1/NPB3.3-OMP/config/make.def).
-
-In npb/, create a file post-installation.sh and add following lines to it:
+In parsec/, create a file post-installation.sh and add following lines to it:
 
 ```sh
 #!/bin/bash
@@ -181,7 +206,7 @@ echo 'Post Installation Done'
 
 This post-installation.sh script (which is a script to run after Ubuntu is installed on the disk image) installs m5 and copies the contents of runscript.sh to .bashrc.
 Therefore, we need to add those things in runscript.sh which we want to execute as soon as the system boots up.
-Create runscript.sh in npb/ and add following lines to it:
+Create runscript.sh in parsec/ and add following lines to it:
 
 ```sh
 #!/bin/sh
@@ -198,7 +223,7 @@ fi
 runscript.sh uses m5 readfile to read the contents of a script which is how gem5 passes scripts to the simulated system from the host system.
 The passed script will then be executed and will be responsible for running benchmark/s which we will look into more later.
 
-Finally, create npb.json and add following contents:
+Finally, create parsec.json and add following contents:
 
 ```json
 {
@@ -237,7 +262,7 @@ Finally, create npb.json and add following contents:
             "iso_checksum_type": "{{ user `iso_checksum_type` }}",
             "iso_urls": [ "{{ user `iso_url` }}" ],
             "memory": "{{ user `vm_memory`}}",
-            "output_directory": "npb/{{ user `image_name` }}-image",
+            "output_directory": "parsec/{{ user `image_name` }}-image",
             "qemuargs":
             [
                 [ "-cpu", "host" ],
@@ -265,12 +290,12 @@ Finally, create npb.json and add following contents:
         },
         {
             "type": "file",
-            "source": "npb/runscript.sh",
+            "source": "parsec/runscript.sh",
             "destination": "/home/gem5/"
         },
         {
             "type": "file",
-            "source": "npb/npb-hooks/NPB3.3.1/NPB3.3-OMP",
+            "source": "parsec/parsec-benchmark/",
             "destination": "/home/gem5/"
         },
         {
@@ -278,8 +303,8 @@ Finally, create npb.json and add following contents:
             "execute_command": "echo '{{ user `ssh_password` }}' | {{.Vars}} sudo -E -S bash '{{.Path}}'",
             "scripts":
             [
-                "npb/post-installation.sh",
-                "npb/npb-install.sh"
+                "parsce/post-installation.sh",
+                "parsec/parsec-install.sh"
             ]
         }
     ],
@@ -301,13 +326,13 @@ Finally, create npb.json and add following contents:
         "ssh_username": "gem5",
         "vm_cpus": "16",
         "vm_memory": "8192",
-        "image_name": "npb"
+        "image_name": "parsec"
   }
 
 }
 ```
 
-npb.json is our primary .json configuration file. The provisioners and variables section of this file configure the files that need to be transferred to the disk and other things like disk image's name.
+parsec.json is our primary .json configuration file. The provisioners and variables section of this file configure the files that need to be transferred to the disk and other things like disk image's name.
 
 Next, download packer (if not already downloaded) in the disk-image folder:
 
@@ -319,15 +344,15 @@ unzip packer_1.4.3_linux_amd64.zip
 Now, to build the disk image inside the disk-image folder, run:
 
 ```
-./packer validate npb/npb.json
+./packer validate parsec/parsec.json
 
-./packer build npb/npb.json
+./packer build parsec/parsec.json
 ```
 
 ## Compiling the linux kernel
 
 In this tutorial, we will use the latest LTS (long term support) release of linux kernel v4.19.83 with gem5 to run NAS parallel benchmarks.
-First, get the linux kernel config file from [here](https://github.com/darchr/gem5art/blob/master/docs/linux-configs/config.4.19.83), and place it in npb-tests folder.
+First, get the linux kernel config file from [here](https://github.com/darchr/gem5art/blob/master/docs/linux-configs/config.4.19.83), and place it in parsec-tests folder.
 Then, we will get the linux source of version 4.19.83:
 
 ```
@@ -345,14 +370,14 @@ cp vmlinux vmlinux-4.19.83
 
 ## gem5 run scripts
 
-Next, we need to add gem5 run scripts. We will do that in a folder named configs-npb-tests.
-Get the run script named run_npb.py from [here](https://github.com/darchr/gem5art/blob/master/docs/gem5-configs/configs-npb-tests/run_npb.py), and other system configuration files from
-[here](https://github.com/darchr/gem5art/blob/master/docs/gem5-configs/configs-npb-tests/system/).
-The run script (run_npb.py) takes the following arguments:
+Next, we need to add gem5 run scripts. We will do that in a folder named configs-parsec-tests.
+Get the run script named run_parsec.py from [here](https://github.com/darchr/gem5art-experiments/blob/master/gem5-configs/configs-parsec-tests/run_parsec.py), and other system configuration files from
+[here](https://github.com/darchr/gem5art/blob/master/docs/gem5-configs/configs-parsec-tests/system/).
+The run script (run_parsec.py) takes the following arguments:
 - kernel: compiled kernel to be used for simulation
 - disk: built disk image to be used for simulation
 - cpu: the cpu model to use (e.g. kvm or atomic)
-- benchmark: NPB workload to run (e.g. is.C.x, ep.C.x, bt.C.x, where C is the class)
+- benchmark: PARSEC workload to run (e.g. blackscholes, bodytrack, facesim, etc.)
 - num_cpus: number of parallel cpus to be simulated
 
 ## Database and Celery Server
@@ -379,7 +404,7 @@ celery -E -A gem5art.tasks.celery worker --autoscale=[number of workers],0
 
 
 ## Creating a launch script
-Finally, we will create a launch script with the name launch_npb_tests.py, which will be responsible for registering the artifacts to be used and then launching gem5 jobs.
+Finally, we will create a launch script with the name launch_parsec_tests.py, which will be responsible for registering the artifacts to be used and then launching gem5 jobs.
 
 The first thing to do in the launch script is to import required modules and classes:
 
@@ -423,7 +448,7 @@ experiments_repo = Artifact.registerArtifact(
 
 Note that the name of the artifact (returned by the registerArtifact method) is totally up to the user as well as most of the other attributes of these artifacts.
 
-For all other artifacts, add following lines in launch_npb_tests.py:
+For all other artifacts, add following lines in launch_parsec_tests.py:
 
 ```python
 parsec_repo = Artifact.registerArtifact(
