@@ -7,7 +7,7 @@ Authors:
 
 ## Introduction
 
-In this tutorial, we will use gem5art to create a disk image for PARSEC benchmarks ([PARSEC](https://parsec.cs.princeton.edu/)) and then run these benchmarks using gem5. 
+In this tutorial, we will use gem5art to create a disk image for PARSEC benchmarks ([PARSEC](https://dl.acm.org/doi/10.1145/1454115.1454128)) and then run the benchmarks using gem5. 
 PARSEC is mainly designed to represent the applications that require vast amount of shared-memory. 
 
 Following are their details:
@@ -94,26 +94,7 @@ pip install gem5art-artifact gem5art-run gem5art-tasks
 
 ## Building gem5
 
-Next clone gem5 from googlesource:
-
-```sh
-git clone https://gem5.googlesource.com/public/gem5
-```
-Run the following build gem5:
-
-```sh
-scons build/X86/gem5.opt -j8
-```
-
-Also make sure to build the m5 utility which will be moved to the disk image eventually.
-m5 utility allows to trigger simulation tasks from inside the simulated system.
-For example, it can be used dump simulation statistics when the simulated system triggers to do so.
-We will need m5 mainly to exit the simulation when the simulated system will be done with the execution of a particular PARSEC benchmark.
-
-```sh
-cd gem5/util/m5/
-make -f Makefile.x86
-```
+For instructions on how to build gem5 look [here](npb-tutorial.md##Building-gem5).
 
 ## Creating a disk image
 First create a disk-image folder where we will keep all disk image related files:
@@ -351,22 +332,7 @@ Now, to build the disk image inside the disk-image folder, run:
 
 ## Compiling the linux kernel
 
-In this tutorial, we will use the latest LTS (long term support) release of linux kernel v4.19.83 with gem5 to run NAS parallel benchmarks.
-First, get the linux kernel config file from [here](https://github.com/darchr/gem5art/blob/master/docs/linux-configs/config.4.19.83), and place it in parsec-tests folder.
-Then, we will get the linux source of version 4.19.83:
-
-```
-git clone --branch v4.19.83 --depth 1 https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
-mv linux linux-stable
-cd linux-stable
-```
-Compile the linux kernel from its source (using already downloaded config file config.4.19.83):
-
-```
-cp ../config.4.19.83 .config
-make -j8
-cp vmlinux vmlinux-4.19.83
-```
+Follow the instructions [here](npb-tutorial.md##Compiling-the-linux-kernel) to compile your linux kernel
 
 ## gem5 run scripts
 
@@ -382,26 +348,7 @@ The run script (run_parsec.py) takes the following arguments:
 
 ## Database and Celery Server
 
-If not already running/created, you can create a database using:
-
-```sh
-docker run -p 27017:27017 -v <absolute path to the created directory>:/data/db --name mongo-<some tag> -d mongo
-```
-in a newly created directory.
-
-If not already installed, install `RabbitMQ` on your system (before running celery) using:
-
-```sh
-apt-get install rabbitmq-server
-```
-
-Now, run celery server using:
-
-```sh
-celery -E -A gem5art.tasks.celery worker --autoscale=[number of workers],0
-```
-
-
+To create a database and start a celery server follow the instructions [here](npb-tutorial.md##Database-and-Celery-Server).
 
 ## Creating a launch script
 Finally, we will create a launch script with the name launch_parsec_tests.py, which will be responsible for registering the artifacts to be used and then launching gem5 jobs.
@@ -565,7 +512,7 @@ if __name__ == "__main__":
 ```
 The above lines are responsible for looping through all possible combinations of variables involved in this experiment.
 For each combination, a gem5Run object is created and eventually passed to run_gem5_instance to be
-executed asynchronously using Celery.
+executed asynchronously using Celery. Note that when using timingSimpleCPU model only size **simsmall** has been used because the other sizes take more than 24 hours to simulate.
 
 
 Finally, make sure you are in python virtual env and then run the script:
@@ -580,3 +527,18 @@ Once you run the launch script, the declared artifacts will be registered by gem
 Celery will run as many jobs in parallel as allowed by the user (at the time of starting the server).
 As soon as a gem5 job finishes, a compressed version of the results will be stored in the database as well.
 User can also query the database using the methods discussed in the [Artifacts](../main-doc/artifacts.md), [Runs](../main-doc/runs.md) sections and [boot-test](boot-tutorial.md) tutorial previously.
+
+Here is the status of each workload after simulation: 
+
+![WorkingStatusKVM](../images/WorkingStatusKVM.png)
+![WorkingStatusTiming](../images/WorkingStatusTiming.png)
+
+Below are the simulation time for KVM and TimingSimple cpu models. 
+
+![SimTimeKVM](../images/SimTimeKVM.png)
+![SimTimeTiming](../images/SimTimeTiming.png)
+
+The number of instructions run on each cpu model is shown below: 
+
+![InstCountKVM](../images/InstCountKVM.png)
+![InstCountTiming](../images/InstCountTiming.png)
