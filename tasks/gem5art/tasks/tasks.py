@@ -28,6 +28,8 @@
 # Authors: Jason Lowe-Power
 
 from .celery import gem5app
+import multiprocessing as mp
+import time
 
 @gem5app.task(bind=True, serializer='pickle')
 def run_gem5_instance(self, gem5_run, cwd = '.'):
@@ -37,3 +39,23 @@ def run_gem5_instance(self, gem5_run, cwd = '.'):
     """
 
     gem5_run.run(self, cwd = cwd)
+
+def run_single_job(run):
+    start_time = time.time()
+    print(f"Running {' '.join(run.command)} at {time.time()}")
+    run.run()
+    finish_time = time.time()
+    print(f"Finished {' '.join(run.command)} at {time.time()}. Total time = {finish_time - start_time}")
+
+def run_job_pool(job_list, num_parallel_jobs = mp.cpu_count() // 2):
+    """
+    Runs gem5 jobs in parallel when Celery is not used.
+    Creates as many parallel jobs as core count if no explicit
+    job count is provided
+    Receives a list of run objects created by the launch script
+    """ 
+    pool = mp.Pool(num_parallel_jobs)
+    pool.map(run_single_job, job_list)
+    pool.close()
+    pool.join()
+    print(f"All jobs done running!")
