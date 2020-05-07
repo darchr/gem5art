@@ -8,7 +8,7 @@ Authors:
 ## Introduction
 In this tutorial, we will demonstrate how to utilize gem5art to run SPEC CPU 2006 benchmarks in gem5 full system mode.
 The full example with all of the gem5art tutorials can be found [here](https://github.com/darchr/gem5art-experiments).
-The scripts in this tutorial work with gem5art-* v0.3.1.
+The scripts in this tutorial work with gem5art-* v1.1.0.
 
 ### SPEC CPU 2006 Benchmarks
 **Important:** The usage of this tutorial is just for the purpose of demonstration.
@@ -105,18 +105,11 @@ linux-4.19.83/
 Essentially, we will ignore files and folders that when we use gem5art to keep track of them, or the presence of those files and folders do not affect the experiment's results.
 
 ### Building gem5
-In this step, we download the source code and build gem5.
-In this tutorial, we use m5 writefile function to copy the file from the disk image to the host system.
-That function does not work out-of-the-box in the current version of gem5 (as of November 2019).
-We need to cherry-pick two commits, one from googlesource, and one from darchr/gem5 on GitHub for that function to work.
+In this step, we download the source code and build gem5 v19.
 
 ```sh
-git clone https://gem5.googlesource.com/public/gem5
+git clone -b v19.0.0.0 https://gem5.googlesource.com/public/gem5
 cd gem5
-git remote add darchr https://github.com/darchr/gem5
-git fetch darchr
-git cherry-pick 6450aaa7ca9e3040fb9eecf69c51a01884ac370c
-git cherry-pick 3403665994b55f664f4edfc9074650aaa7ddcd2c
 scons build/X86/gem5.opt -j8
 ```
 
@@ -127,29 +120,26 @@ In launch_spec2006_experiments.py, we document the step in Artifact objects as f
 ```python
 gem5_repo = Artifact.registerArtifact(
     command = '''
-        git clone https://gem5.googlesource.com/public/gem5;
-        cd gem5;
-        git remote add darchr https://github.com/darchr/gem5;
-        git fetch darchr;
-        git cherry-pick 6450aaa7ca9e3040fb9eecf69c51a01884ac370c;
-        git cherry-pick 3403665994b55f664f4edfc9074650aaa7ddcd2c;
+        git clone -b v19.0.0.0 https://gem5.googlesource.com/public/gem5
+        cd gem5
+        scons build/X86/gem5.opt -j8
     ''',
     typ = 'git repo',
     name = 'gem5',
     path =  'gem5/',
     cwd = './',
-    documentation = 'cloned gem5 master branch from googlesource and cherry-picked 2 commits on Nov 20th'
+    documentation = 'cloned gem5 v19'
 )
 
 
 gem5_binary = Artifact.registerArtifact(
     command = 'scons build/X86/gem5.opt -j8',
     typ = 'gem5 binary',
-    name = 'gem5',
+    name = 'gem5-19',
     cwd = 'gem5/',
     path =  'gem5/build/X86/gem5.opt',
     inputs = [gem5_repo,],
-    documentation = 'compiled gem5 binary right after downloading the source code, this has two cherry picked changes to fix m5 readfile in KVM'
+    documentation = 'compiled gem5 v19 binary'
 )
 ```
 
@@ -410,6 +400,7 @@ In the root folder of the experiment,
 mkdir gem5-configs
 cd gem5-configs
 git init
+git remote add origin https://your-remote-add/run-spec-config.git
 ```
 
 Then we copy all the scripts in configs-spec-tests folder to gem5-configs.
@@ -418,13 +409,13 @@ In the root folder of the experiment,
 
 ```sh
 cd gem5-configs
-wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/run_spec.py
+wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/gem5-configs/configs-spec-tests/run_spec.py
 mkdir -p system
 cd system
-wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/system/__init__.py
-wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/system/caches.py
-wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/system/fs_tools.py
-wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/system/system.py
+wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/gem5-configs/configs-spec-tests/system/__init__.py
+wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/gem5-configs/configs-spec-tests/system/caches.py
+wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/gem5-configs/configs-spec-tests/system/fs_tools.py
+wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/gem5-configs/configs-spec-tests/system/system.py
 cd ..
 git add *
 git commit -m "Add run scripts for SPEC2006"
@@ -435,13 +426,13 @@ In launch_spec2006_experiments.py, we make an Artifact object of the Linux kerne
 ```python
 run_script_repo = Artifact.registerArtifact(
     command = '''
-        wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/run_spec.py
+        wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/gem5-configs/configs-spec-tests/run_spec.py
         mkdir -p system
         cd system
-        wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/system/__init__.py
-        wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/system/caches.py
-        wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/system/fs_tools.py
-        wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/system/system.py
+        wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/gem5-configs/configs-spec-tests/system/__init__.py
+        wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/gem5-configs/configs-spec-tests/system/caches.py
+        wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/gem5-configs/configs-spec-tests/system/fs_tools.py
+        wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/gem5-configs/configs-spec-tests/system/system.py
     ''',
     typ = 'git repo',
     name = 'gem5-configs',
@@ -458,7 +449,7 @@ The gem5 run script, [run_spec.py](https://github.com/darchr/gem5art/blob/master
 Currently, we are supporting the following CPU models: kvm, o3, atomic, timing.
 More CPU models could be added to getDetailedCPUModel() in run_spec.py.
 * --benchmark: (required) name of the SPEC CPU 2006 benchmark.
-The availability of the benchmarks could be found [here](#) TODO.
+The availability of the benchmarks could be found at the end of the tutorial.
 * --size: (required) size of the benchmark. There are three options: ref, train, test.
 * --no-copy-logs: this is an optional parameter specifying whether the spec log files should be copied to the host system.
 * --no-listeners: this is an optional parameter specifying whether gem5 should open ports so that gdb or telnet could connect to.
@@ -557,6 +548,7 @@ if __name__ == "__main__":
         for size in benchmark_sizes[cpu]:
             for benchmark in benchmarks:
                 run = gem5Run.createFSRun(
+                    'gem5 19 spec 2006 experiment',
                     'gem5/build/X86/gem5.opt', # gem5_binary
                     'gem5-configs/run_spec.py', # run_script
                     'results/{}/{}/{}'.format(cpu, size, benchmark), # relative_outdir
@@ -568,9 +560,9 @@ if __name__ == "__main__":
                     linux_binary, # linux_binary_artifact
                     disk_image, # disk_image_artifact
                     cpu, benchmark, size, # params
-                    timeout = 5*24*60*60 # 5 days
+                    timeout = 5 * 24 * 60 * 60 # 5 days
                 )
-                run_gem5_instance.apply_async((run,)) # TODO: update this script to gem5art-0.4.1
+                run_gem5_instance.apply_async((run,))
 
 ```
 The above launch function will run the all the available benchmarks with kvm, atomic, timing, and o3 cpus.
@@ -608,7 +600,7 @@ If the benchmark run is successful, there will be a line starting with `Success:
 
 
 ## Appendix I. Working SPEC 2006 Benchmarks x CPU Model table
-Not all benchmarks are compiled in the above set up as of November 2019.
+Not all benchmarks are compiled in the above set up as of March 2020.
 The following are compiled benchmarks:
 
 | Benchmarks         | KVM/test        | KVM/ref         | AtomicCPU/test  | O3CPU/test      | TimingSimpleCPU/test |
@@ -616,27 +608,27 @@ The following are compiled benchmarks:
 | 401.bzip2          | Success         | Success         | Success         | Success         | Success              |
 | 403.gcc            | Success         | Success         | Success         | Success         | Success              |
 | 410.bwaves         | Success         | Success         | Success         | Success         | Success              |
-| 416.gamess         | Error           | Error           | Error           | Error           | Error                |
-| 429.mcf            | Success         | Success         | Success         | Success         | No SPEC logs         |
+| 416.gamess         | Success         | Success         | Success         | Success         | Success              |
+| 429.mcf            | Success         | Success         | Success         | Success         | Success              |
 | 433.milc           | Success         | Success         | Success         | Success         | Success              |
-| 434.zeusmp         | Success         | Success         | Success         | No SPEC logs    | Success              |
+| 434.zeusmp         | Success         | Success         | Success         | No logs         | Success              |
 | 435.gromacs        | Success         | Success         | Success         | Success         | Success              |
 | 436.cactusADM      | Success         | Success         | Success         | Success         | Success              |
 | 437.leslie3d       | Success         | Success         | Success         | Success         | Success              |
 | 444.namd           | Success         | Success         | Success         | Success         | Success              |
-| 445.gobmk          | Success         | Success         | Success         | No SPEC logs    | Success              |
+| 445.gobmk          | Success         | Success         | Success         | TimeOut         | Success              |
 | 453.povray         | Success         | Success         | Success         | Success         | Success              |
 | 454.calculix       | Success         | Success         | Success         | Success         | Success              |
 | 456.hmmer          | Success         | Success         | Success         | Success         | Success              |
 | 458.sjeng          | Success         | Success         | Success         | Success         | Success              |
 | 459.GemsFDTD       | Success         | Success         | Success         | Success         | Success              |
 | 462.libquantum     | Success         | Success         | Success         | Success         | Success              |
-| 464.h264ref        | Success         | Success         | Success         | No SPEC logs    | Success              |
+| 464.h264ref        | Success         | Success         | Success         | Success         | Success              |
 | 465.tonto          | Success         | Success         | Success         | Success         | Success              |
 | 470.lbm            | Success         | Success         | Success         | Success         | Success              |
 | 471.omnetpp        | Success         | Success         | Success         | Success         | Success              |
-| 473.astar          | Success         | Success         | Success         | No SPEC logs    | Success              |
-| 481.wrf            | Error           | Error           | Error           | Error           | Error                |
+| 473.astar          | Success         | Success         | Success         | Success         | Success              |
+| 481.wrf            | Success         | Success         | Success         | Success         | Success              |
 | 482.sphinx3        | Success         | Success         | Success         | Success         | Success              |
 | 998.specrand       | Success         | Success         | Success         | Success         | Success              |
 | 999.specrand       | Success         | Success         | Success         | Success         | Success              |

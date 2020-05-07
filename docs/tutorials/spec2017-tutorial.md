@@ -8,7 +8,7 @@ Authors:
 ## Introduction
 In this tutorial, we will demonstrate how to utilize gem5art to run SPEC CPU 2017 benchmarks in gem5 full system mode.
 The full example with all of the gem5art tutorials can be found [here](https://github.com/darchr/gem5art-experiments).
-The scripts in this tutorial work with gem5art-* v0.3.1.
+The scripts in this tutorial work with gem5art-* v1.1.0.
 
 **Note**: This steps in this tutorial are mostly identical to those of [the SPEC 2006 tutorial](spec2006-tutorial.md).
 The differences are in the scripts used to create the disk image, and the name of the benchmarks.
@@ -102,18 +102,11 @@ linux-4.19.83/
 Essentially, we will ignore files and folders that when we use gem5art to keep track of them, or the presence of those files and folders do not affect the experiment's results.
 
 ### Building gem5
-In this step, we download the source code and build gem5.
-In this tutorial, we use m5 writefile function to copy the file from the disk image to the host system.
-That function does not work out-of-the-box in the current version of gem5 (as of December 2019).
-We need to cherry-pick two commits, one from googlesource, and one from darchr/gem5 on GitHub for that function to work.
+In this step, we download the source code and build gem5 v19.
 
 ```sh
-git clone https://gem5.googlesource.com/public/gem5
+git clone -b v19.0.0.0 https://gem5.googlesource.com/public/gem5
 cd gem5
-git remote add darchr https://github.com/darchr/gem5
-git fetch darchr
-git cherry-pick 6450aaa7ca9e3040fb9eecf69c51a01884ac370c
-git cherry-pick 3403665994b55f664f4edfc9074650aaa7ddcd2c
 scons build/X86/gem5.opt -j8
 ```
 
@@ -124,29 +117,26 @@ In launch_spec2017_experiments.py, we document the step in Artifact objects as f
 ```python
 gem5_repo = Artifact.registerArtifact(
     command = '''
-        git clone https://gem5.googlesource.com/public/gem5;
-        cd gem5;
-        git remote add darchr https://github.com/darchr/gem5;
-        git fetch darchr;
-        git cherry-pick 6450aaa7ca9e3040fb9eecf69c51a01884ac370c;
-        git cherry-pick 3403665994b55f664f4edfc9074650aaa7ddcd2c;
+        git clone -b v19.0.0.0 https://gem5.googlesource.com/public/gem5
+        cd gem5
+        scons build/X86/gem5.opt -j8
     ''',
     typ = 'git repo',
     name = 'gem5',
     path =  'gem5/',
     cwd = './',
-    documentation = 'cloned gem5 master branch from googlesource and cherry-picked 2 commits on Nov 20th'
+    documentation = 'cloned gem5 v19'
 )
 
 
 gem5_binary = Artifact.registerArtifact(
     command = 'scons build/X86/gem5.opt -j8',
     typ = 'gem5 binary',
-    name = 'gem5',
+    name = 'gem5-19',
     cwd = 'gem5/',
     path =  'gem5/build/X86/gem5.opt',
     inputs = [gem5_repo,],
-    documentation = 'compiled gem5 binary right after downloading the source code, this has two cherry picked changes to fix m5 readfile in KVM'
+    documentation = 'compiled gem5 v19'
 )
 ```
 
@@ -396,7 +386,7 @@ linux_binary = Artifact.registerArtifact(
 ### The gem5 Run Script/gem5 Configuration
 In this step, we take a look at the final missing piece: the gem5 run script.
 The script is where we specify the simulated system.
-We offer example scripts in the [configs-spec2017-tests folder](https://github.com/darchr/gem5art/blob/master/docs/gem5-configs/configs-spec2017-tests/).
+We offer example scripts in the [configs-spec-tests folder](https://github.com/darchr/gem5art/blob/master/docs/gem5-configs/configs-spec-tests/).
 
 First, we create a folder named gem5-configs containing all gem5 configs.
 Since gem5art requires a git repo for the run scripts, we will make a local git repo for the run scripts.
@@ -409,19 +399,19 @@ cd gem5-configs
 git init
 ```
 
-Then we copy all the scripts in configs-spec2017-tests folder to gem5-configs.
+Then we copy all the scripts in configs-spec-tests folder to gem5-configs.
 
 In the root folder of the experiment,
 
 ```sh
 cd gem5-configs
-wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/run_spec.py
+wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/gem5-configs/configs-spec-tests/run_spec.py
 mkdir -p system
 cd system
-wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/system/__init__.py
-wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/system/caches.py
-wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/system/fs_tools.py
-wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/system/system.py
+wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/gem5-configs/configs-spec-tests/system/__init__.py
+wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/gem5-configs/configs-spec-tests/system/caches.py
+wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/gem5-configs/configs-spec-tests/system/fs_tools.py
+wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/gem5-configs/configs-spec-tests/system/system.py
 cd ..
 git add *
 git commit -m "Add run scripts for SPEC2017"
@@ -435,10 +425,10 @@ run_script_repo = Artifact.registerArtifact(
         wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/run_spec.py
         mkdir -p system
         cd system
-        wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/system/__init__.py
-        wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/system/caches.py
-        wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/system/fs_tools.py
-        wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/configs-spec-tests/system/system.py
+        wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/gem5-configs/configs-spec-tests/system/__init__.py
+        wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/gem5-configs/configs-spec-tests/system/caches.py
+        wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/gem5-configs/configs-spec-tests/system/fs_tools.py
+        wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/gem5-configs/configs-spec-tests/system/system.py
     ''',
     typ = 'git repo',
     name = 'gem5-configs',
@@ -448,14 +438,14 @@ run_script_repo = Artifact.registerArtifact(
 )
 ```
 
-The gem5 run script, [run_spec.py](https://github.com/darchr/gem5art/blob/master/docs/configs-spec2017-tests/run_spec.py), takes the following parameters:
+The gem5 run script, [run_spec.py](https://github.com/darchr/gem5art/blob/master/docs/configs-spec-tests/run_spec.py), takes the following parameters:
 * --kernel: (required) the path to vmlinux file.
 * --disk: (required) the path to spec image.
 * --cpu: (required) name of the detailed CPU model.
 Currently, we are supporting the following CPU models: kvm, o3, atomic, timing.
 More CPU models could be added to getDetailedCPUModel() in run_spec.py.
 * --benchmark: (required) name of the SPEC CPU 2017 benchmark.
-The availability of the benchmarks could be found [here](#) TODO.
+The availability of the benchmarks could be found at the end of the tutorial.
 * --size: (required) size of the benchmark. There are three options: ref, train, test.
 * --no-copy-logs: this is an optional parameter specifying whether the spec log files should be copied to the host system.
 * --no-listeners: this is an optional parameter specifying whether gem5 should open ports so that gdb or telnet could connect to.
@@ -542,13 +532,20 @@ if __name__ == "__main__":
                        'o3':     ['test'],
                        'timing': ['test']
                       }
-    benchmarks = [TODO]
-    # unavailable benchmarks: 400.perlbench,447.dealII,450.soplex,483.xalancbmk
+    benchmarks = ["503.bwaves_r", "507.cactuBSSN_r", "508.namd_r", "510.parest_r", "511.povray_r", "519.lbm_r",
+                  "521.wrf_r", "526.blender_r", "527.cam4_r", "538.imagick_r", "544.nab_r", "549.fotonik3d_r",
+                  "554.roms_r", "997.specrand_fr", "603.bwaves_s", "607.cactuBSSN_s", "619.lbm_s", "621.wrf_s",
+                  "627.cam4_s", "628.pop2_s", "638.imagick_s", "644.nab_s", "649.fotonik3d_s", "654.roms_s",
+                  "996.specrand_fs", "500.perlbench_r", "502.gcc_r", "505.mcf_r", "520.omnetpp_r", "523.xalancbmk_r",
+                  "525.x264_r", "531.deepsjeng_r", "541.leela_r", "548.exchange2_r", "557.xz_r", "999.specrand_ir",
+                  "600.perlbench_s", "602.gcc_s", "605.mcf_s", "620.omnetpp_s", "623.xalancbmk_s", "625.x264_s",
+                  "631.deepsjeng_s", "641.leela_s", "648.exchange2_s", "657.xz_s", "998.specrand_is"]
 
     for cpu in cpus:
         for size in benchmark_sizes[cpu]:
             for benchmark in benchmarks:
                 run = gem5Run.createFSRun(
+                    'gem5 19 spec 2017 experiment', # name
                     'gem5/build/X86/gem5.opt', # gem5_binary
                     'gem5-configs/run_spec.py', # run_script
                     'results/{}/{}/{}'.format(cpu, size, benchmark), # relative_outdir
@@ -580,61 +577,58 @@ In the root folder of the experiment,
 python3 launch_spec2017_experiment.py
 ```
 
-## Getting the Results
-TODO
-
 ## Appendix I. Working SPEC 2017 Benchmarks x CPU Model Matrix
-All benchmarks are compiled in the above set up as of December 2019.
+All benchmarks are compiled in the above set up as of March 2020.
 The following are compiled benchmarks:
 
 | Benchmarks             | KVM/test       | KVM/ref        | O3CPU/test     | AtomicCPU/test | TimingSimpleCPU/test |
 |------------------------|----------------|----------------|----------------|----------------|----------------------|
-| 503.bwaves_r           |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 507.cactuBSSN_r        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 508.namd_r             |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 510.parest_r           |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 511.povray_r           |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 519.lbm_r              |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 521.wrf_r              |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 526.blender_r          |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 527.cam4_r             |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 538.imagick_r          |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 544.nab_r              |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 549.fotonik3d_r        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 554.roms_r             |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 997.specrand_fr        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 603.bwaves_s           |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 607.cactuBSSN_s        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 619.lbm_s              |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 621.wrf_s              |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 627.cam4_s             | Workload segfault | Workload segfault |      gem5 error |     gem5 error |                     ?|
-| 628.pop2_s             |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 638.imagick_s          |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 644.nab_s              |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 649.fotonik3d_s        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 654.roms_s             |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 996.specrand_fs        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 500.perlbench_r        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 502.gcc_r              |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 505.mcf_r              |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 520.omnetpp_r          |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 523.xalancbmk_r        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 525.x264_r             |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 531.deepsjeng_r        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 541.leela_r            |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 548.exchange2_r        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 557.xz_r               |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 999.specrand_ir        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 600.perlbench_s        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 602.gcc_s              |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 605.mcf_s              |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 620.omnetpp_s          |        Success |        Success |     gem5 error |              ? |                     ?|
-| 623.xalancbmk_s        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 625.x264_s             |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 631.deepsjeng_s        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 641.leela_s            |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 648.exchange2_s        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 657.xz_s               |        Success |        Success |     gem5 error |     gem5 error |                     ?|
-| 998.specrand_is        |        Success |        Success |     gem5 error |     gem5 error |                     ?|
+| 500.perlbench_r        |        Success |        Success |  gem5 segfault | One test failed |      One test failed |
+| 502.gcc_r              |        Success |        Success |        Success |        Success |              Success |
+| 503.bwaves_r           |        Success |        Success | Timed out (20 days) |        Success |              Success |
+| 505.mcf_r              |        Success |        Success |        Success |        Success |              Success |
+| 507.cactuBSSN_r        |        Success |        Success |        Success |        Success |              Success |
+| 508.namd_r             |        Success |        Success |              ? |        Success |              Success |
+| 510.parest_r           |        Success |        Success | Workload segfault | Workload segfault | Workload segfault |
+| 511.povray_r           |        Success |        Success |        Success |        Success |              Success |
+| 519.lbm_r              |        Success |        Success |        Success |        Success |              Success |
+| 520.omnetpp_r          |        Success |        Success |        Success |        Success |                    ? |
+| 521.wrf_r              |        Success |        Success |  gem5 segfault |        Success |              Success |
+| 523.xalancbmk_r        |        Success |        Success |        Success |        Success |                    ? |
+| 525.x264_r             |        Success |        Success | Timed out (20 days) |        Success |              Success |
+| 526.blender_r          |        Success |        Success |        Success |        Success |              Success |
+| 527.cam4_r             |        Success |        Success |              ? |        Success |              Success |
+| 531.deepsjeng_r        |        Success |        Success |        Success |        Success |              Success |
+| 538.imagick_r          |        Success |        Success |        Success |        Success |              Success |
+| 541.leela_r            |        Success |        Success |        Success |        Success |              Success |
+| 544.nab_r              |        Success |        Success |        Success |        Success |              Success |
+| 548.exchange2_r        |        Success |        Success |        Success |        Success |              Success |
+| 549.fotonik3d_r        |        Success |        Success |        Success |        Success |              Success |
+| 554.roms_r             |        Success |        Success |  gem5 segfault |        Success |              Success |
+| 557.xz_r               |        Success |        Success |        Success |        Success |              Success |
+| 600.perlbench_s        |        Success |        Success | One test failed | One test failed |                    ? |
+| 602.gcc_s              |        Success |        Success |        Success |        Success |              Success |
+| 603.bwaves_s           |        Success |        Success | Timed out (20 days) |        Success |              Success |
+| 605.mcf_s              |        Success |        Success |        Success |        Success |                    ? |
+| 607.cactuBSSN_s        |        Success |        Success |        Success |        Success |              Success |
+| 619.lbm_s              |        Success |        Success |              ? |        Success |              Success |
+| 620.omnetpp_s          |        Success |        Success |        Success |        Success |              Success |
+| 621.wrf_s              |        Success |        Success |        Success |        Success |              Success |
+| 623.xalancbmk_s        |        Success |        Success |        Success |        Success |              Success |
+| 625.x264_s             |        Success |        Success | Timed out (20 days) |        Success |              Success |
+| 627.cam4_s             | Workload segfault | Workload segfault | Workload segfault | Workload segfault | Workload segfault |
+| 628.pop2_s             |        Success |        Success |        Success |        Success |              Success |
+| 631.deepsjeng_s        |        Success |        Success |  gem5 segfault |        Success |                    ? |
+| 638.imagick_s          |        Success |        Success |        Success |        Success |              Success |
+| 641.leela_s            |        Success |        Success |        Success |        Success |              Success |
+| 644.nab_s              |        Success |        Success |        Success |        Success |              Success |
+| 648.exchange2_s        |        Success |        Success |        Success |        Success |              Success |
+| 649.fotonik3d_s        |        Success |        Success |        Success |        Success |              Success |
+| 654.roms_s             |        Success |        Success |        Success |        Success |              Success |
+| 657.xz_s               |        Success |        Success |        Success |        Success |              Success |
+| 996.specrand_fs        |        Success |        Success |        Success |        Success |              Success |
+| 997.specrand_fr        |        Success |        Success |        Success |        Success |           gem5 error |
+| 998.specrand_is        |        Success |        Success |        Success |        Success |              Success |
+| 999.specrand_ir        |        Success |        Success |        Success |        Success |                    ? |
 
 
