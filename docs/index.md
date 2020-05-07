@@ -72,6 +72,7 @@ Tutorials
    tutorials/microbench-tutorial.md
    tutorials/spec2006-tutorial.md
    tutorials/spec2017-tutorial.md
+   tutorials/parsec-tutorial.md
 
 Indices and tables
 ==================
