@@ -252,7 +252,7 @@ if __name__ == "__main__":
 
 ```
 
-Note that, in contrast to previous tutorials ([boot](boot-tutorial.md), [npb](npb-tutorial.md)), we are using createSERun here, as we want to run gem5 in SE mode.
+Note that, in contrast to previous tutorials ([boot](boot-tutorial.md), [npb](npb-tutorial.md)), we are using createSERun this time, as we want to run gem5 in SE mode.
 The details of the arguments needed by `createSERun()` can be found [here](../main-doc/run.html#gem5art.run.gem5Run.createSERun)).
 The full launch script is available [here](https://github.com/darchr/gem5art/blob/master/docs/launch-scripts/launch_micro_tests.py).
 
