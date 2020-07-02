@@ -5,6 +5,8 @@
 ![CI Badge](https://github.com/darchr/gem5art/workflows/CI/badge.svg)
 [![Documentation Status](https://readthedocs.org/projects/gem5art/badge/?version=latest)](https://gem5art.readthedocs.io/en/latest/?badge=latest)
 
+See <https://gem5art.readthedocs.io/en/latest/> for detailed documentation.
+
 ## Installing gem5art
 
 To install gem5art, simply use pip.
