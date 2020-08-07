@@ -28,6 +28,14 @@ apt-get install rabbitmq-server
 ```
 
 ## Monitoring Celery
+Celery does not explicitly show the status of the runs by default. 
+[flower](https://flower.readthedocs.io/en/latest/), a Python package, is a web-based tool for monitoring and administrating Celery.  
+
+To install flower, 
+```sh
+pip install flower
+```
+
 You can monitor the celery cluster doing the following:
 
 ```sh
