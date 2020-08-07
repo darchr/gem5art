@@ -6,8 +6,21 @@ Authors:
 # Tasks
 
 ## Introduction
-The actual gem5 experiment is executed with the help of [Celery](http://www.celeryproject.org/).
-Celery server can run many gem5 tasks asynchronously. Once a user creates a gem5Run object (discussed previously) while using gem5art, this object needs to be passed to a method run_gem5_instance() registered with Celery app, which is responsible for starting a Celery task to run gem5. The other argument needed by the run_gem5_instance() is the current working directory. Fundamentally, celery is not required to run gem5 jobs with gem5art and a job can be directly launched by calling run() function of gem5Run object. However, celery can do a better job of managing multiple runs.
+The actual gem5 experiment can be executed with the help of [Python multiprocessing support](https://docs.python.org/3/library/multiprocessing.html), [Celery](http://www.celeryproject.org/) or even without using any job manager (a job can be directly launched by calling run() function of gem5Run object).
+
+## Use of Python Multiprocessing
+
+This is a simple way to run gem5 jobs using Ptyhon multiprocessing library. 
+You can use the following function in your job launch script to execute gem5art run objects:
+
+```python
+run_job_pool([a list containing all run objects you want to execute], num_parallel_jobs = [Number of parralel jobs you want to run])
+```
+The implementation of `run_job_pool` can be found [here](https://github.com/darchr/gem5art/blob/master/tasks/gem5art/tasks/tasks.py#L50).
+
+## Use of Celery
+
+Celery server can run many gem5 tasks asynchronously. Once a user creates a gem5Run object (discussed previously) while using gem5art, this object needs to be passed to a method run_gem5_instance() registered with Celery app, which is responsible for starting a Celery task to run gem5. The other argument needed by the run_gem5_instance() is the current working directory.
 
 Celery server can be started with the following command:
 

@@ -16,6 +16,15 @@ For example, assuming created run object (in a launch script) is called run, you
 run.run()
 ```
 
+**Is there a more user-friendly way to launch gem5 jobs?**
+
+You can use python multiprocessing library based function calls (provided by gem5art) to launch multiple gem5 jobs in parallel.
+Specifically, you can call the following function in your gem5art launch script:
+
+```python
+run_job_pool([a list containing all run objects you want to execute], num_parallel_jobs = [Number of parralel jobs you want to run])
+```
+
 **How to access/search the files/artifacts in the database?**
 
 You can use the pymongo API functions to access the files in the database.
