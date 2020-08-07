@@ -36,6 +36,14 @@ Make sure to use the new name field to query the results or runs in the database
 
 **How can I monitor the status of jobs launched using gem5art launch script?**
 
+Celery does not explicitly show the status of the runs by default. 
+[flower](https://flower.readthedocs.io/en/latest/), a Python package, is a web-based tool for monitoring and administrating Celery.  
+
+To install the flower package, 
+```sh
+pip install flower
+```
+
 If you are using celery to run your tasks, you can use celery monitoring tool called flower.
 For this purpose, use the following command:
 
