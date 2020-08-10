@@ -30,6 +30,7 @@
 """File contains the Artifact class and helper functions
 """
 
+from collections import defaultdict
 import hashlib
 from inspect import cleandoc
 import os
@@ -197,13 +198,26 @@ class Artifact:
 
     def __init__(self, other: Union[str, UUID, Dict[str, Any]]) -> None:
         """Constructs the object from the database based on a UUID or
-        dictionary from the database
+        dictionary from the database. If the object can't be found in the
+        database, then construct it with a bunch of '???' instead of actual
+        values.
         """
         _db = getDBConnection()
         if isinstance(other, str):
             other = UUID(other)
         if isinstance(other, UUID):
+            id = other
             other = _db.get(other)
+            if not other:
+                # If we can't find it in the database, something is wrong.
+                # However, we want to go ahead and construct an object to make
+                # callers (e.g., run.loadFromDict) happy. Most things we'll use
+                # '???' to denote that we don't know, but a couple need special
+                # care
+                other = defaultdict(lambda: '???')
+                other['_id'] = id
+                other['git'] = {}
+                other['inputs'] = []
 
         if not other:
             raise Exception("Cannot construct artifact")
