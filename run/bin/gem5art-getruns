@@ -38,7 +38,7 @@ from json import dump
 
 import gem5art.artifact
 from gem5art.artifact import getDBConnection
-from gem5art.run import getRuns
+from gem5art.run import getRunsByNameLike, getRuns
 
 def parseArgs():
     parser = ArgumentParser(
@@ -54,6 +54,8 @@ def parseArgs():
                 help="Limit of the number of runs to return. Default: all")
     parser.add_argument('--db-uri', default = default_db_uri,
                 help = f"The database to connect to. Default {default_db_uri}")
+    parser.add_argument('-s', '--search_name', help="Query for the name field",
+                        default='')
 
     return parser.parse_args()
 
@@ -64,7 +66,11 @@ if __name__ == "__main__":
     db = getDBConnection(args.db_uri)
 
     with open(args.filename, 'w') as f:
-        runs = getRuns(args.fs_only, args.limit)
+        if args.search_name:
+            runs = getRunsByNameLike(args.search_name, args.fs_only,
+                                     args.limit)
+        else:
+            runs = getRuns(args.fs_only, args.limit)
 
         to_dump = [run._convertForJson(run._getSerializable()) for run in runs]
         dump(to_dump, f, indent=2)
