@@ -293,7 +293,12 @@ class gem5Run:
         run.artifacts = []
         for k,v in d.items():
             if isinstance(v, UUID) and k != '_id':
-                a = Artifact(v)
+                try:
+                    a = Artifact(v)
+                except Exception:
+                    # UUID isn't found in the database. Insert a simple
+                    # dict with just an id and blank data instead
+                    a = {'_id': str(v), 'data':'???'}
                 setattr(run, k, a)
                 run.artifacts.append(a)
             else:
