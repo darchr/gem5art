@@ -30,15 +30,22 @@
 from abc import ABC, abstractmethod
 
 import gridfs # type: ignore
+import os
 from pathlib import Path
 from pymongo import MongoClient # type: ignore
 from typing import Any, Dict, Iterable, Union, Type
+from urllib.parse import urlparse
 from uuid import UUID
 
 class ArtifactDB(ABC):
     """
     Abstract base class for all artifact DBs.
     """
+
+    @abstractmethod
+    def __init__(self, uri: str):
+        """Initialize the database with a URI"""
+        pass
 
     @abstractmethod
     def put(self, key: UUID, artifact: Dict[str,Union[str,UUID]]) -> None:
@@ -106,11 +113,15 @@ class ArtifactMongoDB(ArtifactDB):
       UUID of the artifact.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, uri :str) -> None:
+        """Initialize the mongodb connection and grab pointers to the databases
+           uri is the location of the database in a mongodb compatible form.
+           http://dochub.mongodb.org/core/connections.
+        """
         # Note: Need "connect=False" so that we don't connect until the first
         # time we interact with the database. Required for the gem5 running
         # celery server
-        self.db = MongoClient(connect=False).artifact_database
+        self.db = MongoClient(host=uri, connect=False).artifact_database
         self.artifacts = self.db.artifacts
         self.fs = gridfs.GridFSBucket(self.db, disable_md5=True)
 
@@ -182,15 +193,50 @@ class ArtifactMongoDB(ArtifactDB):
 
 _db = None
 
-def getDBConnection(typ: Type[ArtifactDB] = ArtifactMongoDB) -> ArtifactDB:
+_db_schemes : Dict[str, Type[ArtifactDB]] = {
+    'mongodb': ArtifactMongoDB
+}
+
+def _getDBType(uri: str) -> Type[ArtifactDB]:
+    """Internal function to take a URI and return a class that can be
+    constructed with that URI. For instance "mongodb://localhost" will return
+    an ArtifactMongoDB. More types will be added in the future.
+
+    Supported types:
+        **ArtifactMongoDB**: mongodb://...
+            See http://dochub.mongodb.org/core/connections for details.
+    """
+    result = urlparse(uri)
+    if result.scheme in _db_schemes:
+        return _db_schemes[result.scheme]
+    else:
+        raise Exception(f"Cannot find DB type for {uri}")
+
+def getDBConnection(uri: str = '') -> ArtifactDB:
     """Returns the database connection
 
-    Eventually, this should likely read from a config file to get the database
-    information. However, for now, we'll use mongodb defaults
+    uri: a string representing the URI of the database. See _getDBType for
+        details. If no URI is given we use the default
+        (mongodb://localhost:27017) or the value in the GEM5ART_DB environment
+        variable.
+
+    If the connection has not been established, this will create a new
+    connection. If the connection has been established, this will replace the
+    connection if the uri input is non-empy.
     """
     global _db
 
-    if not _db:
-        _db = typ()
+    # mypy bug: https://github.com/python/mypy/issues/5423
+    if _db is not None and not uri: # type: ignore[unreachable]
+        # If we have already established a connection, use that
+        return _db # type: ignore[unreachable]
+
+    default_uri = "mongodb://localhost:27017"
+
+    if not uri:
+        uri = os.environ.get("GEM5ART_DB", default_uri)
+
+    typ = _getDBType(uri)
+    _db = typ(uri)
 
     return _db
