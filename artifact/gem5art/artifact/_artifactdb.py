@@ -200,6 +200,8 @@ class ArtifactMongoDB(ArtifactDB):
 
 _db = None
 
+_default_uri = "mongodb://localhost:27017"
+
 _db_schemes : Dict[str, Type[ArtifactDB]] = {
     'mongodb': ArtifactMongoDB
 }
@@ -238,10 +240,8 @@ def getDBConnection(uri: str = '') -> ArtifactDB:
         # If we have already established a connection, use that
         return _db # type: ignore[unreachable]
 
-    default_uri = "mongodb://localhost:27017"
-
     if not uri:
-        uri = os.environ.get("GEM5ART_DB", default_uri)
+        uri = os.environ.get("GEM5ART_DB", _default_uri)
 
     typ = _getDBType(uri)
     _db = typ(uri)
