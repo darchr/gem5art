@@ -35,8 +35,9 @@ This file simply wraps the getRuns function from gem5art.run.
 
 from argparse import ArgumentParser
 from json import dump
-from uuid import UUID
 
+import gem5art.artifact
+from gem5art.artifact import getDBConnection
 from gem5art.run import getRuns
 
 def parseArgs():
@@ -44,17 +45,23 @@ def parseArgs():
         description = "Dump all runs from the database into a json file"
     )
 
+    default_db_uri = gem5art.artifact._artifactdb._default_uri
+
     parser.add_argument('filename', help="Output file name")
     parser.add_argument('--fs-only', action = 'store_true', default = False,
                 help="Only output FS runs")
     parser.add_argument('--limit', type=int, default = 0,
                 help="Limit of the number of runs to return. Default: all")
+    parser.add_argument('--db-uri', default = default_db_uri,
+                help = f"The database to connect to. Default {default_db_uri}")
 
     return parser.parse_args()
 
 if __name__ == "__main__":
 
     args = parseArgs()
+
+    db = getDBConnection(args.db_uri)
 
     with open(args.filename, 'w') as f:
         runs = getRuns(args.fs_only, args.limit)
