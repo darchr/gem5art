@@ -45,7 +45,7 @@ class MockDB(ArtifactDB):
     This is a Mock DB,
     used to run unit tests
     """
-    def __init__(self):
+    def __init__(self, uri = ''):
         self.db = {}
         self.hashes = {}
 
@@ -74,12 +74,13 @@ class MockDB(ArtifactDB):
     def downloadFile(self, key, path):
         pass
 
+# Add the MockDB as a scheme
+artifact._artifactdb._db_schemes['mockdb'] = MockDB
 
 # This needs to be a global variable so
 # that this getDBConnection is the first
 # call to create a DB connection
-_db = getDBConnection(typ = MockDB)
-
+_db = getDBConnection('mockdb://')
 
 class TestGit(unittest.TestCase):
     def test_keys(self):
