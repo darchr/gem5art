@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2019 The Regents of the University of California
 # All Rights Reserved.
 #
@@ -24,8 +23,6 @@
 # THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
-# Authors: Jason Lowe-Power
 
 """File contains the Artifact class and helper functions
 """
@@ -284,50 +281,3 @@ class Artifact:
 
     def __hash__(self) -> int:
         return self._id.int
-
-def _getByType(typ: str, limit: int = 0) -> Iterator[Artifact]:
-    """Returns a generator of Artifacts with matching `type` from the db.
-
-    Limit specifies the maximum number of results to return.
-    """
-    _db = getDBConnection()
-    data = _db.searchByType(typ, limit=limit)
-
-    for d in data:
-        yield Artifact(d)
-
-def getDiskImages(limit: int = 0) -> Iterator[Artifact]:
-    """Returns a generator of disk images (type = disk image).
-
-    Limit specifies the maximum number of results to return.
-    """
-
-    return _getByType('disk image', limit)
-
-def getgem5Binaries(limit: int = 0) -> Iterator[Artifact]:
-    """Returns a generator of gem5 binaries (type = gem5 binary).
-
-    Limit specifies the maximum number of results to return.
-    """
-
-    return _getByType('gem5 binary', limit)
-
-
-def getLinuxBinaries(limit: int = 0) -> Iterator[Artifact]:
-    """Returns a generator of Linux kernel binaries (type = kernel).
-
-    Limit specifies the maximum number of results to return.
-    """
-
-    return _getByType('kernel', limit)
-
-def getByName(name: str, limit: int = 0) -> Iterator[Artifact]:
-    """Returns all objects mathching `name` in database.
-
-    Limit specifies the maximum number of results to return.
-    """
-    _db = getDBConnection()
-    data = _db.searchByName(name, limit=limit)
-
-    for d in data:
-        yield Artifact(d)
