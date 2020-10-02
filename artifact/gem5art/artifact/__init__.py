@@ -30,5 +30,5 @@
 """This is the gem5 artifact package"""
 
 from .artifact import Artifact
-from .artifact import getByName, getDiskImages, getLinuxBinaries, getgem5Binaries
+from .common_queries import getByName, getDiskImages, getLinuxBinaries, getgem5Binaries
 from ._artifactdb import getDBConnection
