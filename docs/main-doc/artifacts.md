@@ -6,6 +6,7 @@ Authors:
 # Artifacts
 
 ## Introduction
+
 As discussed before, all unique objects used during gem5 experiments are termed "artifacts" in gem5art.
 Examples of artifacts include: gem5 binary, gem5 source code repo, Linux kernel source repo, linux binary, disk image, and packer binary (used to build the disk image).
 The goal of this infrastructure is to keep a record of all the artifacts used in a particular experiment and to return the set of used artifacts when the same experiment needs to be performed in the future.
@@ -78,7 +79,6 @@ Note: While creating new artifacts, warning messages showing that certain attrib
 
 You can create an artifact with just a UUID if it is already stored in the database.
 
-
 ## ArtifactDB
 
 The particular database used in this work is [MongoDB](https://www.mongodb.com/).
@@ -87,14 +87,14 @@ We use MongoDB since it can easily store large files (e.g., disk images), is tig
 Currently, it's required to run a database to use gem5.
 However, we are planning on changing this default to allow gem5art to be used standalone as well.
 
-gem5art assumes there is a MongoDB instance running on the localhost.
-In a future version, we will support accessing remote databases as well.
+gem5art allows you to connect to any database, but by default assumes there is a MongoDB instance running on the localhost at `mongo://localhost:27017`.
+You can use the environment variable `GEM5ART_DB` to specify the default database to connect when running simple scripts.
+Additionally, you can specify the location of the database when calling `getDBConnection` in your scripts.
 
-In case no database exists or a user want their own database, following steps should be taken to create a new database:
+In case no database exists or a user want their own database, you can create a new database by creating a new directory and running the mongodb docker image.
+See the [MongoDB docker documentation](https://hub.docker.com/_/mongo) or the [MongoDB documentation](https://docs.mongodb.com/) for more information.
 
-  - Create a new directory
-  - Run:
-```
+```sh
 `docker run -p 27017:27017 -v <absolute path to the created directory>:/data/db --name mongo-<some tag> -d mongo`
 ```
 
@@ -118,23 +118,28 @@ You can list all of the details of all of the artifacts by running the following
 from pymongo import MongoClient
 
 db = MongoClient().artifact_database
-for i in db.artifacts.find():print(i)
+for i in db.artifacts.find():
+    print(i)
 ```
 
 gem5art also provides a few methods to search the database for artifacts of a particular type or name. For example, to find all disk images in a database you can do the following:
 
 ```python
 import gem5art.artifact
-for i in gem5art.artifact.getDiskImages():print(i)
+db = gem5art.artifact.getDBConnection('mongo://localhost')
+for i in gem5art.artifact.getDiskImages(db):
+    print(i)
 ```
 
-Other similar methods include: getLinuxBinaries(), getgem5Binaries()
+Other similar methods include: `getLinuxBinaries()`, `getgem5Binaries()`
 
 You can use getByName() method to search database for artifacts using the name attribute. For example, to search for gem5 named artifacts:
 
 ```python
 import gem5art.artifact
-for i in gem5art.artifact.getByName("gem5"):print(i)
+db = gem5art.artifact.getDBConnection('mongo://localhost')
+for i in gem5art.artifact.getByName(db, "gem5"):
+    print(i)
 ```
 
 ## Downloading from the Database
@@ -151,7 +156,7 @@ Python 3.6.8 (default, Oct  7 2019, 12:59:55)
 Type "help", "copyright", "credits" or "license" for more information.
 >>> from gem5art.artifact import *
 >>> db = getDBConnection()
->>> for i in getDiskImages(limit=2): print(i)
+>>> for i in getDiskImages(db, limit=2): print(i)
 ...
 ubuntu
     id: d4a54de8-3a1f-4d4d-9175-53c15e647afd
@@ -165,7 +170,7 @@ ubuntu
     path: disk-image/ubuntu-image/ubuntu
     inputs: packer:fe8ba737-ffd4-44fa-88b7-9cd072f82979, fs-x86-test:5bfaab52-7d04-49f2-8fea-c5af8a7f34a8, m5:69dad8b1-48d0-43dd-a538-f3196a894804
     Ubuntu with m5 binary installed and root auto login
->>> for i in getLinuxBinaries(limit=2): print(i)
+>>> for i in getLinuxBinaries(db, limit=2): print(i)
 ...
 
 vmlinux-5.2.3
@@ -191,7 +196,7 @@ import gem5art.artifact
 
 db = gem5art.artifact.getDBConnection()
 
-disks = gem5art.artifact.getByName('npb')
+disks = gem5art.artifact.getByName(db, 'npb')
 
 for disk in disks:
     if disk.type == 'disk image' and disk.documentation == 'npb disk image created on Nov 20':
@@ -202,9 +207,8 @@ Here, we assume that there can be multiple disk images/artifacts with the name `
 
 The dual of the [downloadFile](artifacts.html#gem5art.artifact._artifactdb.ArtifactDB.downloadFile) method used above is [upload](artifacts.html#gem5art.artifact._artifactdb.ArtifactDB.upload).
 
-
-
 ## Artifacts API Documentation
+
 ```eval_rst
 Artifact Module
 --------
@@ -220,6 +224,12 @@ Artifact
 Artifact
 --------
 .. automodule:: gem5art.artifact.artifact.Artifact
+    :members:
+    :undoc-members:
+
+Helper Functions for Common Queries
+-----------------------------------
+.. automodule:: gem5art.artifact.common_queries
     :members:
     :undoc-members:
 
