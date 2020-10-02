@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# Copyright (c) 2019 The Regents of the University of California
+# Copyright (c) 2019-2020 The Regents of the University of California
 # All Rights Reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -24,8 +23,16 @@
 # THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
-# Authors: Jason Lowe-Power
+
+"""This file defines the ArtifactDB type and some common implementations of
+ArtifactDB.
+
+The database interface defined here does not include any schema information.
+The database "schema" is defined in the artifact.py file based on the types of
+artifacts stored in the database.
+
+Some common queries can be found in common_queries.py
+"""
 
 from abc import ABC, abstractmethod
 
