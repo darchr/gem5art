@@ -67,10 +67,10 @@ if __name__ == "__main__":
 
     with open(args.filename, 'w') as f:
         if args.search_name:
-            runs = getRunsByNameLike(args.search_name, args.fs_only,
+            runs = getRunsByNameLike(db, args.search_name, args.fs_only,
                                      args.limit)
         else:
-            runs = getRuns(args.fs_only, args.limit)
+            runs = getRuns(db, args.fs_only, args.limit)
 
         to_dump = [run._convertForJson(run._getSerializable()) for run in runs]
         dump(to_dump, f, indent=2)

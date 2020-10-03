@@ -48,8 +48,7 @@ import zipfile
 
 from gem5art import artifact
 from gem5art.artifact import Artifact
-
-_db: artifact._artifactdb.ArtifactDB = artifact.getDBConnection()
+from gem5art.artifact._artifactdb import ArtifactDB
 
 class gem5Run:
     """
@@ -412,7 +411,8 @@ class gem5Run:
         that only the spawned process runs in the new directory.
         """
         # Check if the run is already in the database
-        if self.hash in _db:
+        db = artifact.getDBConnection()
+        if self.hash in db:
             print(f"Error: Have already run {self.command}. Exiting!")
             return
 
@@ -483,7 +483,7 @@ class gem5Run:
         self.saveResults()
 
         # Store current gem5 run in the database
-        _db.put(self._id, self._getSerializable())
+        db.put(self._id, self._getSerializable())
 
         print("Done storing the results of {}".format(' '.join(self.command)))
 
@@ -509,7 +509,7 @@ class gem5Run:
     def __str__(self) -> str:
         return  self.string + ' -> ' + self.status
 
-def getRuns(fs_only: bool = False, limit: int = 0) -> Iterable[gem5Run]:
+def getRuns(db: ArtifactDB, fs_only: bool = False, limit: int = 0) -> Iterable[gem5Run]:
     """Returns a generator of gem5Run objects.
 
     If fs_only is True, then only full system runs will be returned.
@@ -517,15 +517,15 @@ def getRuns(fs_only: bool = False, limit: int = 0) -> Iterable[gem5Run]:
     """
 
     if not fs_only:
-        runs = _db.searchByType('gem5 run', limit=limit)
+        runs = db.searchByType('gem5 run', limit=limit)
         for run in runs:
             yield gem5Run.loadFromDict(run)
 
-    fsruns = _db.searchByType('gem5 run fs', limit=limit)
+    fsruns = db.searchByType('gem5 run fs', limit=limit)
     for run in fsruns:
         yield gem5Run.loadFromDict(run)
 
-def getRunsByName(name: str, fs_only: bool = False,
+def getRunsByName(db: ArtifactDB, name: str, fs_only: bool = False,
                   limit: int = 0) -> Iterable[gem5Run]:
     """ Returns a generator of gem5Run objects, which have the field "name"
     **exactly** the same as the name parameter. The name used in this query
@@ -536,16 +536,16 @@ def getRunsByName(name: str, fs_only: bool = False,
     """
 
     if not fs_only:
-        seruns = _db.searchByNameType(name, 'gem5 run', limit=limit)
+        seruns = db.searchByNameType(name, 'gem5 run', limit=limit)
         for run in seruns:
             yield gem5Run.loadFromDict(run)
 
-    fsruns = _db.searchByNameType(name, 'gem5 run fs', limit=limit)
+    fsruns = db.searchByNameType(name, 'gem5 run fs', limit=limit)
 
     for run in fsruns:
         yield gem5Run.loadFromDict(run)
 
-def getRunsByNameLike(name: str, fs_only: bool = False,
+def getRunsByNameLike(db: ArtifactDB, name: str, fs_only: bool = False,
                       limit: int = 0) -> Iterable[gem5Run]:
     """ Return a generator of gem5Run objects, which have the field "name"
     containing the name parameter as a substring. The name used in this
@@ -556,12 +556,12 @@ def getRunsByNameLike(name: str, fs_only: bool = False,
     """
 
     if not fs_only:
-        seruns = _db.searchByLikeNameType(name, 'gem5 run', limit=limit)
+        seruns = db.searchByLikeNameType(name, 'gem5 run', limit=limit)
 
         for run in seruns:
             yield gem5Run.loadFromDict(run)
 
-    fsruns = _db.searchByLikeNameType(name, 'gem5 run fs', limit=limit)
+    fsruns = db.searchByLikeNameType(name, 'gem5 run fs', limit=limit)
 
     for run in fsruns:
         yield gem5Run.loadFromDict(run)
