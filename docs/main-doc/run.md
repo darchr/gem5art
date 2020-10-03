@@ -92,7 +92,10 @@ For this purpose, gem5art provides a method `getRuns`, which you can use as foll
 
 ```python
 import gem5art.run
-for i in gem5art.run.getRuns(fs_only=False, limit=100):print(i)
+from gem5art.artifact import getDBConnection
+db = getDBConnection()
+for i in gem5art.run.getRuns(db, fs_only=False, limit=100):
+    print(i)
 ```
 
 The documentation on [getRuns](run.html#gem5art.run.getRuns) is available at the bottom of this page.
@@ -109,7 +112,10 @@ For this purpose, gem5art provides a method `getRunsByName`, which can be used a
 
 ```python
 import gem5art.run
-for i in gem5art.run.getRunsByName(name='boot_tests_v1', fs_only=True, limit=100):print(i)
+from gem5art.artifact import getDBConnection
+db = getDBConnection()
+for i in gem5art.run.getRunsByName(db, name='boot_tests_v1', fs_only=True, limit=100):
+    print(i)
 ```
 
 The documentation on `getRunsByName` is available [here](run.html#gem5art.run.getRunsByName).
