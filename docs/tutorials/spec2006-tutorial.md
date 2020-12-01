@@ -8,7 +8,7 @@ Authors:
 ## Introduction
 In this tutorial, we will demonstrate how to utilize gem5art to run SPEC CPU 2006 benchmarks in gem5 full system mode.
 The full example with all of the gem5art tutorials can be found [here](https://github.com/darchr/gem5art-experiments).
-The scripts in this tutorial work with gem5art-* v1.1.0 and gem5 20.1.0.2 stable.
+The scripts in this tutorial work with gem5art-* v1.3.0 and gem5 20.1.0.2 stable.
 
 ### SPEC CPU 2006 Benchmarks
 **Important:** The usage of this tutorial is just for the purpose of demonstration.
@@ -607,8 +607,7 @@ If the benchmark run is successful, there will be a line starting with `Success:
 
 ## Appendix I. Working Status
 Not all benchmarks are compiled in the above set up as of March 2020.
-https://www.gem5.org/documentation/benchmark_status/gem5-20#spec-2006-tests
-
+The working status of SPEC 2006 workloads is available here: [https://www.gem5.org/documentation/benchmark_status/gem5-20#spec-2006-tests](https://www.gem5.org/documentation/benchmark_status/gem5-20#spec-2006-tests).
 
 Benchmarks that are not available:
 ```
