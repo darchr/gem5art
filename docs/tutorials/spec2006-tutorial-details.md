@@ -23,7 +23,6 @@ Another example of the usage of SPEC CPU benchmarks is [here](https://cacm.acm.o
 Different from the gem5 SE (syscall emulation) mode, the full system mode uses an actual Linux kernel instead of emulating responsibilities of a typical modern OS, such as managing page tables, taking care of syscalls.
 Therefore, the results would be more realistic when using gem5 FS, especially when the interactions between the workload and the OS are significant parts of the simulation.
 
-
 In order to run gem5 in the full system mode, gem5 requires a built Linux kernel, which is configurable.
 gem5 does not support all configurations in Linux, including the default Linux kernel configuration.
 To accomondate this, we will provide Linux configurations that are to known to work with gem5.
@@ -35,13 +34,13 @@ In this tutorial, we will provide working Linux configurations, the necessary st
 We structure the experiment as follows (note that there are many more ways to structure the experiments, and the following is one of them),
 * root folder
   * gem5: a folder containing gem5 source code and gem5 binaries.
-  * disk-image: a folder containing inputs to produce a disk image containing SPEC CPU 2006 benchmarks.
-  * gem5-fullsystem-configs: a folder containing a gem5 configuration that is made specifically to run SPEC benchmarks as described in the below figure.
+  * disk-image: a folder containing inputs to produce a disk image containing SPEC CPU 2017 benchmarks.
+  * linux-configs: a folder containing different Linux configurations for different Linux kernel versions.
+  * gem5-configs: a folder containing a gem5 configuration that is made specifically to run SPEC CPU 2017 benchmarks.
   * results: a folder storing the experiment's results. This folder will have a certain structure in order to make sure that every gem5 run does not overwrite other gem5 runs results.
-  * launch_spec2006_experiments.py: a script that does the following,
+  * launch_spec2017_experiments.py: a script that does the following,
     * Documenting the experiment using Artifacts objects.
     * Running the experiment in gem5 full system mode.
-  * vmlinux: a compiled Linux kernel binary.
 
 ### An Overview of Host System - gem5 Interactions
 ![**Figure 1.**]( ../images/spec_tutorial_figure1.png "")
@@ -272,9 +271,9 @@ packer = Artifact.registerArtifact(
 ```
 
 Second, we create a packer script (a json file) that describes how the disk image will be built.
-In this step, we assume that we have the SPEC 2006 ISO file in the disk-image/spec2006 folder.
+In this step, we assume that we have the SPEC 2006 ISO file in the `disk-image/spec-2006` folder.
 In this script, the ISO file name is CPU2006v1.0.1.iso.
-The script is available [here](https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b3ba84103afcdecfe345494c5/src/spec-2006/disk-image/spec-2006/spec-2006.json), and we save the file at `disk-image/spec2006/spec2006.json`.
+The script is available [here](https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b3ba84103afcdecfe345494c5/src/spec-2006/disk-image/spec-2006/spec-2006.json), and we save the file at `disk-image/spec-2006/spec-2006.json`.
 
 In the root folder of experiment,
 
@@ -287,12 +286,12 @@ To build the disk image,
 
 ```sh
 cd disk-image/
-./packer validate spec2006/spec2006.json # validate the script, including checking the input files
-./packer build spec2006/spec2006.json
+./packer validate spec-2006/spec-2006.json # validate the script, including checking the input files
+./packer build spec-2006/spec-2006.json
 ```
 
 The process should take about than an hour to complete on a fairly recent machine with a cable internet speed.
-The disk image will be in disk-image/spec2006/spec2006-image/spec2006.
+The disk image will be in `disk-image/spec-2006/spec-2006-image/spec-2006`.
 
 **Note:** Packer will output a VNC port that could be used to inspect the building process.
 Ubuntu has a built-in VNC viewer, namely Remmina.
@@ -303,37 +302,92 @@ Now, in launch_spec2006_experiments.py, we make an Artifact object of the disk i
 
 ```python
 disk_image = Artifact.registerArtifact(
-    command = './packer build spec2006/spec2006.json',
+    command = './packer build spec-2006/spec-2006.json',
     typ = 'disk image',
-    name = 'spec2006',
+    name = 'spec-2006',
     cwd = 'disk-image/',
-    path = 'disk-image/spec2006/spec2006-image/spec2006',
+    path = 'disk-image/spec-2006/spec-2006-image/spec-2006',
     inputs = [packer, experiments_repo, m5_binary,],
     documentation = 'Ubuntu Server with SPEC 2006 installed, m5 binary installed and root auto login'
 )
 ```
 
-### Obtaining a compiled Linux kernel
-Compiled Linux kernels can be found here: [https://www.gem5.org/documentation/general_docs/gem5_resources/](https://www.gem5.org/documentation/general_docs/gem5_resources/).
+### Compiling Linux Kernel
+In this step, we will download Linux kernel source code and compile the Linux kernel.
+The file of interest in this step is the vmlinux file.
 
-The following command downloads the Linux kernel version 4.19.83 compiled from a Linux kernel configuration that is known to work with gem5,
+First, we download the Linux kernel source code.
+Version 4.19.83 has been tested with gem5 as discussed [in the other tutorial](boot-tutorial.md).
+We suggest using config files that have been tested with gem5.
+The following command will shallow clone the linux stable repository as well as checking out the tag v4.19.83, which contains the code for linux kernel version 4.19.83.
+The git command also works well for other version numbers.
+
+In the root of the experiment folder,
+
 ```sh
-wget http://dist.gem5.org/dist/v20-1/kernels/x86/static/vmlinux-4.19.83
+git clone --branch v4.19.83 --depth 1 https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/
+mv linux linux-4.19.83
 ```
 
-Now, in launch_spec2006_experiments.py, we make an Artifact object of the Linux kernel binary.
+Now, in launch_spec2006_experiments.py, we make an Artifact object of the Linux stable git repo.
+
+```python
+linux_repo = Artifact.registerArtifact(
+    command = '''
+    	git clone git clone --branch v4.19.83 --depth 1 https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/;
+    	mv linux linux-4.19.83
+    ''',
+    typ = 'git repo',
+    name = 'linux-4.19.83',
+    path =  'linux-4.19.83',
+    cwd = './',
+    documentation = 'Linux kernel 4.19 source code repo obtained in November'
+)
+```
+
+Next, we compile the Linux kernel.
+We will make a folder named linux-configs containing all working linux configs.
+Working Linux configs and documentations for generating a Linux config are discussed here [here](boot-tutorial.md).
+
+In the root folder of the experiment,
+
+```sh
+mkdir linux-configs
+```
+
+To download the linux-4.19.83 configs,
+
+```sh
+cd linux-configs
+wget https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b3ba84103afcdecfe345494c5/src/linux-kernel/linux-configs/config.4.19.83?format=TEXT | base64 --decode > config.4.19.83
+```
+
+The following commands will copy the linux config and compile the linux kernel.
+In the root folder of the experiment,
+
+```sh
+cp linux-configs/config.4.19.83 linux-4.19.83/.config
+cd linux-4.19.83
+make -j8
+cp vmlinux vmlinux-4.19.83
+```
+
+Now, in launch_spec2017_experiments.py, we make an Artifact object of the Linux kernel binary.
 
 ```python
 linux_binary = Artifact.registerArtifact(
     name = 'vmlinux-4.19.83',
     typ = 'kernel',
-    path = 'vmlinux-4.19.83',
+    path = 'linux-4.19.83/vmlinux-4.19.83',
     cwd = './',
     command = '''
-    wget http://dist.gem5.org/dist/v20-1/kernels/x86/static/vmlinux-4.19.83
+        cp linux-configs/config.4.19.83 linux-4.19.83/.config
+        cd linux-4.19.83
+        make -j8
+        cp vmlinux vmlinux-4.19.83
     ''',
-    inputs = [experiments_repo],
-    documentation = "kernel binary for v4.19.83 obtained from gem5-resources binary distribution",
+    inputs = [experiments_repo, linux_repo,],
+    documentation = "kernel binary for v4.19.83",
 )
 ```
 
