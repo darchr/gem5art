@@ -20,11 +20,14 @@ Examples of the usage of SPEC CPU 2006 benchmark in the literature are [here](ht
 Another example of the usage of SPEC CPU benchmarks is [here](https://cacm.acm.org/magazines/2019/2/234352-a-new-golden-age-for-computer-architecture/fulltext) [5].
 
 ### gem5 Full System Mode
-Different from the gem5 SE (syscall emulation) mode, the full system mode uses the Linux kernel instead of emulating syscalls.
-Therefore, the results would be more realistic if system calls are a significant portion of the benchmarks.
+Different from the gem5 SE (syscall emulation) mode, the full system mode uses an actual Linux kernel instead of emulating responsibilities of a typical modern OS, such as managing page tables, taking care of syscalls.
+Therefore, the results would be more realistic when using gem5 FS, especially when the interactions between the workload and the OS are significant parts of the simulation.
+
+
 In order to run gem5 in the full system mode, gem5 requires a built Linux kernel, which is configurable.
-gem5 does not support all configurations in Linux, but we will provide a Linux configuration that works with gem5.
-(See the [run exit tutorial](boot-tutorial.md) for details on what kernels are currently tested with gem5.)
+gem5 does not support all configurations in Linux, including the default Linux kernel configuration.
+To accomondate this, we will provide Linux configurations that are to known to work with gem5.
+(Please prefer to the [run exit tutorial](boot-tutorial.md) for details on what kernels are currently tested with gem5.)
 Other than that, a gem5 full system configuration is also a requirement to run gem5 full system mode.
 In this tutorial, we will provide working Linux configurations, the necessary steps to build a Linux kernel, and a working gem5 full system configuration.
 
