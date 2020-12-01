@@ -294,10 +294,10 @@ cd disk-image/
 The process should take about than an hour to complete on a fairly recent machine with a cable internet speed.
 The disk image will be in disk-image/spec2006/spec2006-image/spec2006.
 
-**Note:**: Packer will output a VNC port that could be used to inspect the building process.
+**Note:** Packer will output a VNC port that could be used to inspect the building process.
 Ubuntu has a built-in VNC viewer, namely Remmina.
 
-**Note:**: [More about using packer and building disk images](../main-doc/disks.md).
+**Note:** [More about using packer and building disk images](../main-doc/disks.md).
 
 Now, in launch_spec2006_experiments.py, we make an Artifact object of the disk image.
 
