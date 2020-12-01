@@ -98,9 +98,9 @@ m5out
 results
 gem5art-env
 disk-image/packer
-disk-image/spec2006/spec2006-image/spec2006
+disk-image/spec-2006/spec-2006-image/spec-2006
 disk-image/packer_cache
-disk-image/spec2006/CPU2006v1.0.1.iso
+disk-image/spec-2006/CPU2006v1.0.1.iso
 gem5
 linux-4.19.83/
 ```
@@ -179,13 +179,13 @@ m5_binary = Artifact.registerArtifact(
 ### Preparing Scripts to Modify the Disk Image
 In this step, we will prepare the scripts that will modify the disk image after the Ubuntu installation process has finished, and before the first time we use the disk image in gem5.
 We will keep the related files in the disk-image folder of the experiment.
-The files that are made specifically for SPEC 2006 benchmarks will be in `disk-image/spec2006`, and the files that are commonly used accross most benchmarks will be in `disk-image/shared`.
+The files that are made specifically for SPEC 2006 benchmarks will be in `disk-image/spec-2006`, and the files that are commonly used accross most benchmarks will be in `disk-image/shared`.
 
 In the root folder of the experiment,
 
 ```sh
 mkdir disk-image
-mkdir disk-image/spec2006
+mkdir disk-image/spec-2006
 mkdir disk-image/shared
 ```
 
@@ -197,7 +197,7 @@ The script could be found [here](https://gem5.googlesource.com/public/gem5-resou
 To download the script, in the root folder of the experiment,
 
 ```sh
-cd disk-image/spec2006
+cd disk-image/spec-2006
 wget -O - https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b3ba84103afcdecfe345494c5/src/spec-2006/disk-image/spec-2006/runscript.sh?format=TEXT | base64 --decode > runscript.sh
 ```
 
@@ -210,20 +210,20 @@ The script could be found [here](https://gem5.googlesource.com/public/gem5-resou
 To download the script, in the root folder of the experiment,
 
 ```sh
-cd disk-image/spec2006
+cd disk-image/spec-2006
 wget -O - https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b3ba84103afcdecfe345494c5/src/spec-2006/disk-image/spec-2006/post-installation.sh?format=TEXT | base64 --decode > post-installation.sh
 ```
 
 The third script is the `install-spec2006.sh` script, which installs the dependencies required to compile and run the SPEC 2006 benchmarks, which will be compiled and built in the script.
 We figure out that the dependencies include `g++`, `gcc`, and `gfortran`.
-So we will get the `build-essential` and `gfortran` packages from Debian (note that "12345" is the default password, this could be modified in the `spec2006.json` file).
+So we will get the `build-essential` and `gfortran` packages from Debian (note that "12345" is the default password, this could be modified in the `spec-2006.json` file).
 The script also modifies the default config script to make the benchmarks work with this set up.
 The script could be found [here](https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b3ba84103afcdecfe345494c5/src/spec-2006/disk-image/spec-2006/install-spec2006.sh).
 
 To download the script, in the root folder of the experiment,
 
 ```sh
-cd disk-image/spec2006
+cd disk-image/spec-2006
 wget -O - https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b3ba84103afcdecfe345494c5/src/spec-2006/disk-image/spec-2006/install-spec2006.sh?format=TEXT | base64 --decode > install-spec2006.sh
 ```
 
@@ -272,14 +272,14 @@ packer = Artifact.registerArtifact(
 ```
 
 Second, we create a packer script (a json file) that describes how the disk image will be built.
-In this step, we assume that we have the SPEC 2006 ISO file in the disk-image/spec2006 folder.
+In this step, we assume that we have the SPEC 2006 ISO file in the disk-image/spec-2006 folder.
 In this script, the ISO file name is CPU2006v1.0.1.iso.
-The script is available [here](https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b3ba84103afcdecfe345494c5/src/spec-2006/disk-image/spec-2006/spec-2006.json), and we save the file at `disk-image/spec2006/spec2006.json`.
+The script is available [here](https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b3ba84103afcdecfe345494c5/src/spec-2006/disk-image/spec-2006/spec-2006.json), and we save the file at `disk-image/spec-2006/spec-2006.json`.
 
 In the root folder of experiment,
 
 ```sh
-cd disk-image/spec2006/
+cd disk-image/spec-2006/
 wget https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b3ba84103afcdecfe345494c5/src/spec-2006/disk-image/spec-2006/spec-2006.json?format=TEXT | base64 --decode > spec-2006.json
 ```
 
@@ -287,12 +287,12 @@ To build the disk image,
 
 ```sh
 cd disk-image/
-./packer validate spec2006/spec2006.json # validate the script, including checking the input files
-./packer build spec2006/spec2006.json
+./packer validate spec-2006/spec-2006.json # validate the script, including checking the input files
+./packer build spec-2006/spec-2006.json
 ```
 
 The process should take about than an hour to complete on a fairly recent machine with a cable internet speed.
-The disk image will be in disk-image/spec2006/spec2006-image/spec2006.
+The disk image will be in disk-image/spec-2006/spec-2006-image/spec-2006.
 
 **Note:** Packer will output a VNC port that could be used to inspect the building process.
 Ubuntu has a built-in VNC viewer, namely Remmina.
@@ -303,11 +303,11 @@ Now, in launch_spec2006_experiments.py, we make an Artifact object of the disk i
 
 ```python
 disk_image = Artifact.registerArtifact(
-    command = './packer build spec2006/spec2006.json',
+    command = './packer build spec-2006/spec-2006.json',
     typ = 'disk image',
-    name = 'spec2006',
+    name = 'spec-2006',
     cwd = 'disk-image/',
-    path = 'disk-image/spec2006/spec2006-image/spec2006',
+    path = 'disk-image/spec-2006/spec-2006-image/spec-2006',
     inputs = [packer, experiments_repo, m5_binary,],
     documentation = 'Ubuntu Server with SPEC 2006 installed, m5 binary installed and root auto login'
 )
@@ -331,7 +331,7 @@ linux_binary = Artifact.registerArtifact(
     typ = 'kernel',
     path = '/vmlinux-4.19.83',
     cwd = './',
-    command = ''' wgethttp://dist.gem5.org/dist/v20-1/kernels/x86/static/vmlinux-4.19.83''',
+    command = ''' wget http://dist.gem5.org/dist/v20-1/kernels/x86/static/vmlinux-4.19.83''',
     inputs = [experiments_repo,],
     documentation = "kernel binary for v4.19.83",
 )
@@ -369,7 +369,7 @@ wget -O - https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b
 wget -O - https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b3ba84103afcdecfe345494c5/src/spec-2006/configs/system/system.py?format=TEXT | base64 --decode > system.py
 cd ..
 git add *
-git commit -m "Add run scripts for SPEC2006"
+git commit -m "Add run scripts for SPEC 2006"
 ```
 
 In launch_spec2006_experiments.py, we make an Artifact object of the Linux kernel binary.
@@ -507,7 +507,7 @@ if __name__ == "__main__":
                     gem5_repo, # gem5_git_artifact
                     run_script_repo, # run_script_git_artifact
                     vmlinux-4.19.83', # linux_binary
-                    'disk-image/spec2006/spec2006-image/spec2006', # disk_image
+                    'disk-image/spec-2006/spec-2006-image/spec-2006', # disk_image
                     linux_binary, # linux_binary_artifact
                     disk_image, # disk_image_artifact
                     cpu, benchmark, size, # params
