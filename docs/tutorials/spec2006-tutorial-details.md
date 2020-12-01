@@ -36,12 +36,12 @@ We structure the experiment as follows (note that there are many more ways to st
 * root folder
   * gem5: a folder containing gem5 source code and gem5 binaries.
   * disk-image: a folder containing inputs to produce a disk image containing SPEC CPU 2006 benchmarks.
-  * linux-configs: a folder containing different Linux configurations for different Linux kernel versions.
   * gem5-fullsystem-configs: a folder containing a gem5 configuration that is made specifically to run SPEC benchmarks as described in the below figure.
   * results: a folder storing the experiment's results. This folder will have a certain structure in order to make sure that every gem5 run does not overwrite other gem5 runs results.
   * launch_spec2006_experiments.py: a script that does the following,
     * Documenting the experiment using Artifacts objects.
     * Running the experiment in gem5 full system mode.
+  * vmlinux: a compiled Linux kernel binary.
 
 ### An Overview of Host System - gem5 Interactions
 ![**Figure 1.**]( ../images/spec_tutorial_figure1.png "")
@@ -252,7 +252,7 @@ The current version of packer as of November 2020 is 1.6.5.
 cd disk-image/
 wget https://releases.hashicorp.com/packer/1.6.5/packer_1.6.5_linux_amd64.zip
 unzip packer_1.6.5_linux_amd64.zip
-rm packer_1.6.5_linux_amd64.zip
+rm packer_1.6.5linux_amd64.zip
 ```
 
 In launch_spec2006_experiments.py, we document how we obtain the binary as follows,
@@ -313,64 +313,12 @@ disk_image = Artifact.registerArtifact(
 )
 ```
 
-### Compiling Linux Kernel
-In this step, we will download Linux kernel source code and compile the Linux kernel.
-The file of interest in this step is the vmlinux file.
+### Obtaining a compiled Linux kernel
+Compiled Linux kernels can be found here: [https://www.gem5.org/documentation/general_docs/gem5_resources/](https://www.gem5.org/documentation/general_docs/gem5_resources/).
 
-First, we download the Linux kernel source code.
-Version 4.19.83 has been tested with gem5 as discussed [in the other tutorial](boot-tutorial.md).
-We suggest using config files that have been tested with gem5.
-The following command will shallow clone the linux stable repository as well as checking out the tag v4.19.83, which contains the code for linux kernel version 4.19.83.
-The git command also works well for other version numbers.
-
-In the root of the experiment folder,
-
+The following command downloads the Linux kernel version 4.19.83 compiled from a Linux kernel configuration that is known to work with gem5,
 ```sh
-git clone --branch v4.19.83 --depth 1 https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/
-mv linux linux-4.19.83
-```
-
-Now, in launch_spec2006_experiments.py, we make an Artifact object of the Linux stable git repo.
-
-```python
-linux_repo = Artifact.registerArtifact(
-    command = '''
-    	git clone git clone --branch v4.19.83 --depth 1 https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/;
-    	mv linux linux-4.19.83
-    ''',
-    typ = 'git repo',
-    name = 'linux-4.19.83',
-    path =  'linux-4.19.83',
-    cwd = './',
-    documentation = 'Linux kernel 4.19 source code repo obtained in November 2020'
-)
-```
-
-Next, we compile the Linux kernel.
-We will make a folder named linux-configs containing all working linux configs.
-Working Linux configs and documentations for generating a Linux config are discussed here [here](boot-tutorial.md).
-
-In the root folder of the experiment,
-
-```sh
-mkdir linux-configs
-```
-
-To download the linux-4.19.83 configs,
-
-```sh
-cd linux-configs
-wget -O - https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b3ba84103afcdecfe345494c5/src/linux-kernel/linux-configs/config.4.19.83?format=TEXT | base64 --decode > config.4.19.83
-```
-
-The following commands will copy the linux config and compile the linux kernel.
-In the root folder of the experiment,
-
-```sh
-cp linux-configs/config.4.19.83 linux-4.19.83/.config
-cd linux-4.19.83
-make -j8
-cp vmlinux vmlinux-4.19.83
+wget http://dist.gem5.org/dist/v20-1/kernels/x86/static/vmlinux-4.19.83
 ```
 
 Now, in launch_spec2006_experiments.py, we make an Artifact object of the Linux kernel binary.
@@ -379,16 +327,13 @@ Now, in launch_spec2006_experiments.py, we make an Artifact object of the Linux 
 linux_binary = Artifact.registerArtifact(
     name = 'vmlinux-4.19.83',
     typ = 'kernel',
-    path = 'linux-4.19.83/vmlinux-4.19.83',
+    path = 'vmlinux-4.19.83',
     cwd = './',
     command = '''
-        cp linux-configs/config.4.19.83 linux-4.19.83/.config
-        cd linux-4.19.83
-        make -j8
-        cp vmlinux vmlinux-4.19.83
+    wget http://dist.gem5.org/dist/v20-1/kernels/x86/static/vmlinux-4.19.83
     ''',
-    inputs = [experiments_repo, linux_repo,],
-    documentation = "kernel binary for v4.19.83",
+    inputs = [experiments_repo],
+    documentation = "kernel binary for v4.19.83 obtained from gem5-resources binary distribution",
 )
 ```
 
