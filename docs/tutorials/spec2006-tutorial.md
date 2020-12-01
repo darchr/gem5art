@@ -415,13 +415,13 @@ In the root folder of the experiment,
 
 ```sh
 cd gem5-configs
-wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/gem5-configs/configs-spec-tests/run_spec.py
+wget -O - https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b3ba84103afcdecfe345494c5/src/spec-2006/configs/run_spec.py?format=TEXT | base64 --decode > run_spec.py
 mkdir -p system
 cd system
-wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/gem5-configs/configs-spec-tests/system/__init__.py
-wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/gem5-configs/configs-spec-tests/system/caches.py
-wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/gem5-configs/configs-spec-tests/system/fs_tools.py
-wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/gem5-configs/configs-spec-tests/system/system.py
+wget -O - https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b3ba84103afcdecfe345494c5/src/spec-2006/configs/system/__init__.py?format=TEXT | base64 --decode > __init__.py
+wget -O - https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b3ba84103afcdecfe345494c5/src/spec-2006/configs/system/caches.py?format=TEXT | base64 --decode > caches.py
+wget -O - https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b3ba84103afcdecfe345494c5/src/spec-2006/configs/system/fs_tools.py?format=TEXT | base64 --decode > fs_tools.py
+wget -O - https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b3ba84103afcdecfe345494c5/src/spec-2006/configs/system/system.py?format=TEXT | base64 --decode > system.py
 cd ..
 git add *
 git commit -m "Add run scripts for SPEC2006"
@@ -432,13 +432,13 @@ In launch_spec2006_experiments.py, we make an Artifact object of the Linux kerne
 ```python
 run_script_repo = Artifact.registerArtifact(
     command = '''
-        wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/gem5-configs/configs-spec-tests/run_spec.py
-        mkdir -p system
-        cd system
-        wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/gem5-configs/configs-spec-tests/system/__init__.py
-        wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/gem5-configs/configs-spec-tests/system/caches.py
-        wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/gem5-configs/configs-spec-tests/system/fs_tools.py
-        wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/gem5-configs/configs-spec-tests/system/system.py
+        wget -O - https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b3ba84103afcdecfe345494c5/src/spec-2006/configs/run_spec.py?format=TEXT | base64 --decode > run_spec.py;
+        mkdir -p system;
+        cd system;
+        wget -O - https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b3ba84103afcdecfe345494c5/src/spec-2006/configs/system/__init__.py?format=TEXT | base64 --decode > __init__.py;
+        wget -O - https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b3ba84103afcdecfe345494c5/src/spec-2006/configs/system/caches.py?format=TEXT | base64 --decode > caches.py;
+        wget -O - https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b3ba84103afcdecfe345494c5/src/spec-2006/configs/system/fs_tools.py?format=TEXT | base64 --decode > fs_tools.py;
+        wget -O - https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b3ba84103afcdecfe345494c5/src/spec-2006/configs/system/system.py?format=TEXT | base64 --decode > system.py;
     ''',
     typ = 'git repo',
     name = 'gem5-configs',
@@ -448,7 +448,7 @@ run_script_repo = Artifact.registerArtifact(
 )
 ```
 
-The gem5 run script, [run_spec.py](https://github.com/darchr/gem5art/blob/master/docs/gem5-configs/configs-spec-tests/run_spec.py), takes the following parameters:
+The gem5 run script, [run_spec.py](https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b3ba84103afcdecfe345494c5/src/spec-2006/configs/run_spec.py), takes the following parameters:
 * --kernel: (required) the path to vmlinux file.
 * --disk: (required) the path to spec image.
 * --cpu: (required) name of the detailed CPU model.
@@ -458,7 +458,7 @@ More CPU models could be added to getDetailedCPUModel() in run_spec.py.
 The availability of the benchmarks could be found at the end of the tutorial.
 * --size: (required) size of the benchmark. There are three options: ref, train, test.
 * --no-copy-logs: this is an optional parameter specifying whether the spec log files should be copied to the host system.
-* --no-listeners: this is an optional parameter specifying whether gem5 should open ports so that gdb or telnet could connect to.
+* --allow-listeners: this is an optional parameter specifying whether gem5 should open ports so that gdb or telnet could connect to. No listeners are allowed by default.
 
 We don't use another Artifact object to document this file.
 The Artifact repository object of the root folder will keep track of the changes of the script.
@@ -605,39 +605,9 @@ If the benchmark run is successful, there will be a line starting with `Success:
 [5] J. L. Hennessy and D. A. Patterson, “A new golden age for computer architecture,” *Communications of the ACM*, vol. 62, no. 2, pp. 48–60, 2019.
 
 
-## Appendix I. Working SPEC 2006 Benchmarks x CPU Model table
+## Appendix I. Working Status
 Not all benchmarks are compiled in the above set up as of March 2020.
-The following are compiled benchmarks:
-
-| Benchmarks         | KVM/test        | KVM/ref         | AtomicCPU/test  | O3CPU/test      | TimingSimpleCPU/test |
-|--------------------|-----------------|-----------------|-----------------|-----------------|----------------------|
-| 401.bzip2          | Success         | Success         | Success         | Success         | Success              |
-| 403.gcc            | Success         | Success         | Success         | Success         | Success              |
-| 410.bwaves         | Success         | Success         | Success         | Success         | Success              |
-| 416.gamess         | Success         | Success         | Success         | Success         | Success              |
-| 429.mcf            | Success         | Success         | Success         | Success         | Success              |
-| 433.milc           | Success         | Success         | Success         | Success         | Success              |
-| 434.zeusmp         | Success         | Success         | Success         | No logs         | Success              |
-| 435.gromacs        | Success         | Success         | Success         | Success         | Success              |
-| 436.cactusADM      | Success         | Success         | Success         | Success         | Success              |
-| 437.leslie3d       | Success         | Success         | Success         | Success         | Success              |
-| 444.namd           | Success         | Success         | Success         | Success         | Success              |
-| 445.gobmk          | Success         | Success         | Success         | TimeOut         | Success              |
-| 453.povray         | Success         | Success         | Success         | Success         | Success              |
-| 454.calculix       | Success         | Success         | Success         | Success         | Success              |
-| 456.hmmer          | Success         | Success         | Success         | Success         | Success              |
-| 458.sjeng          | Success         | Success         | Success         | Success         | Success              |
-| 459.GemsFDTD       | Success         | Success         | Success         | Success         | Success              |
-| 462.libquantum     | Success         | Success         | Success         | Success         | Success              |
-| 464.h264ref        | Success         | Success         | Success         | Success         | Success              |
-| 465.tonto          | Success         | Success         | Success         | Success         | Success              |
-| 470.lbm            | Success         | Success         | Success         | Success         | Success              |
-| 471.omnetpp        | Success         | Success         | Success         | Success         | Success              |
-| 473.astar          | Success         | Success         | Success         | Success         | Success              |
-| 481.wrf            | Success         | Success         | Success         | Success         | Success              |
-| 482.sphinx3        | Success         | Success         | Success         | Success         | Success              |
-| 998.specrand       | Success         | Success         | Success         | Success         | Success              |
-| 999.specrand       | Success         | Success         | Success         | Success         | Success              |
+https://www.gem5.org/documentation/benchmark_status/gem5-20#spec-2006-tests
 
 
 Benchmarks that are not available:
@@ -654,8 +624,8 @@ As mentioned earlier, SPEC 2006 benchmark suite has been retired, and the newer 
 This section will show how to reuse the scripts made for SPEC 2006 to run SPEC 2017 experiments.
 Changes are minimal, ie. changing `2006` to `2017`, updating the location of the ISO file, changing SPEC 2006 run command (`runspec`) to SPEC 2017 run command (`runcpu`), and manipulating the SPEC 2017 config.
 ### Updating Disk Image Scripts
-The disk image scripts to generate the SPEC 2017 disk image [could be found here](https://github.com/darchr/gem5art/tree/master/docs/disks/spec2017).
-[The changes could be found here.](https://github.com/darchr/gem5art/commit/70019fd0196d946a65efd96bb9b2b692c0dd04be)
+The disk image scripts to generate the SPEC 2017 disk image [can be found here](https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b3ba84103afcdecfe345494c5/src/spec-2017/disk-image/).
+[The changes can be found here.](https://github.com/darchr/gem5art/commit/70019fd0196d946a65efd96bb9b2b692c0dd04be)
 
 **Note:** In the example SPEC 2017 config, the workloads are compiled using the flag `-march=native`.
 However, since workloads are compiled while the disk image is being building by packer, the binaries would be built accordingly to the configuration of the CPU simulated by packer.
@@ -663,6 +633,6 @@ This is definitely not ideal to run those binaries on gem5, which is not guarant
 Hence, the `-march=native` flag is removed.
 Other tuning flags should be manually added.
 ### Updating the Launch Script
-The new launch script [could be found here](https://github.com/darchr/gem5art/blob/master/docs/launch-scripts/launch_spec2017_experiments.py).
+The new launch script [can be found here](https://github.com/darchr/gem5art/blob/master/docs/launch-scripts/launch_spec2017_experiments.py).
 Names of SPEC 2017 workloads are updated.
 
