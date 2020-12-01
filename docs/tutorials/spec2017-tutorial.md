@@ -33,12 +33,12 @@ We structure the experiment as follows (note that there are many more ways to st
 * root folder
   * gem5: a folder containing gem5 source code and gem5 binaries.
   * disk-image: a folder containing inputs to produce a disk image containing SPEC CPU 2017 benchmarks.
-  * linux-configs: a folder containing different Linux configurations for different Linux kernel versions.
   * gem5-configs: a folder containing a gem5 configuration that is made specifically to run SPEC CPU 2017 benchmarks.
   * results: a folder storing the experiment's results. This folder will have a certain structure in order to make sure that every gem5 run does not overwrite other gem5 runs results.
   * launch_spec2017_experiments.py: a script that does the following,
     * Documenting the experiment using Artifacts objects.
     * Running the experiment in gem5 full system mode.
+  * vmlinux-4.19.83: Linux kernel binary compilied from a Linux kernel configuration that is known to work with gem5.
 
 ### An Overview of Host System - gem5 Interactions
 ![**Figure 1.**]( ../images/spec_tutorial_figure1.png "")
@@ -94,11 +94,10 @@ m5out
 results
 gem5art-env
 disk-image/packer
-disk-image/spec2017/spec2017-image/spec2017
+disk-image/spec-2017/spec-2017-image/spec-2017
 disk-image/packer_cache
-disk-image/spec2017/cpu2017-1.1.0.iso
+disk-image/spec-2017/cpu2017-1.1.0.iso
 gem5
-linux-4.19.83/
 ```
 
 Essentially, we will ignore files and folders that when we use gem5art to keep track of them, or the presence of those files and folders do not affect the experiment's results.
@@ -173,13 +172,13 @@ m5_binary = Artifact.registerArtifact(
 ### Preparing Scripts to Modify the Disk Image
 In this step, we will prepare the scripts that will modify the disk image after the Ubuntu installation process has finished, and before the first time we use the disk image in gem5.
 We will keep the related files in the disk-image folder of the experiment.
-The files that are made specifically for SPEC 2017 benchmarks will be in disk-image/spec2017, and the files that are commonly used accross most benchmarks will be in `disk-image/shared`.
+The files that are made specifically for SPEC 2017 benchmarks will be in disk-image/spec-2017, and the files that are commonly used accross most benchmarks will be in `disk-image/shared`.
 
 In the root folder of the experiment,
 
 ```sh
 mkdir disk-image
-mkdir disk-image/spec2017
+mkdir disk-image/spec-2017
 mkdir disk-image/shared
 ```
 
@@ -191,7 +190,7 @@ The script could be found [here](https://gem5.googlesource.com/public/gem5-resou
 To download the script, in the root folder of the experiment,
 
 ```sh
-cd disk-image/spec2017
+cd disk-image/spec-2017
 wget -O - https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b3ba84103afcdecfe345494c5/src/spec-2017/disk-image/spec-2017/runscript.sh?format=TEXT | base64 --decode > runscript.sh
 ```
 **Notes:** Due to the code hosting software at gem5.googlesource.com (Gitiles) only allows download the content of a file encrypted in base64, the above command downloads the encrypted content and pipelines it to `base64` utils, which decrypts the content and pipelines it to the `runscript.sh` file.
@@ -203,20 +202,20 @@ The script could be found [here](https://gem5.googlesource.com/public/gem5-resou
 To download the script, in the root folder of the experiment,
 
 ```sh
-cd disk-image/spec2017
+cd disk-image/spec-2017
 wget -O - https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b3ba84103afcdecfe345494c5/src/spec-2017/disk-image/spec-2017/post-installation.sh?format=TEXT | base64 --decode > post-installation.sh
 ```
 
 The third script is the `install-spec2017.sh` script, which will install the dependencies required to compile and run the SPEC 2017 benchmarks, which will be compiled and built in the script.
 We figure out that the dependencies include `g++`, `gcc`, and `gfortran`.
-So we will get the `build-essential` and `gfortran` packages from Debian (note that "12345" is the default password, this could be modified in the `spec2017.json` file).
+So we will get the `build-essential` and `gfortran` packages from Debian (note that "12345" is the default password, this could be modified in the `spec-2017.json` file).
 The script also modifies the default config script to make the benchmarks work with this set up.
 The script could be found [here](https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b3ba84103afcdecfe345494c5/src/spec-2017/disk-image/spec-2017/install-spec2017.sh).
 
 To download the script, in the root folder of the experiment,
 
 ```sh
-cd disk-image/spec2017
+cd disk-image/spec-2017
 wget -O - https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b3ba84103afcdecfe345494c5/src/spec-2017/disk-image/spec-2017/install-spec2017.sh?format=TEXT | base64 --decode > install-spec2017.sh
 ```
 
@@ -272,7 +271,7 @@ The script is available [here](https://gem5.googlesource.com/public/gem5-resourc
 In the root folder of experiment,
 
 ```sh
-cd disk-image/spec2017/
+cd disk-image/spec-2017/
 wget https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b3ba84103afcdecfe345494c5/src/spec-2017/disk-image/spec-2017/spec-2017.json?format=TEXT | base64 --decode > spec-2017.json
 ```
 
@@ -306,64 +305,14 @@ disk_image = Artifact.registerArtifact(
 )
 ```
 
-### Compiling Linux Kernel
-In this step, we will download Linux kernel source code and compile the Linux kernel.
-The file of interest in this step is the vmlinux file.
+### Obtaining a Compiled Linux Kernel that Works with gem5
+The compiled Linux kernel binaries that is known to work with gem5 can be found here: [https://www.gem5.org/documentation/general_docs/gem5_resources/](https://www.gem5.org/documentation/general_docs/gem5_resources/).
 
-First, we download the Linux kernel source code.
-Version 4.19.83 has been tested with gem5 as discussed [in the other tutorial](boot-tutorial.md).
-We suggest using config files that have been tested with gem5.
-The following command will shallow clone the linux stable repository as well as checking out the tag v4.19.83, which contains the code for linux kernel version 4.19.83.
-The git command also works well for other version numbers.
-
-In the root of the experiment folder,
-
-```sh
-git clone --branch v4.19.83 --depth 1 https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/
-mv linux linux-4.19.83
-```
-
-Now, in launch_spec2017_experiments.py, we make an Artifact object of the Linux stable git repo.
-
-```python
-linux_repo = Artifact.registerArtifact(
-    command = '''
-    	git clone git clone --branch v4.19.83 --depth 1 https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/;
-    	mv linux linux-4.19.83
-    ''',
-    typ = 'git repo',
-    name = 'linux-4.19.83',
-    path =  'linux-4.19.83',
-    cwd = './',
-    documentation = 'Linux kernel 4.19 source code repo obtained in November'
-)
-```
-
-Next, we compile the Linux kernel.
-We will make a folder named linux-configs containing all working linux configs.
-Working Linux configs and documentations for generating a Linux config are discussed here [here](boot-tutorial.md).
-
+The following command downloads the compiled Linux kernel of version 4.19.83.
 In the root folder of the experiment,
 
 ```sh
-mkdir linux-configs
-```
-
-To download the linux-4.19.83 configs,
-
-```sh
-cd linux-configs
-wget https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b3ba84103afcdecfe345494c5/src/linux-kernel/linux-configs/config.4.19.83?format=TEXT | base64 --decode > config.4.19.83
-```
-
-The following commands will copy the linux config and compile the linux kernel.
-In the root folder of the experiment,
-
-```sh
-cp linux-configs/config.4.19.83 linux-4.19.83/.config
-cd linux-4.19.83
-make -j8
-cp vmlinux vmlinux-4.19.83
+wget http://dist.gem5.org/dist/v20-1/kernels/x86/static/vmlinux-4.19.83
 ```
 
 Now, in launch_spec2017_experiments.py, we make an Artifact object of the Linux kernel binary.
@@ -372,15 +321,10 @@ Now, in launch_spec2017_experiments.py, we make an Artifact object of the Linux 
 linux_binary = Artifact.registerArtifact(
     name = 'vmlinux-4.19.83',
     typ = 'kernel',
-    path = 'linux-4.19.83/vmlinux-4.19.83',
+    path = '/vmlinux-4.19.83',
     cwd = './',
-    command = '''
-        cp linux-configs/config.4.19.83 linux-4.19.83/.config
-        cd linux-4.19.83
-        make -j8
-        cp vmlinux vmlinux-4.19.83
-    ''',
-    inputs = [experiments_repo, linux_repo,],
+    command = ''' wget http://dist.gem5.org/dist/v20-1/kernels/x86/static/vmlinux-4.19.83''',
+    inputs = [experiments_repo,],
     documentation = "kernel binary for v4.19.83",
 )
 ```
@@ -416,7 +360,7 @@ wget -O - https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b
 wget -O - https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b3ba84103afcdecfe345494c5/src/spec-2017/configs/system/system.py?format=TEXT | base64 --decode > system.py
 cd ..
 git add *
-git commit -m "Add run scripts for SPEC2017"
+git commit -m "Add run scripts for SPEC 2017"
 ```
 
 In launch_spec2017_experiments.py, we make an Artifact object of the Linux kernel binary.
@@ -554,8 +498,8 @@ if __name__ == "__main__":
                     gem5_binary, # gem5_artifact
                     gem5_repo, # gem5_git_artifact
                     run_script_repo, # run_script_git_artifact
-                    'linux-4.19.83/vmlinux-4.19.83', # linux_binary
-                    'disk-image/spec2017/spec2017-image/spec2017', # disk_image
+                    'vmlinux-4.19.83', # linux_binary
+                    'disk-image/spec-2017/spec-2017-image/spec-2017', # disk_image
                     linux_binary, # linux_binary_artifact
                     disk_image, # disk_image_artifact
                     cpu, benchmark, size, # params
