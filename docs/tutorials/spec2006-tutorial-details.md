@@ -252,7 +252,7 @@ The current version of packer as of November 2020 is 1.6.5.
 cd disk-image/
 wget https://releases.hashicorp.com/packer/1.6.5/packer_1.6.5_linux_amd64.zip
 unzip packer_1.6.5_linux_amd64.zip
-rm packer_1.6.5linux_amd64.zip
+rm packer_1.6.5_linux_amd64.zip
 ```
 
 In launch_spec2006_experiments.py, we document how we obtain the binary as follows,
