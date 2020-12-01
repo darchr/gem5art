@@ -8,7 +8,7 @@ Authors:
 ## Introduction
 In this tutorial, we will demonstrate how to utilize gem5art to run SPEC CPU 2006 benchmarks in gem5 full system mode.
 The full example with all of the gem5art tutorials can be found [here](https://github.com/darchr/gem5art-experiments).
-The scripts in this tutorial work with gem5art-* v1.1.0.
+The scripts in this tutorial work with gem5art-* v1.1.0 and gem5 20.1.0.2 stable.
 
 ### SPEC CPU 2006 Benchmarks
 **Important:** The usage of this tutorial is just for the purpose of demonstration.
@@ -27,7 +27,7 @@ Therefore, the results would be more realistic when using gem5 FS, especially wh
 In order to run gem5 in the full system mode, gem5 requires a built Linux kernel, which is configurable.
 gem5 does not support all configurations in Linux, including the default Linux kernel configuration.
 To accomondate this, we will provide Linux configurations that are to known to work with gem5.
-(Please prefer to the [run exit tutorial](boot-tutorial.md) for details on what kernels are currently tested with gem5.)
+(Please prefer to the [gem5's benchmark status page](https://www.gem5.org/documentation/benchmark_status) for details on what Linux has been tested with gem5.)
 Other than that, a gem5 full system configuration is also a requirement to run gem5 full system mode.
 In this tutorial, we will provide working Linux configurations, the necessary steps to build a Linux kernel, and a working gem5 full system configuration.
 
@@ -47,10 +47,10 @@ We structure the experiment as follows (note that there are many more ways to st
 ![**Figure 1.**]( ../images/spec_tutorial_figure1.png "")
 A visual depict of how gem5 interacts with the host system.
 gem5 is configured to do the following: booting the Linux kernel, running the benchmark, and copying the SPEC outputs to the host system.
-However, since we are interested in getting the stats only for the benchmark, we configure gem5 to exit after the kernel is booted, and then we reset the stats before running the benchmark.
-We use KVM for Linux booting process as we want to quickly boot the system, and after the booting process is complete, we switch to the desired detailed CPU to run the benchmark.
+However, since we are interested in getting the stats only for the benchmark, we will configure gem5 to exit after the kernel is booted, and then we reset the stats before running the benchmark.
+We use KVM for Linux booting process to quickly boot the system, and after the process is complete, we switch to the desired detailed CPU to run the benchmark.
 Similarly, after the benchmark is complete, gem5 exits to host, which allows us to get the stats at that point.
-After that, we switch the CPU back to KVM, which allows us to quickly write the SPEC output files to the host.
+After that, optionally, we switch the CPU back to KVM, which allows us to quickly write the SPEC output files to the host.
 
 **Important:** gem5 will output the stats again when the gem5 run is complete.
 Therefore, we will see two stats in one file in stats.txt.
@@ -84,7 +84,7 @@ experiments_repo = Artifact.registerArtifact(
     name = 'experiment',
     path =  './',
     cwd = './',
-    documentation = 'local repo to run spec 2006 experiments with gem5'
+    documentation = 'local repo to run spec 2006 experiments with gem5 full system mode'
 )
 ```
 
@@ -105,25 +105,25 @@ gem5
 linux-4.19.83/
 ```
 
-Essentially, we will ignore files and folders that when we use gem5art to keep track of them, or the presence of those files and folders do not affect the experiment's results.
+Essentially, we will ignore files and folders that we use gem5art to keep track of them, or the presence of those files and folders do not affect the experiment's results.
 
 ### Building gem5
-In this step, we download the source code and build gem5 v19.
+In this step, we download the source code and build gem5 v20.1.0.2.
 
 ```sh
-git clone -b v19.0.0.0 https://gem5.googlesource.com/public/gem5
+git clone -b v20.1.0.2 https://gem5.googlesource.com/public/gem5
 cd gem5
 scons build/X86/gem5.opt -j8
 ```
 
-We have two artifacts: one is the gem5 source code (the gem5 git repo), and the gem5 binary.
+We have two artifacts: one is the gem5 source code (the gem5 git repo), and the gem5 binary (`gem5.opt`).
 The documentation of this step would be how we get the source code and how we compile the gem5 binary.
 In launch_spec2006_experiments.py, we document the step in Artifact objects as follows,
 
 ```python
 gem5_repo = Artifact.registerArtifact(
     command = '''
-        git clone -b v19.0.0.0 https://gem5.googlesource.com/public/gem5
+        git clone -b v20.1.0.2 https://gem5.googlesource.com/public/gem5
         cd gem5
         scons build/X86/gem5.opt -j8
     ''',
@@ -131,18 +131,18 @@ gem5_repo = Artifact.registerArtifact(
     name = 'gem5',
     path =  'gem5/',
     cwd = './',
-    documentation = 'cloned gem5 v19'
+    documentation = 'cloned gem5 v20.1.0.2'
 )
 
 
 gem5_binary = Artifact.registerArtifact(
     command = 'scons build/X86/gem5.opt -j8',
     typ = 'gem5 binary',
-    name = 'gem5-19',
+    name = 'gem5-20.1.0.2',
     cwd = 'gem5/',
     path =  'gem5/build/X86/gem5.opt',
     inputs = [gem5_repo,],
-    documentation = 'compiled gem5 v19 binary'
+    documentation = 'compiled gem5 v20.1.0.2 binary'
 )
 ```
 
@@ -152,23 +152,24 @@ The examples of how m5 is used could be found in the runscripts that we will des
 m5 binary will be copied to the disk image, so that the guest could run m5 binary during the experiment.
 Therefore, m5 binary should be compiled before we build the disk image.
 
-**Note:** it's important to compile the m5 binary with -DM5_ADDR=0xFFFF0000 as is default in the Makefile. If you don't compile with -DM5_ADDR and try to run with KVM you'll get an illegal instruction error.
+**Note:** it's important to compile the m5 binary with -DM5_ADDR=0xFFFF0000 as is default in the SConscript.
+If you don't compile with -DM5_ADDR and try to run with KVM, you'll get an illegal instruction error.
 
 To compile m5 binary,
 
 ```sh
 cd gem5/util/m5/
-make -f Makefile.x86
+scons build/x86/out/m5
 ```
 
 In launch_spec2006_experiments.py, we document the step in an Artifact object as follows,
 
 ```python
 m5_binary = Artifact.registerArtifact(
-    command = 'make -f Makefile.x86',
+    command = 'scons build/x86/out/m5',
     typ = 'binary',
     name = 'm5',
-    path =  'gem5/util/m5/m5',
+    path =  'gem5/util/m5/build/x86/out/m5',
     cwd = 'gem5/util/m5',
     inputs = [gem5_repo,],
     documentation = 'm5 utility'
@@ -178,7 +179,7 @@ m5_binary = Artifact.registerArtifact(
 ### Preparing Scripts to Modify the Disk Image
 In this step, we will prepare the scripts that will modify the disk image after the Ubuntu installation process has finished, and before the first time we use the disk image in gem5.
 We will keep the related files in the disk-image folder of the experiment.
-The files that are made specifically for SPEC 2006 benchmarks will be in disk-image/spec2006, and the files that are commonly used accross most benchmarks will be in disk-image/shared.
+The files that are made specifically for SPEC 2006 benchmarks will be in `disk-image/spec2006`, and the files that are commonly used accross most benchmarks will be in `disk-image/shared`.
 
 In the root folder of the experiment,
 
@@ -188,52 +189,54 @@ mkdir disk-image/spec2006
 mkdir disk-image/shared
 ```
 
-The first script is the runscript.sh script, which will be appended to the end of `.bashrc` file.
-Therefore, that script will run when we use the disk image in gem5, after the Linux booting process has finished.
+The first script is the `runscript.sh` script, which will be appended to the end of `.bashrc` file.
+As a result, that script will run when we use the disk image in gem5 after the Linux booting process has finished.
 Figure 1 describes how this script interacts with the gem5 config file.
-The script could be found [here](https://github.com/darchr/gem5art/blob/master/docs/disks/spec2006/runscript.sh).
+The script could be found [here](https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b3ba84103afcdecfe345494c5/src/spec-2006/disk-image/spec-2006/runscript.sh).
 
 To download the script, in the root folder of the experiment,
 
 ```sh
 cd disk-image/spec2006
-wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/disks/spec2006/runscript.sh
+wget -O - https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b3ba84103afcdecfe345494c5/src/spec-2006/disk-image/spec-2006/runscript.sh?format=TEXT | base64 --decode > runscript.sh
 ```
 
-The second script is post-installation.sh script, which will copy the "auto logging in" script to the correct place, and copy the m5 binary to /sbin/ in the disk image.
+**Notes:** Due to the code hosting software at gem5.googlesource.com (Gitiles) only allows download the content of a file encrypted in base64, the above command downloads the encrypted content and pipelines it to `base64` utils, which decrypts the content and pipelines it to the `runscript.sh` file.
+
+The second script is `post-installation.sh` script, which will copy the "auto logging in" script to the correct place, and copy the m5 binary to /sbin/ in the disk image.
 This script will also append the above script (runscript.sh) to the end of `.bashrc`.
-The script could be found [here](https://github.com/darchr/gem5art/blob/master/docs/disks/spec2006/post-installation.sh).
+The script could be found [here](https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b3ba84103afcdecfe345494c5/src/spec-2006/disk-image/spec-2006/post-installation.sh).
 
 To download the script, in the root folder of the experiment,
 
 ```sh
 cd disk-image/spec2006
-wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/disks/spec2006/post-installation.sh
+wget -O - https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b3ba84103afcdecfe345494c5/src/spec-2006/disk-image/spec-2006/post-installation.sh?format=TEXT | base64 --decode > post-installation.sh
 ```
 
-The third script is the install-spec2006.sh script, which will install the dependencies required to compile and run the SPEC 2006 benchmarks, which will be compiled and built in the script.
-We figure out that the dependencies include g++, gcc, and gfortran.
-So we will get the build-essential and gfortran packages from Debian (note that "12345" is the default password, this could be modified in the spec2006.json file).
+The third script is the `install-spec2006.sh` script, which installs the dependencies required to compile and run the SPEC 2006 benchmarks, which will be compiled and built in the script.
+We figure out that the dependencies include `g++`, `gcc`, and `gfortran`.
+So we will get the `build-essential` and `gfortran` packages from Debian (note that "12345" is the default password, this could be modified in the `spec2006.json` file).
 The script also modifies the default config script to make the benchmarks work with this set up.
-The script could be found [here](https://github.com/darchr/gem5art/blob/master/docs/disks/spec2006/post-installation.sh).
+The script could be found [here](https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b3ba84103afcdecfe345494c5/src/spec-2006/disk-image/spec-2006/install-spec2006.sh).
 
 To download the script, in the root folder of the experiment,
 
 ```sh
 cd disk-image/spec2006
-wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/disks/spec2006/install-spec2006.sh
+wget -O - https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b3ba84103afcdecfe345494c5/src/spec-2006/disk-image/spec-2006/install-spec2006.sh?format=TEXT | base64 --decode > install-spec2006.sh
 ```
 
 We also need two other files: the auto logging in script and Ubuntu preseed.
 Those files are usually reused by other benchmarks, so we will keep them in disk-image/shared.
-The auto logging in script is [here](https://github.com/darchr/gem5art/blob/master/docs/disks/shared/preseed.cfg), and the Ubuntu preseed configuration is [here](https://github.com/darchr/gem5art/blob/master/docs/disks/shared/serial-getty%40.service).
+The auto logging in script is [here](https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b3ba84103afcdecfe345494c5/src/spec-2006/disk-image/shared/preseed.cfg), and the Ubuntu preseed configuration is [here](https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b3ba84103afcdecfe345494c5/src/spec-2006/disk-image/shared/serial-getty%40.service).
 
 In the root folder of the experiment,
 
 ```sh
 cd disk-image/shared
-wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/disks/shared/preseed.cfg
-wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/disks/shared/serial-getty%40.service
+wget -O - https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b3ba84103afcdecfe345494c5/src/spec-2006/disk-image/shared/preseed.cfg?format=TEXT | base64 --decode > preseed.cfg
+ wget -O - https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b3ba84103afcdecfe345494c5/src/spec-2006/disk-image/shared/serial-getty%40.service?format=TEXT | base64 --decode > serial-getty@.service
 ```
 
 We don't make Artifact objects for those scripts.
@@ -243,13 +246,13 @@ Instead, we let the Artifact repository object of the root folder to keep track 
 Having prepared necessary scripts to create the disk image, in this step, we will build the disk image using [packer](https://www.packer.io/).
 
 First, we download the packer binary.
-The current version of packer as of November 2019 is 1.4.5.
+The current version of packer as of November 2020 is 1.6.5.
 
 ```sh
 cd disk-image/
-wget https://releases.hashicorp.com/packer/1.4.5/packer_1.4.5_linux_amd64.zip
-unzip packer_1.4.5_linux_amd64.zip
-rm packer_1.4.5_linux_amd64.zip
+wget https://releases.hashicorp.com/packer/1.6.5/packer_1.6.5_linux_amd64.zip
+unzip packer_1.6.5_linux_amd64.zip
+rm packer_1.6.5linux_amd64.zip
 ```
 
 In launch_spec2006_experiments.py, we document how we obtain the binary as follows,
@@ -257,8 +260,8 @@ In launch_spec2006_experiments.py, we document how we obtain the binary as follo
 ```python
 packer = Artifact.registerArtifact(
     command = '''
-        wget https://releases.hashicorp.com/packer/1.4.5/packer_1.4.5_linux_amd64.zip;
-        unzip packer_1.4.5_linux_amd64.zip;
+        wget https://releases.hashicorp.com/packer/1.6.5/packer_1.6.5_linux_amd64.zip;
+        unzip packer_1.6.5_linux_amd64.zip;
     ''',
     typ = 'binary',
     name = 'packer',
@@ -271,13 +274,13 @@ packer = Artifact.registerArtifact(
 Second, we create a packer script (a json file) that describes how the disk image will be built.
 In this step, we assume that we have the SPEC 2006 ISO file in the disk-image/spec2006 folder.
 In this script, the ISO file name is CPU2006v1.0.1.iso.
-The script is available [here](https://github.com/darchr/gem5art/blob/master/docs/disks/spec2006/spec2006.json), and we save the file at disk-image/spec2006/spec2006.json.
+The script is available [here](https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b3ba84103afcdecfe345494c5/src/spec-2006/disk-image/spec-2006/spec-2006.json), and we save the file at `disk-image/spec2006/spec2006.json`.
 
 In the root folder of experiment,
 
 ```sh
 cd disk-image/spec2006/
-wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/disks/spec2006/spec2006.json
+wget https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b3ba84103afcdecfe345494c5/src/spec-2006/disk-image/spec-2006/spec-2006.json?format=TEXT | base64 --decode > spec-2006.json
 ```
 
 To build the disk image,
@@ -288,7 +291,7 @@ cd disk-image/
 ./packer build spec2006/spec2006.json
 ```
 
-The process should not take more than 40 minutes on a fairly recent machine with a normal internet speed.
+The process should take about than an hour to complete on a fairly recent machine with a cable internet speed.
 The disk image will be in disk-image/spec2006/spec2006-image/spec2006.
 
 **Note:**: Packer will output a VNC port that could be used to inspect the building process.
@@ -339,7 +342,7 @@ linux_repo = Artifact.registerArtifact(
     name = 'linux-4.19.83',
     path =  'linux-4.19.83',
     cwd = './',
-    documentation = 'Linux kernel 4.19 source code repo obtained in November'
+    documentation = 'Linux kernel 4.19 source code repo obtained in November 2020'
 )
 ```
 
@@ -357,7 +360,7 @@ To download the linux-4.19.83 configs,
 
 ```sh
 cd linux-configs
-wget https://raw.githubusercontent.com/darchr/gem5art/master/docs/linux-configs/config.4.19.83
+wget -O - https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b3ba84103afcdecfe345494c5/src/linux-kernel/linux-configs/config.4.19.83?format=TEXT | base64 --decode > config.4.19.83
 ```
 
 The following commands will copy the linux config and compile the linux kernel.
@@ -392,7 +395,7 @@ linux_binary = Artifact.registerArtifact(
 ### The gem5 Run Script/gem5 Configuration
 In this step, we take a look at the final missing piece: the gem5 run script.
 The script is where we specify the simulated system.
-We offer example scripts in the [configs-spec-tests folder](https://github.com/darchr/gem5art/blob/master/docs/gem5-configs/configs-spec-tests/).
+We offer example scripts in the [spec-2006/configs folder](https://gem5.googlesource.com/public/gem5-resources/+/a9db8cf1e2ea3c4b3ba84103afcdecfe345494c5/src/spec-2006/configs/).
 
 First, we create a folder named gem5-configs containing all gem5 configs.
 Since gem5art requires a git repo for the run scripts, we will make a local git repo for the run scripts.
