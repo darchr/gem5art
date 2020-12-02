@@ -30,14 +30,13 @@
 import m5
 from m5.objects import *
 from m5.util import convert
-from fs_tools import *
-from caches import *
+from .fs_tools import *
+from .caches import *
 
-class MySystem(LinuxX86System):
+class MySystem(System):
 
-    def __init__(self, kernel, disk, cpu_type, num_cpus, opts):
+    def __init__(self, kernel, disk, cpu_type, num_cpus):
         super(MySystem, self).__init__()
-        self._opts = opts
 
         self._host_parallel = cpu_type == "kvm"
 
@@ -57,7 +56,7 @@ class MySystem(LinuxX86System):
         self.membus.default = Self.badaddr_responder.pio
 
         # Set up the system port for functional access from the simulator
-        self.system_port = self.membus.slave
+        self.system_port = self.membus.cpu_side_ports
 
         self.initFS(self.membus, num_cpus)
 
@@ -67,12 +66,12 @@ class MySystem(LinuxX86System):
         self.setDiskImages(disk, disk)
 
         # Change this path to point to the kernel you want to use
-        self.kernel = kernel
+        self.workload.object_file = kernel
         # Options specified on the kernel command line
         boot_options = ['earlyprintk=ttyS0', 'console=ttyS0', 'lpj=7999923',
                          'root=/dev/hda1']
 
-        self.boot_osflags = ' '.join(boot_options)
+        self.workload.command_line = ' '.join(boot_options)
 
         # Create the CPUs for our system.
         self.createCPU(cpu_type, num_cpus)
@@ -121,7 +120,8 @@ class MySystem(LinuxX86System):
         else:
             m5.fatal("No CPU type {}".format(cpu_type))
 
-        map(lambda c: c.createThreads(), self.cpu)
+        for cpu in self.cpu:
+            cpu.createThreads()
 
     def setDiskImages(self, img_path_1, img_path_2):
         disk0 = CowDisk(img_path_1)
@@ -134,8 +134,8 @@ class MySystem(LinuxX86System):
             cpu.l2bus = L2XBar()
 
             # Create an L1 instruction and data cache
-            cpu.icache = L1ICache(self._opts)
-            cpu.dcache = L1DCache(self._opts)
+            cpu.icache = L1ICache()
+            cpu.dcache = L1DCache()
             cpu.mmucache = MMUCache()
 
             # Connect the instruction and data caches to the CPU
@@ -149,7 +149,7 @@ class MySystem(LinuxX86System):
             cpu.mmucache.connectBus(cpu.l2bus)
 
             # Create an L2 cache and connect it to the l2bus
-            cpu.l2cache = L2Cache(self._opts)
+            cpu.l2cache = L2Cache()
             cpu.l2cache.connectCPUSideBus(cpu.l2bus)
 
             # Connect the L2 cache to the L3 bus
@@ -163,9 +163,9 @@ class MySystem(LinuxX86System):
             # For x86 only, connect interrupts to the memory
             # Note: these are directly connected to the memory bus and
             #       not cached
-            cpu.interrupts[0].pio = self.membus.master
-            cpu.interrupts[0].int_master = self.membus.slave
-            cpu.interrupts[0].int_slave = self.membus.master
+            cpu.interrupts[0].pio = self.membus.mem_side_ports
+            cpu.interrupts[0].int_requestor = self.membus.cpu_side_ports
+            cpu.interrupts[0].int_responder = self.membus.mem_side_ports
 
 
     def createMemoryControllersDDR3(self):
@@ -173,13 +173,15 @@ class MySystem(LinuxX86System):
 
     def _createMemoryControllers(self, num, cls):
         self.mem_cntrls = [
-            cls(range = self.mem_ranges[0],
-                port = self.membus.master)
+            MemCtrl(dram = cls(range = self.mem_ranges[0]),
+                    port = self.membus.mem_side_ports)
             for i in range(num)
         ]
 
     def initFS(self, membus, cpus):
         self.pc = Pc()
+
+        self.workload = X86FsLinux()
 
         # Constants similar to x86_traits.hh
         IO_address_space_base = 0x8000000000000000
@@ -190,8 +192,8 @@ class MySystem(LinuxX86System):
         # North Bridge
         self.iobus = IOXBar()
         self.bridge = Bridge(delay='50ns')
-        self.bridge.master = self.iobus.slave
-        self.bridge.slave = membus.master
+        self.bridge.mem_side_port = self.iobus.cpu_side_ports
+        self.bridge.cpu_side_port = membus.mem_side_ports
         # Allow the bridge to pass through:
         #  1) kernel configured PCI device memory map address: address range
         #  [0xC0000000, 0xFFFF0000). (The upper 64kB are reserved for m5ops.)
@@ -211,8 +213,8 @@ class MySystem(LinuxX86System):
         # Create a bridge from the IO bus to the memory bus to allow access
         # to the local APIC (two pages)
         self.apicbridge = Bridge(delay='50ns')
-        self.apicbridge.slave = self.iobus.master
-        self.apicbridge.master = membus.slave
+        self.apicbridge.cpu_side_port = self.iobus.mem_side_ports
+        self.apicbridge.mem_side_port = membus.cpu_side_ports
         self.apicbridge.ranges = [AddrRange(interrupts_address_space_base,
                                             interrupts_address_space_base +
                                             cpus * APIC_range_size
@@ -231,15 +233,15 @@ class MySystem(LinuxX86System):
                             size = '1kB',
                             tgts_per_mshr = 12,
                             addr_ranges = self.mem_ranges)
-        self.iocache.cpu_side = self.iobus.master
-        self.iocache.mem_side = self.membus.slave
+        self.iocache.cpu_side = self.iobus.mem_side_ports
+        self.iocache.mem_side = self.membus.cpu_side_ports
 
         self.intrctrl = IntrControl()
 
         ###############################################
 
         # Add in a Bios information structure.
-        self.smbios_table.structures = [X86SMBiosBiosInformation()]
+        self.workload.smbios_table.structures = [X86SMBiosBiosInformation()]
 
         # Set up the Intel MP table
         base_entries = []
@@ -297,8 +299,8 @@ class MySystem(LinuxX86System):
         assignISAInt(1, 1)
         for i in range(3, 15):
             assignISAInt(i, i)
-        self.intel_mp_table.base_entries = base_entries
-        self.intel_mp_table.ext_entries = ext_entries
+        self.workload.intel_mp_table.base_entries = base_entries
+        self.workload.intel_mp_table.ext_entries = ext_entries
 
         entries = \
            [
@@ -315,4 +317,4 @@ class MySystem(LinuxX86System):
         entries.append(X86E820Entry(addr = 0xFFFF0000, size = '64kB',
                                     range_type=2))
 
-        self.e820_table.entries = entries
+        self.workload.e820_table.entries = entries

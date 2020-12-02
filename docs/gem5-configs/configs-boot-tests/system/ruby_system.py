@@ -30,14 +30,13 @@
 import m5
 from m5.objects import *
 from m5.util import convert
-from fs_tools import *
-from MI_example_caches import MyCacheSystem
+from .fs_tools import *
 
-class MyRubySystem(LinuxX86System):
 
-    def __init__(self, kernel, disk, cpu_type, num_cpus, opts):
+class MyRubySystem(System):
+
+    def __init__(self, kernel, disk, cpu_type, mem_sys, num_cpus):
         super(MyRubySystem, self).__init__()
-        self._opts = opts
 
         self._host_parallel = cpu_type == "kvm"
 
@@ -58,12 +57,12 @@ class MyRubySystem(LinuxX86System):
         self.setDiskImages(disk, disk)
 
         # Change this path to point to the kernel you want to use
-        self.kernel = kernel
+        self.workload.object_file = kernel
         # Options specified on the kernel command line
         boot_options = ['earlyprintk=ttyS0', 'console=ttyS0', 'lpj=7999923',
                          'root=/dev/hda1']
 
-        self.boot_osflags = ' '.join(boot_options)
+        self.workload.command_line = ' '.join(boot_options)
 
         # Create the CPUs for our system.
         self.createCPU(cpu_type, num_cpus)
@@ -71,9 +70,17 @@ class MyRubySystem(LinuxX86System):
         self.createMemoryControllersDDR3()
 
         # Create the cache hierarchy for the system.
-        self.caches = MyCacheSystem()
+        if mem_sys == 'MI_example':
+            from .MI_example_caches import MIExampleSystem
+            self.caches = MIExampleSystem()
+        elif mem_sys == 'MESI_Two_Level':
+            from .MESI_Two_Level import MESITwoLevelCache
+            self.caches = MESITwoLevelCache()
+        elif mem_sys == 'MOESI_CMP_directory':
+            from .MOESI_CMP_directory import MOESICMPDirCache
+            self.caches = MOESICMPDirCache()
         self.caches.setup(self, self.cpu, self.mem_cntrls,
-                          [self.pc.south_bridge.ide.dma, self.iobus.master],
+                          [self.pc.south_bridge.ide.dma, self.iobus.mem_side_ports],
                           self.iobus)
 
         if self._host_parallel:
@@ -112,8 +119,9 @@ class MyRubySystem(LinuxX86System):
         else:
             m5.fatal("No CPU type {}".format(cpu_type))
 
-        map(lambda c: c.createThreads(), self.cpu)
-        map(lambda c: c.createInterruptController(), self.cpu)
+        for cpu in self.cpu:
+            cpu.createThreads()
+            cpu.createInterruptController()
 
     def setDiskImages(self, img_path_1, img_path_2):
         disk0 = CowDisk(img_path_1)
@@ -125,12 +133,14 @@ class MyRubySystem(LinuxX86System):
 
     def _createMemoryControllers(self, num, cls):
         self.mem_cntrls = [
-            cls(range = self.mem_ranges[0])
+            MemCtrl(dram = cls(range = self.mem_ranges[0]))
             for i in range(num)
         ]
 
     def initFS(self, cpus):
         self.pc = Pc()
+
+        self.workload = X86FsLinux()
 
         # North Bridge
         self.iobus = IOXBar()
@@ -145,7 +155,7 @@ class MyRubySystem(LinuxX86System):
         ###############################################
 
         # Add in a Bios information structure.
-        self.smbios_table.structures = [X86SMBiosBiosInformation()]
+        self.workload.smbios_table.structures = [X86SMBiosBiosInformation()]
 
         # Set up the Intel MP table
         base_entries = []
@@ -203,8 +213,8 @@ class MyRubySystem(LinuxX86System):
         assignISAInt(1, 1)
         for i in range(3, 15):
             assignISAInt(i, i)
-        self.intel_mp_table.base_entries = base_entries
-        self.intel_mp_table.ext_entries = ext_entries
+        self.workload.intel_mp_table.base_entries = base_entries
+        self.workload.intel_mp_table.ext_entries = ext_entries
 
         entries = \
            [
@@ -221,4 +231,4 @@ class MyRubySystem(LinuxX86System):
         entries.append(X86E820Entry(addr = 0xFFFF0000, size = '64kB',
                                     range_type=2))
 
-        self.e820_table.entries = entries
+        self.workload.e820_table.entries = entries
