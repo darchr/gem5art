@@ -208,8 +208,8 @@ Repeat the above process for other kernel versions that we want to use in this e
 ## gem5 run scripts
 
 Next, we need to add gem5 run scripts. We will do that in a folder named configs-boot-tests.
-Get the run script named run_exit.py from [here](https://github.com/darchr/gem5art/blob/master/docs/gem5-configs/configs-boot-tests/run_exit.py), and other system configuration files from
-[here](https://github.com/darchr/gem5art/blob/master/docs/gem5-configs/configs-boot-tests/system/).
+Get the run script named run_exit.py from [here](https://gem5.googlesource.com/public/gem5-resources/+/refs/heads/stable/src/boot-exit/configs/run_exit.py), and other system configuration files from
+[here](https://gem5.googlesource.com/public/gem5-resources/+/refs/heads/stable/src/boot-exit/configs/system).
 The run script (run_exit.py) takes the following arguments:
 - kernel: compiled kernel to be used for simulation
 - disk: built disk image to be used for simulation
