@@ -91,7 +91,7 @@ See the commands below:
 ```sh
 git clone https://gem5.googlesource.com/public/gem5
 cd gem5
-git checkout 90a6e809629c978c2df765eb
+git checkout v20.1.0.0
 scons build/X86/gem5.opt -j8
 ```
 You can also add your changes to gem5 source before building it. Make sure to commit any changes you make to gem5 repo and documenting it while registering gem5 artifact in the launch script.
@@ -104,12 +104,12 @@ gem5_repo = Artifact.registerArtifact(
     name = 'gem5',
     path =  'gem5/',
     cwd = './',
-    documentation = 'cloned gem5 from googlesource and checked out release-staging-v20.1.0.0 (Sep 14, 2020)'
+    documentation = 'cloned gem5 from googlesource and checked out v20.1.0.0'
 )
 
 gem5_binary = Artifact.registerArtifact(
     command = '''cd gem5;
-    git checkout 90a6e809629c978c2df765ebb70;
+    git checkout v20.1.0.0;
     scons build/X86/gem5.opt -j8
     ''',
     typ = 'gem5 binary',
@@ -117,7 +117,7 @@ gem5_binary = Artifact.registerArtifact(
     cwd = 'gem5/',
     path =  'gem5/build/X86/gem5.opt',
     inputs = [gem5_repo,],
-    documentation = 'gem5 binary based on release-staging-v20.1.0.0 (Sep 14, 2020)'
+    documentation = 'gem5 binary based on v20.1.0.0'
 )
 ```
 
@@ -177,7 +177,7 @@ In this tutorial, we want to experiment with different linux kernels to examine 
 
 
 Let's use an example of kernel v5.4.49 to see how to compile the kernel.
-First, add a folder linux-configs to store linux kernel config files. The configuration files of interest are available [here](https://github.com/darchr/gem5art/blob/master/docs/linux-configs/).
+First, add a folder linux-configs to store linux kernel config files. The configuration files of interest are available [here](https://gem5.googlesource.com/public/gem5-resources/+/refs/heads/stable/src/boot-exit/linux-configs/).
 Then, we will get the linux source and checkout the required linux version (e.g. v5.4.49 in this case).
 
 ```
@@ -304,7 +304,7 @@ gem5_repo = Artifact.registerArtifact(
     name = 'gem5',
     path =  'gem5/',
     cwd = './',
-    documentation = 'cloned gem5 from googlesource and checked out release-staging-v20.1.0.0 (Sep 14, 2020)'
+    documentation = 'cloned gem5 from googlesource and checked out v20.1.0.0'
 )
 
 m5_binary = Artifact.registerArtifact(
@@ -329,7 +329,7 @@ disk_image = Artifact.registerArtifact(
 
 gem5_binary = Artifact.registerArtifact(
     command = '''cd gem5;
-    git checkout 90a6e809629c978c2df765ebb70;
+    git checkout v20.1.0.0;
     scons build/X86/gem5.opt -j8
     ''',
     typ = 'gem5 binary',
@@ -337,12 +337,12 @@ gem5_binary = Artifact.registerArtifact(
     cwd = 'gem5/',
     path =  'gem5/build/X86/gem5.opt',
     inputs = [gem5_repo,],
-    documentation = 'gem5 binary based on release-staging-v20.1.0.0 (Sep 14, 2020)'
+    documentation = 'gem5 binary based on v20.1.0.0'
 )
 
 gem5_binary_MESI_Two_Level = Artifact.registerArtifact(
     command = '''cd gem5;
-    git checkout 90a6e809629c978c2df765ebb70;
+    git checkout v20.1.0.0;
     scons build/X86_MESI_Two_Level/gem5.opt --default=X86 PROTOCOL=MESI_Two_Level SLICC_HTML=True -j8
     ''',
     typ = 'gem5 binary',
@@ -350,12 +350,12 @@ gem5_binary_MESI_Two_Level = Artifact.registerArtifact(
     cwd = 'gem5/',
     path =  'gem5/build/X86_MESI_Two_Level/gem5.opt',
     inputs = [gem5_repo,],
-    documentation = 'gem5 binary based on release-staging-v20.1.0.0 (Sep 14, 2020)'
+    documentation = 'gem5 binary based on v20.1.0.0'
 )
 
 gem5_binary_MOESI_CMP_directory = Artifact.registerArtifact(
     command = '''cd gem5;
-    git checkout 90a6e809629c978c2df765ebb70;
+    git checkout v20.1.0.0;
     scons build/MOESI_CMP_directory/gem5.opt --default=X86 PROTOCOL=MOESI_CMP_directory -j8
     ''',
     typ = 'gem5 binary',
@@ -363,7 +363,7 @@ gem5_binary_MOESI_CMP_directory = Artifact.registerArtifact(
     cwd = 'gem5/',
     path =  'gem5/build/X86_MOESI_CMP_directory/gem5.opt',
     inputs = [gem5_repo,],
-    documentation = 'gem5 binary based on release-staging-v20.1.0.0 (Sep 14, 2020)'
+    documentation = 'gem5 binary based on v20.1.0.0'
 )
 
 linux_repo = Artifact.registerArtifact(
@@ -397,9 +397,37 @@ linux_binaries = {
 }
 ```
 
-Once, all the artifacts are registered the next step is to launch all gem5 jobs. To do that, add the following lines in your script:
+Once, all the artifacts are registered the next step is to launch all gem5 jobs. To do that, first we will create a method `createRun` to create gem5art runs based on a few arguments:
 
-## If Using Celery
+```python
+def createRun(linux, boot_type, cpu, num_cpu, mem):
+
+    if mem == 'MESI_Two_Level':
+        binary_gem5 = 'gem5/build/X86_MESI_Two_Level/gem5.opt'
+        artifact_gem5 = gem5_binary_MESI_Two_Level
+    elif mem == 'MOESI_CMP_directory':
+        binary_gem5 = 'gem5/build/MOESI_CMP_directory/gem5.opt'
+        artifact_gem5 = gem5_binary_MOESI_CMP_directory
+    else:
+        binary_gem5 = 'gem5/build/X86/gem5.opt'
+        artifact_gem5 = gem5_binary
+
+    return gem5Run.createFSRun(
+        'boot experiments with gem5-20.1',
+        binary_gem5,
+        'configs-boot-tests/run_exit.py',
+        'results/run_exit/vmlinux-{}/boot-exit/{}/{}/{}/{}'.
+            format(linux, cpu, mem, num_cpu, boot_type),
+        artifact_gem5, gem5_repo, experiments_repo,
+        os.path.join('linux-stable', 'vmlinux'+'-'+linux),
+        'disk-image/boot-exit/boot-exit-image/boot-exit',
+        linux_binaries[linux], disk_image,
+        cpu, mem, num_cpu, boot_type,
+        timeout = 10*60*60 #10 hours
+        )
+```
+
+Next, initialize all the parameters to pass to `createRun` method, depending on the configuration space we want to test:
 
 ```python
 if __name__ == "__main__":
@@ -407,33 +435,13 @@ if __name__ == "__main__":
     num_cpus = ['1', '2', '4', '8']
     cpu_types = ['kvm', 'atomic', 'simple', 'o3']
     mem_types = ['MI_example', 'MESI_Two_Level', 'MOESI_CMP_directory']
+```
 
-    def createRun(linux, boot_type, cpu, num_cpu, mem):
+Then, to run actual jobs depending on if you want to use celery or python multiprocessing library, add the following in your launch script:
 
-        if mem == 'MESI_Two_Level':
-            binary_gem5 = 'gem5/build/X86_MESI_Two_Level/gem5.opt'
-            artifact_gem5 = gem5_binary_MESI_Two_Level
-        elif mem == 'MOESI_CMP_directory':
-            binary_gem5 = 'gem5/build/MOESI_CMP_directory/gem5.opt'
-            artifact_gem5 = gem5_binary_MOESI_CMP_directory
-        else:
-            binary_gem5 = 'gem5/build/X86/gem5.opt'
-            artifact_gem5 = gem5_binary
+## If Using Celery
 
-        return gem5Run.createFSRun(
-            'boot experiments with gem5-20.1',
-            binary_gem5,
-            'configs-boot-tests/run_exit.py',
-            'results/run_exit/vmlinux-{}/boot-exit/{}/{}/{}/{}'.
-                format(linux, cpu, mem, num_cpu, boot_type),
-            artifact_gem5, gem5_repo, experiments_repo,
-            os.path.join('linux-stable', 'vmlinux'+'-'+linux),
-            'disk-image/boot-exit/boot-exit-image/boot-exit',
-            linux_binaries[linux], disk_image,
-            cpu, mem, num_cpu, boot_type,
-            timeout = 10*60*60 #10 hours
-            )
-
+```python
     # For the cross product of tests, create a run object.
     runs = starmap(createRun, product(linuxes, boot_types, cpu_types, num_cpus, mem_types))
     # Run all of these experiments in parallel
@@ -444,42 +452,10 @@ if __name__ == "__main__":
 ## If Using Python Multiprocessing Library:
 
 ```python
-def worker(run):
-    run.run()
-    json = run.dumpsJson()
-    print(json)
-
-if __name__ == "__main__":
-    boot_types = ['init']
-    num_cpus = ['1', '2', '4', '8']
-    cpu_types = ['kvm', 'atomic', 'simple', 'o3']
-    mem_types = ['MI_example', 'MESI_Two_Level', 'MOESI_CMP_directory']
-
-    def createRun(linux, boot_type, cpu, num_cpu, mem):
-
-        if mem == 'MESI_Two_Level':
-            binary_gem5 = 'gem5/build/X86_MESI_Two_Level/gem5.opt'
-            artifact_gem5 = gem5_binary_MESI_Two_Level
-        elif mem == 'MOESI_CMP_directory':
-            binary_gem5 = 'gem5/build/MOESI_CMP_directory/gem5.opt'
-            artifact_gem5 = gem5_binary_MOESI_CMP_directory
-        else:
-            binary_gem5 = 'gem5/build/X86/gem5.opt'
-            artifact_gem5 = gem5_binary
-
-        return gem5Run.createFSRun(
-            'boot experiments with gem5-20.1 (timeout reruns)',
-            binary_gem5,
-            'configs-boot-tests/run_exit.py',
-            'results/run_exit/vmlinux-{}/boot-exit/{}/{}/{}/{}'.
-                format(linux, cpu, mem, num_cpu, boot_type),
-            artifact_gem5, gem5_repo, experiments_repo,
-            os.path.join('linux-stable', 'vmlinux'+'-'+linux),
-            'disk-image/boot-exit/boot-exit-image/boot-exit',
-            linux_binaries[linux], disk_image,
-            cpu, mem, num_cpu, boot_type,
-            timeout = 24*60*60 #10 hours
-            )
+    def worker(run):
+        run.run()
+        json = run.dumpsJson()
+        print(json)
 
     jobs = []
     # For the cross product of tests, create a run object.
@@ -490,9 +466,7 @@ if __name__ == "__main__":
 
     with mp.Pool(mp.cpu_count() // 2) as pool:
          pool.map(worker, jobs)
-
 ```
-
 
 The above lines are responsible for looping through all possible combinations of variables involved in this experiment.
 For each combination, a gem5Run object is created and eventually passed to run_gem5_instance to be executed asynchronously if using Celery.
