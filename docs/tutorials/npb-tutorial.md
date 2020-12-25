@@ -21,24 +21,42 @@ Pseudo Applications:
 - **SP:** Scalar Penta-diagonal solver
 - **LU:** Lower-Upper Gauss-Seidel solver
 
-There are different classes (A,B,C,D,E and F) of the workloads based on the data size that is used with the benchmarks. Detailed discussion of the data sizes is available [here](https://www.nas.nasa.gov/publications/npb_problem_sizes.html).
+There are different classes (A,B,C,D,E and F) of the workloads based on the data size that is used with the benchmarks. Detailed discussion of the data sizes is available [here](https://www.nas.nasa.gov/publications/npb_problem_sizes.html). In this tutorial, we will use only class A of these workloads.
 
-This tutorial follows the following directory structure (inside the main directory):
+We assume the following directory structure to follow in this tutorial:
 
-- configs-npb-tests: gem5 run and configuration scripts to run NPB
-- disk-image: contains packer script and template files used to build a disk image.
-The built disk image will be stored in the same folder
-- gem5: gem5 [source code](https://gem5.googlesource.com/public/gem5) and the compiled binary
-- linux-stable: linux kernel [source code](https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git)  used for full-system experiments
-- config.4.19.83: linux kernel config file used for its compilation
-- results: directory to store the results of the experiments (generated once gem5 jobs are executed)
-- launch_npb_tests.py:  gem5 jobs launch script (creates all of the needed artifacts as well)
+```
+npb/
+  |___ gem5/                               # gem5 source code
+  |
+  |___ disk-image/
+  |      |___ shared/                      # Auxiliary files needed for disk creation
+  |      |___ npb/
+  |            |___ npb-image/             # Will be created once the disk is generated
+  |            |      |___ npb             # The generated disk image
+  |            |___ npb.json               # The Packer script to build the disk image
+  |            |___ runscript.sh           # Executes a user provided script in simulated guest
+  |            |___ post-installation.sh   # Moves runscript.sh to guest's .bashrc
+  |            |___ npb-install.sh         # Compiles NPB inside the generated disk image
+  |            |___ npb-hooks              # The NPB source (modified to use with gem5).
+  |
+  |___ config.4.19.83                      # linux kernel configuration file
+  |
+  |___ configs
+  |      |___ system                       # gem5 system config files
+  |      |___ run_npb.py                   # gem5 run script to run NPB tests
+  |
+  |___ linux                               # Linux source and binary will live here
+  |
+  |___ launch_npb_tests.py                 # script to launch jobs and register artifacts
+```
 
 
 ## Setting up the environment
-First, we need to create the main directory named npb-tests (from where we will run everything) and turn it into a git repository.
-Through the use of npb-tests git repo, we will try to keep track of changes in those files which are not included in any git repo otherwise.
-An example of such files is gem5 run and config scripts (config-npb-tests).
+
+First, we need to create the main directory named **npb-tests** (from where we will run everything) and turn it into a git repository.
+Through the use of **npb-tests** git repo, we will try to keep track of changes in those files which are not included in any git repo otherwise.
+An example of such files is gem5 run and config scripts.
 We want to make sure that we can keep record of any changes in these scripts, so that a particular run of NPB benchmarks can be associated with a particular snapshot of these files.
 We also need to add a git remote to this repo pointing to a remote location where we want this repo to be hosted.
 
@@ -88,22 +106,13 @@ Next clone gem5 from googlesource:
 git clone https://gem5.googlesource.com/public/gem5
 ```
 
-Before building gem5, we need to apply some changes to the source.
-These changes are needed to run gem5 in KVM mode on Intel platforms and also to run some gem5 magic instructions in KVM mode.
-We will get these changes from darchr/gem5 (GitHub).
-Run the following to apply these changes and build gem5:
+If you want to use the exact gem5 source that was used at the time of creating this tutorial you will have to checkout the relevant commit. If you want to try with the current version of gem5 at the time of reading this tutorial, you can ignore the git checkout command.
 
 ```sh
 cd gem5
-git checkout d40f0bc579fb8b10da7181
-git remote add darchr https://github.com/darchr/gem5
-git fetch darchr
-git cherry-pick 6450aaa7ca9e3040fb9eecf69c51a01884ac370c
-git cherry-pick 3403665994b55f664f4edfc9074650aaa7ddcd2c
+git checkout v20.1.0.0;
 scons build/X86/gem5.opt -j8
 ```
-
-Like the linux boot tutorial, you can use or ignore the git checkout command in the above commands depending on if you want to use the gem5 source from the time of making this tutorial or from the time of reading it.
 
 Also make sure to build the m5 utility which will be moved to the disk image eventually.
 m5 utility allows to trigger simulation tasks from inside the simulated system.
@@ -112,7 +121,7 @@ We will need m5 mainly to exit the simulation when the simulated system will be 
 
 ```sh
 cd gem5/util/m5/
-make -f Makefile.x86
+scons build/x86/out/m5
 ```
 
 ## Creating a disk image
@@ -139,7 +148,7 @@ Basically, gem5 magic instructions are used before and after the ROI which exit 
 Next, we will add few other files in npb/ which will be used for compilation of NPB inside the disk image and eventually running of these benchmarks with gem5.
 These files will be moved from host to the disk image using npb.json file as we will soon see.
 
-First, create a file npb-install.sh, which will be executed inside the disk image (once it is built) and will install NPB on the disk image:
+First, create a file **npb-install.sh**, which will be executed inside the disk image (once it is built) and will install NPB on the disk image:
 
 ```sh
 # install build-essential (gcc and g++ included) and gfortran
@@ -157,14 +166,14 @@ make suite HOOKS=1
 `HOOKS=1` flag in the above make command enables the ROI annotations while compiling NPB workloads.
 We are specifically compiling OpenMP (OMP) version of class A, B, C and D of NPB workloads.
 
-To configure the benchmark build process, the source of NPB which we are using relies on modified make.def and suite.def files (build system files). Look [here](https://github.com/darchr/npb-hooks/blob/master/NPB3.3.1/NPB3.3-OMP/README.install) in order to understand the build process of NAS parallel benchmarks.
-'suite.def' file is used to determine which workloads (and of which class) do we want to compile when we run 'make suite' command (as in the above script).
+To configure the benchmark build process, the source of NPB which we are using relies on modified **make.def** and **suite.def** files (build system files). Look [here](https://github.com/darchr/npb-hooks/blob/master/NPB3.3.1/NPB3.3-OMP/README.install), to understand the build process of NAS parallel benchmarks.
+**suite.def** file is used to determine which workloads (and of which class) do we want to compile when we run **make suite** command (as in the above script).
 You can look at the modified suite.def file [here](https://github.com/darchr/npb-hooks/blob/master/NPB3.3.1/NPB3.3-OMP/config/suite.def).
 
-The make.def file we are using add OMP flags to the compiler flags to compile OMP version of the benchmarks. We also add another flag '-DM5OP_ADDR=0xFFFF0000' to the compiler flags, which makes sure that the gem5 magic instructions added to the benchmarks will also work in KVM mode.
+The **make.def** file we are using add OMP flags to the compiler flags to compile OMP version of the benchmarks. We also add another flag **-DM5OP_ADDR=0xFFFF0000** to the compiler flags, which makes sure that the gem5 magic instructions added to the benchmarks will also work in KVM mode.
 You can look at the complete file [here](https://github.com/darchr/npb-hooks/blob/master/NPB3.3.1/NPB3.3-OMP/config/make.def).
 
-In npb/, create a file post-installation.sh and add following lines to it:
+In npb/, create a file **post-installation.sh** and add following lines to it:
 
 ```sh
 #!/bin/bash
@@ -181,7 +190,7 @@ cat /home/gem5/runscript.sh >> /root/.bashrc
 echo 'Post Installation Done'
 ```
 
-This post-installation.sh script (which is a script to run after Ubuntu is installed on the disk image) installs m5 and copies the contents of runscript.sh to .bashrc.
+This **post-installation.sh** script (which is a script to run after Ubuntu is installed on the disk image) installs m5 and copies the contents of **runscript.sh** to **.bashrc**.
 Therefore, we need to add those things in runscript.sh which we want to execute as soon as the system boots up.
 Create runscript.sh in npb/ and add following lines to it:
 
@@ -197,10 +206,10 @@ if [ -s script.sh ]; then
 fi
 # otherwise, drop to the terminal
 ```
-runscript.sh uses m5 readfile to read the contents of a script which is how gem5 passes scripts to the simulated system from the host system.
+**runscript.sh** uses **m5 readfile** to read the contents of a script which is how gem5 passes scripts to the simulated system from the host system.
 The passed script will then be executed and will be responsible for running benchmark/s which we will look into more later.
 
-Finally, create npb.json and add following contents:
+Finally, create **npb.json** and add following contents:
 
 ```json
 {
@@ -309,7 +318,7 @@ Finally, create npb.json and add following contents:
 }
 ```
 
-npb.json is our primary .json configuration file. The provisioners and variables section of this file configure the files that need to be transferred to the disk and other things like disk image's name.
+**npb.json** is our primary .json configuration file. The provisioners and variables section of this file configure the files that need to be transferred to the disk and other things like disk image's name.
 
 Next, download packer (if not already downloaded) in the disk-image folder:
 
@@ -326,10 +335,13 @@ Now, to build the disk image inside the disk-image folder, run:
 ./packer build npb/npb.json
 ```
 
+Once this process succeeds, the created disk image can be found on `npb/npb-image/npb`.
+A disk image already created following the above instructions can be found, gzipped, [here](http://dist.gem5.org/dist/v20-1/images/x86/ubuntu-18-04/npb.img.gz).
+
 ## Compiling the linux kernel
 
-In this tutorial, we will use the latest LTS (long term support) release of linux kernel v4.19.83 with gem5 to run NAS parallel benchmarks.
-First, get the linux kernel config file from [here](https://github.com/darchr/gem5art/blob/master/docs/linux-configs/config.4.19.83), and place it in npb-tests folder.
+In this tutorial, we use of the LTS (long term support) releases of linux kernel v4.19.83 with gem5 to run NAS parallel benchmarks.
+First, get the linux kernel config file from [here](https://gem5.googlesource.com/public/gem5-resources/+/refs/heads/stable/src/boot-exit/linux-configs/), and place it in npb-tests folder.
 Then, we will get the linux source of version 4.19.83:
 
 ```
@@ -345,17 +357,34 @@ make -j8
 cp vmlinux vmlinux-4.19.83
 ```
 
+**Note:** The above instructions are tested with `gcc 7.5.0` and an already compiled Linux binary can be downloaded from the following link:
+
+- [vmlinux-4.19.83](http://dist.gem5.org/dist/v20-1/kernels/x86/static/vmlinux-4.19.83)
+
 ## gem5 run scripts
 
 Next, we need to add gem5 run scripts. We will do that in a folder named configs-npb-tests.
-Get the run script named run_npb.py from [here](https://github.com/darchr/gem5art/blob/master/docs/gem5-configs/configs-npb-tests/run_npb.py), and other system configuration files from
-[here](https://github.com/darchr/gem5art/blob/master/docs/gem5-configs/configs-npb-tests/system/).
-The run script (run_npb.py) takes the following arguments:
-- kernel: compiled kernel to be used for simulation
-- disk: built disk image to be used for simulation
-- cpu: the cpu model to use (e.g. kvm or atomic)
-- benchmark: NPB workload to run (e.g. is.C.x, ep.C.x, bt.C.x, where C is the class)
-- num_cpus: number of parallel cpus to be simulated
+Get the run script named run_npb.py from [here](https://gem5.googlesource.com/public/gem5-resources/+/refs/heads/stable/src/npb/configs/run_npb.py), and other system configuration files from
+[here]((https://gem5.googlesource.com/public/gem5-resources/+/refs/heads/stable/src/npb/configs/system/).
+
+The main script `run_npb.py` expects following arguments:
+
+**kernel:** path to the Linux kernel.
+
+**disk:** path to the npb disk image.
+
+**cpu:** CPU model (`kvm`, `atomic`, `timing`).
+
+**mem_sys:** memory system (`classic`, `MI_example`, `MESI_Two_Level`, `MOESI_CMP_directory`).
+
+**benchmark:** NPB benchmark to execute (`bt.A.x`, `cg.A.x`, `ep.A.x`, `ft.A.x`, `is.A.x`, `lu.A.x`, `mg.A.x`,  `sp.A.x`).
+
+**Note:**
+By default, the previously written instructions to build npb disk image will build class `A`,`B`,`C` and `D` of NPB in the disk image.
+We have only tested class `A` of the NPB.
+Replace `A` with any other class in the above listed benchmark names to test with other classes.
+
+**num_cpus:** number of CPU cores.
 
 ## Database and Celery Server
 
@@ -378,10 +407,11 @@ Now, run celery server using:
 celery -E -A gem5art.tasks.celery worker --autoscale=[number of workers],0
 ```
 
+**Note:** Celery is not required to run gem5 jobs with gem5art. You can also use python multiprocessing library based function calls (provided by gem5art) to launch these jobs in parallel (we will show how to do that later in our launch script).
 
 
 ## Creating a launch script
-Finally, we will create a launch script with the name launch_npb_tests.py, which will be responsible for registering the artifacts to be used and then launching gem5 jobs.
+Finally, we will create a launch script with the name **launch_npb_tests.py**, which will be responsible for registering the artifacts to be used and then launching gem5 jobs.
 
 The first thing to do in the launch script is to import required modules and classes:
 
@@ -389,10 +419,13 @@ The first thing to do in the launch script is to import required modules and cla
 import os
 import sys
 from uuid import UUID
+from itertools import starmap
+from itertools import product
 
 from gem5art.artifact import Artifact
 from gem5art.run import gem5Run
 from gem5art.tasks.tasks import run_gem5_instance
+import multiprocessing as mp
 ```
 
 Next, we will register artifacts. For example, to register packer artifact we will add the following lines:
@@ -406,7 +439,7 @@ packer = Artifact.registerArtifact(
     name = 'packer',
     path =  'disk-image/packer',
     cwd = 'disk-image',
-    documentation = 'Program to build disk images. Downloaded sometime in August from hashicorp.'
+    documentation = 'Program to build disk images. Downloaded sometime in August/19 from hashicorp.'
 )
 ```
 
@@ -429,26 +462,19 @@ For all other artifacts, add following lines in launch_npb_tests.py:
 
 ```python
 gem5_repo = Artifact.registerArtifact(
-    command = '''
-        git clone https://gem5.googlesource.com/public/gem5;
-        cd gem5;
-        git remote add darchr https://github.com/darchr/gem5;
-        git fetch darchr;
-        git cherry-pick 6450aaa7ca9e3040fb9eecf69c51a01884ac370c;
-        git cherry-pick 3403665994b55f664f4edfc9074650aaa7ddcd2c;
-    ''',
+    command = 'git clone https://gem5.googlesource.com/public/gem5',
     typ = 'git repo',
     name = 'gem5',
     path =  'gem5/',
     cwd = './',
-    documentation = 'cloned gem5 master branch from googlesource (Nov 18, 2019) and cherry-picked 2 commits from darchr/gem5'
+    documentation = 'cloned gem5 from googlesource and checked out v20.1.0.0'
 )
 
 m5_binary = Artifact.registerArtifact(
-    command = 'make -f Makefile.x86',
+    command = 'scons build/x86/out/m5',
     typ = 'binary',
     name = 'm5',
-    path =  'gem5/util/m5/m5',
+    path =  'gem5/util/m5/build/x86/out/m5',
     cwd = 'gem5/util/m5',
     inputs = [gem5_repo,],
     documentation = 'm5 utility'
@@ -465,23 +491,39 @@ disk_image = Artifact.registerArtifact(
 )
 
 gem5_binary = Artifact.registerArtifact(
-    command = 'scons build/X86/gem5.opt',
+    command = '''cd gem5;
+    git checkout v20.1.0.0;
+    scons build/X86/gem5.opt -j8
+    ''',
     typ = 'gem5 binary',
     name = 'gem5',
     cwd = 'gem5/',
     path =  'gem5/build/X86/gem5.opt',
     inputs = [gem5_repo,],
-    documentation = 'default gem5 x86'
+    documentation = 'gem5 binary based on v20.1.0.0'
+)
+
+gem5_binary_MESI_Two_Level = Artifact.registerArtifact(
+    command = '''cd gem5;
+    git checkout v20.1.0.0;
+    scons build/X86_MESI_Two_Level/gem5.opt --default=X86 PROTOCOL=MESI_Two_Level SLICC_HTML=True -j8
+    ''',
+    typ = 'gem5 binary',
+    name = 'gem5',
+    cwd = 'gem5/',
+    path =  'gem5/build/X86_MESI_Two_Level/gem5.opt',
+    inputs = [gem5_repo,],
+    documentation = 'gem5 binary based on v20.1.0.0'
 )
 
 linux_repo = Artifact.registerArtifact(
-    command = '''git clone --branch v4.19.83 --depth 1 https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git;
+    command = '''git clone https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git;
     mv linux linux-stable''',
     typ = 'git repo',
     name = 'linux-stable',
     path =  'linux-stable/',
     cwd = './',
-    documentation = 'linux kernel source code repo'
+    documentation = 'linux kernel source code repo from June 24-2020'
 )
 
 linux_binary = Artifact.registerArtifact(
@@ -499,46 +541,91 @@ linux_binary = Artifact.registerArtifact(
 )
 ```
 
-Once, all of the artifacts are registered, the next step is to launch all gem5 jobs. To do that, add the following lines in your script:
+Once, all the artifacts are registered the next step is to launch all gem5 jobs. To do that, first we will create a method `createRun` to create gem5art runs based on a few arguments:
+
+
+```python
+
+def createRun(bench, clas, cpu, mem, num_cpu):
+
+    if mem == 'MESI_Two_Level':
+        binary_gem5 = 'gem5/build/X86_MESI_Two_Level/gem5.opt'
+        artifact_gem5 = gem5_binary_MESI_Two_Level
+    else:
+        binary_gem5 = 'gem5/build/X86/gem5.opt'
+        artifact_gem5 = gem5_binary
+
+    return gem5Run.createFSRun(
+        'npb with gem5-20.1',
+        binary_gem5,
+        'configs-npb-tests/run_npb.py',
+        f'''results/run_npb_multicore/{bench}/{clas}/{cpu}/{num_cpu}''',
+        artifact_gem5, gem5_repo, experiments_repo,
+        'linux-stable/vmlinux-4.19.83',
+        'disk-image/npb/npb-image/npb',
+        linux_binary, disk_image,
+        cpu, mem, bench.replace('.x', f'.{clas}.x'), num_cpu,
+        timeout = 240*60*60 #240 hours
+        )
+```
+
+Next, initialize all the parameters to pass to `createRun` method, depending on the configuration space we want to test:
 
 ```python
 if __name__ == "__main__":
-    num_cpus = ['1', '4']
+    num_cpus = ['1', '8']
     benchmarks = ['is.x', 'ep.x', 'cg.x', 'mg.x','ft.x', 'bt.x', 'sp.x', 'lu.x']
 
-    classes = ['A', 'B', 'C', 'D']
-    cpus = ['kvm', 'atomic']
-
-for cpu in cpus:
-    for num_cpu in num_cpus:
-        for clas in classes:
-            for bm in benchmarks:
-                if cpu == 'atomic' and clas != 'A':
-                    continue
-                run = gem5Run.createFSRun(
-                    'npb_tests',
-                    'gem5/build/X86/gem5.opt',
-                    'configs-npb-tests/run_npb.py',
-                    f'''results/run_npb/{bm}/{clas}/{cpu}/{num_cpu}''',
-                    gem5_binary, gem5_repo, experiments_repo,
-                    'linux-stable/vmlinux-4.19.83',
-                    'disk-image/npb/npb-image/npb',
-                    linux_binary, disk_image,
-                    cpu, bm.replace('.x', f'.{clas}.x'), num_cpu,
-                    timeout = 24*60*60 #24 hours
-                    )
-                run_gem5_instance.apply_async((run, os.getcwd()))
+    classes = ['A']
+    mem_sys = ['MESI_Two_Level']
+    cpus = ['kvm', 'timing']
 ```
+
+Then, to run actual jobs depending on if you want to use celery or python multiprocessing library, add the following in your launch script:
+
+## If Using Celery
+
+```python
+    # For the cross product of tests, create a run object.
+    runs = starmap(createRun, product(benchmarks, classes, cpus, mem_sys, num_cpus))
+    # Run all of these experiments in parallel
+    for run in runs:
+        run_gem5_instance.apply_async((run, os.getcwd(),))
+```
+
+
+## If Using Python Multiprocessing Library:
+
+```python
+    def worker(run):
+        run.run()
+        json = run.dumpsJson()
+        print(json)
+
+    jobs = []
+
+    # For the cross product of tests, create a run object.
+    runs = starmap(createRun, product(benchmarks, classes, cpus, mem_sys, num_cpus))
+    # Run all of these experiments in parallel
+    for run in runs:
+        jobs.append(run)
+
+    with mp.Pool(mp.cpu_count() // 2) as pool:
+         pool.map(worker, jobs)
+```
+
 The above lines are responsible for looping through all possible combinations of variables involved in this experiment.
-For each combination, a gem5Run object is created and eventually passed to run_gem5_instance to be
-executed asynchronously using Celery.
-We are running class A,B,C and D of NPB with KVM cpu and only class A with atomic cpu. Moreover, we are using a timeout value of 24 hours (which hopefully will be a reasonable number to finish most of the gem5 jobs).
+For each combination, a gem5Run object is created and eventually passed to run_gem5_instance to be executed asynchronously if using Celery.
+In case of python multiprocessing library, these run objects are pushed to a list and then mapped to a job pool.
+Look at the definition of `createFSRun()` [here](../main-doc/run.html#gem5art.run.gem5Run.createFSRun) to understand the use of passed arguments.
+
+Here, we are using a timeout of 240 hours, after which the particular gem5 job will be killed (assuming that gem5 should complete the booting process of linux kernel on the given hardware resources). You can configure this time according to your settings.
 
 The complete launch script is available [here:](https://github.com/darchr/gem5art/blob/master/docs/launch-scripts/launch_npb_tests.py).
 Finally, make sure you are in python virtual env and then run the script:
 
 ```python
-python launch_npb_tests.py
+python launch_boot_tests.py
 ```
 
 ## Results
@@ -550,7 +637,7 @@ User can also query the database using the methods discussed in the [Artifacts](
 
 The status of working of the NAS parallel benchmarks on gem5 based on the results from the experiments of this tutorial is following:
 
-![](../images/npb_kvm)
-![](../images/npb_atomic)
+![](../images/npb_X86KvmCPU_MESI_Two_Level.svg)
+![](../images/npb_TimingSimpleCPU_MESI_Two_Level.svg)
 
-Details of these results can be found [here](https://github.com/darchr/gem5art-experiments/blob/master/npb-experiments/npb_gem5art.ipynb).
+You can look [here](https://www.gem5.org/documentation/benchmark_status/gem5-20) for the latest status of these tests on gem5.
