@@ -340,7 +340,7 @@ A disk image already created following the above instructions can be found, gzip
 
 ## Compiling the linux kernel
 
-In this tutorial, we use of the LTS (long term support) releases of linux kernel v4.19.83 with gem5 to run NAS parallel benchmarks.
+In this tutorial, we use one of the LTS (long term support) releases of linux kernel v4.19.83 with gem5 to run NAS parallel benchmarks.
 First, get the linux kernel config file from [here](https://gem5.googlesource.com/public/gem5-resources/+/refs/heads/stable/src/boot-exit/linux-configs/), and place it in npb-tests folder.
 Then, we will get the linux source of version 4.19.83:
 
