@@ -338,10 +338,13 @@ class gem5Run:
                 f.seek(-1000, os.SEEK_END)
             except OSError:
                 return False
-            last = f.readlines()[-1].decode()
-            if 'Kernel panic' in last:
-                return True
-            else:
+            try:
+                last = f.readlines()[-1].decode()
+                if 'Kernel panic' in last:
+                    return True
+                else:
+                    return False
+            except UnicodeDecodeError:
                 return False
 
     def _getSerializable(self) -> Dict[str, Union[str, UUID]]:
