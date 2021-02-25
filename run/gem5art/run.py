@@ -339,6 +339,14 @@ class gem5Run:
             except OSError:
                 return False
             try:
+                # There was a case where reading `term_path` resulted in a
+                # UnicodeDecodeError. It is known that the terminal output
+                # (content of 'system.pc.com_1.device') is written from a
+                # buffer from gem5, and when gem5 stops, the content of the
+                # buffer is stopped being copied to the file. The buffer is
+                # not flushed as well. So, it might be a case that the content
+                # of the `term_path` is corrupted as a Unicode character could
+                # be longer than a byte.
                 last = f.readlines()[-1].decode()
                 if 'Kernel panic' in last:
                     return True
