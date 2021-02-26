@@ -4,7 +4,7 @@ This package contains two parallel task libraries for running gem5 experiments.
 he actual gem5 experiment can be executed with the help of [Python multiprocessing support](https://docs.python.org/3/library/multiprocessing.html), [Celery](http://www.celeryproject.org/) or even without using any job manager (a job can be directly launched by calling `run()` function of gem5Run object).
 This package implicitly depends on the gem5art run package.
 
-Please cite the the [gem5art paper](https://arch.cs.ucdavis.edu/papers/2021-3-28-gem5art) when using the gem5art packages.
+Please cite the [gem5art paper](https://arch.cs.ucdavis.edu/papers/2021-3-28-gem5art) when using the gem5art packages.
 This documentation can be found on the [gem5 website](http://www.gem5.org/documentation/gem5art/)
 
 ## Use of Python Multiprocessing
