@@ -312,8 +312,8 @@ class gem5Run:
                 new = artifact.artifact.getHash(cwd / v.path)
                 old = v.hash
 
-            if new != v.hash:
-                status = f"Failed artifact check for {cwd / v.path}"
+            if new != old:
+                self.status = f"Failed artifact check for {cwd / v.path}"
                 return False
 
         return True
