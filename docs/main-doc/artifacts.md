@@ -217,7 +217,7 @@ gem5art also provides a few methods to search the database for artifacts of a pa
 
 ```python
 import gem5art.artifact
-db = gem5art.artifact.getDBConnection('mongo://localhost')
+db = gem5art.artifact.getDBConnection('mongodb://localhost')
 for i in gem5art.artifact.getDiskImages(db):
     print(i)
 ```
@@ -228,7 +228,7 @@ You can use getByName() method to search database for artifacts using the name a
 
 ```python
 import gem5art.artifact
-db = gem5art.artifact.getDBConnection('mongo://localhost')
+db = gem5art.artifact.getDBConnection('mongodb://localhost')
 for i in gem5art.artifact.getByName(db, "gem5"):
     print(i)
 ```
