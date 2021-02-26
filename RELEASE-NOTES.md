@@ -1,5 +1,11 @@
 # Release notes for the gem5art package
 
+## v1.3.1
+
+- Minor fixes
+- Update documentation
+- Prepare for merging with main gem5 repository
+
 ## v1.3.0
 
 ### Database now configurable
