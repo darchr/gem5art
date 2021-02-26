@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2019 The Regents of the University of California
 # All Rights Reserved.
 #
@@ -24,8 +23,6 @@
 # THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
-# Authors: Jason Lowe-Power
 
 from .celery import gem5app
 import multiprocessing as mp
@@ -53,7 +50,8 @@ def run_job_pool(job_list, num_parallel_jobs = mp.cpu_count() // 2):
     Creates as many parallel jobs as core count if no explicit
     job count is provided
     Receives a list of run objects created by the launch script
-    """ 
+    """
+
     pool = mp.Pool(num_parallel_jobs)
     pool.map(run_single_job, job_list)
     pool.close()
