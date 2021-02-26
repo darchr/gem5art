@@ -91,7 +91,7 @@ We use MongoDB since it can easily store large files (e.g., disk images), is tig
 Currently, it's required to run a database to use gem5.
 However, we are planning on changing this default to allow gem5art to be used standalone as well.
 
-gem5art allows you to connect to any database, but by default assumes there is a MongoDB instance running on the localhost at `mongo://localhost:27017`.
+gem5art allows you to connect to any database, but by default assumes there is a MongoDB instance running on the localhost at `mongodb://localhost:27017`.
 You can use the environment variable `GEM5ART_DB` to specify the default database to connect when running simple scripts.
 Additionally, you can specify the location of the database when calling `getDBConnection` in your scripts.
 
