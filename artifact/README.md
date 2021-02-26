@@ -2,7 +2,7 @@
 
 This package contains the `Artifact` type and an artifact database for use with [gem5art](http://www.gem5.org/documentation/gem5art/).
 
-Please cite the the [gem5art paper](https://arch.cs.ucdavis.edu/papers/2021-3-28-gem5art) when using the gem5art packages.
+Please cite the [gem5art paper](https://arch.cs.ucdavis.edu/papers/2021-3-28-gem5art) when using the gem5art packages.
 This documentation can be found on the [gem5 website](http://www.gem5.org/documentation/gem5art/)
 
 ## gem5art artifacts
