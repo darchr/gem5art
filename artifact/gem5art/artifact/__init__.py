@@ -30,3 +30,11 @@ from .artifact import Artifact
 from .common_queries import getByName, getDiskImages, getLinuxBinaries, getgem5Binaries
 from ._artifactdb import getDBConnection
 
+__all__ = [
+    "Artifact",
+    "getByName",
+    "getDiskImages",
+    "getLinuxBinaries",
+    "getgem5Binaries",
+    "getDBConnection",
+    ]
