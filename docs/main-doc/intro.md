@@ -50,6 +50,7 @@ Since, gem5art requires Python 3, we recommend creating a virtual environment wi
 Run the following commands to create a virtual environment and install gem5art:
 
 ```sh
-virtualenv -p python3
+virtualenv -p python3 venv
+source venv/bin/activate
 pip install gem5art-artifact gem5art-run gem5art-tasks
 ```

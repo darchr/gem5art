@@ -5,9 +5,9 @@ Authors:
 ---
 # Artifacts
 
-## Introduction
+## gem5art artifacts
 
-As discussed before, all unique objects used during gem5 experiments are termed "artifacts" in gem5art.
+All unique objects used during gem5 experiments are termed "artifacts" in gem5art.
 Examples of artifacts include: gem5 binary, gem5 source code repo, Linux kernel source repo, linux binary, disk image, and packer binary (used to build the disk image).
 The goal of this infrastructure is to keep a record of all the artifacts used in a particular experiment and to return the set of used artifacts when the same experiment needs to be performed in the future.
 
@@ -69,15 +69,19 @@ The use of database also avoids running identical experiments (by generating an 
 To create an `Artifact`, you must use [`registerArtifact`](artifacts.html#gem5art.artifact.artifact.Artifact.registerArtifact) as shown in the above example as well.
 This is a factory method which will initially create the artifact.
 
-```
-TO DO: Add more details here.
-```
+When calling `registerArtifact`, the artifact will automatically be added to the database.
+If it already exists, a pointer to that artifact will be returned.
+
+The parameters to the `registerArtifact` function are meant for *documentation*, not as explicit directions to create the artifact from scratch.
+In the future, this feature may be added to gem5art.
 
 Note: While creating new artifacts, warning messages showing that certain attributes (except hash and id) of two artifacts don't match (when artifact similarity is checked in the code) might appear. Users should make sure that they understand the reasons of any such warnings.
 
 ### Using artifacts from the database
 
 You can create an artifact with just a UUID if it is already stored in the database.
+The behavior will be the same as when creating an artifact that already exists.
+All of the properties of the artifact will be populated from the database.
 
 ## ArtifactDB
 
@@ -87,7 +91,7 @@ We use MongoDB since it can easily store large files (e.g., disk images), is tig
 Currently, it's required to run a database to use gem5.
 However, we are planning on changing this default to allow gem5art to be used standalone as well.
 
-gem5art allows you to connect to any database, but by default assumes there is a MongoDB instance running on the localhost at `mongo://localhost:27017`.
+gem5art allows you to connect to any database, but by default assumes there is a MongoDB instance running on the localhost at `mongodb://localhost:27017`.
 You can use the environment variable `GEM5ART_DB` to specify the default database to connect when running simple scripts.
 Additionally, you can specify the location of the database when calling `getDBConnection` in your scripts.
 
@@ -101,48 +105,29 @@ See the [MongoDB docker documentation](https://hub.docker.com/_/mongo) or the [M
 This uses the official [MongoDB Docker image](https://hub.docker.com/_/mongo) to run the database at the default port on the localhost.
 If the Docker container is killed, it can be restarted with the same command line and the database should be consistent.
 
-## Searching the Database
+### Connecting to an existing database
 
-You use the pymongo Python module or the mongodb command line interface to interact with the database.
-See the [MongoDB documentation](https://docs.mongodb.com/) for more information on how to query the MongoDB database.
+By default, gem5art will assume the database is running at `mongodb://localhost:27017`, which is MongoDB's default on the localhost.
 
-gem5art has two collections.
-`artifact_database.artifacts` stores all of the metadata for the artifacts and `artifact_database.fs` is a [GridFS](https://docs.mongodb.com/manual/core/gridfs/) store for all of the files.
-The files in the GridFS use the same UUIDs as the Artifacts as their primary keys.
+The environment variable `GEM5ART_DB` can override this default.
 
-You can list all of the details of all of the artifacts by running the following in Python.
+Otherwise, to programmatically set a database URI when using gem5art, you can pass a URI to the `getDatabaseConnection` function.
 
-```python
-#!/usr/bin/env python3
+Currently, gem5art only supports MongoDB database backends, but extending this to other databases should be straightforward.
 
-from pymongo import MongoClient
+### Searching the Database
 
-db = MongoClient().artifact_database
-for i in db.artifacts.find():
-    print(i)
-```
+gem5art provides a few convience functions for searching and accessing the database.
+These functions can be found in `artifact.common_queries`.
 
-gem5art also provides a few methods to search the database for artifacts of a particular type or name. For example, to find all disk images in a database you can do the following:
+Specifically, we provide the following functions:
 
-```python
-import gem5art.artifact
-db = gem5art.artifact.getDBConnection('mongo://localhost')
-for i in gem5art.artifact.getDiskImages(db):
-    print(i)
-```
+- `getByName`: Returns all objects mathching `name` in database.
+- `getDiskImages`: Returns a generator of disk images (type = disk image).
+- `getLinuxBinaries`: Returns a generator of Linux kernel binaries (type = kernel).
+- `getgem5Binaries`: Returns a generator of gem5 binaries (type = gem5 binary).
 
-Other similar methods include: `getLinuxBinaries()`, `getgem5Binaries()`
-
-You can use getByName() method to search database for artifacts using the name attribute. For example, to search for gem5 named artifacts:
-
-```python
-import gem5art.artifact
-db = gem5art.artifact.getDBConnection('mongo://localhost')
-for i in gem5art.artifact.getByName(db, "gem5"):
-    print(i)
-```
-
-## Downloading from the Database
+### Downloading from the Database
 
 You can also download a file associated with an artifact using functions provided by gem5art. A good way to search and download items from the database is by using the Python interactive shell.
 You can search the database with the functions provided by the `artifact` module (e.g., [`getByName`](artifacts.html#gem5art.artifact.artifact.getByName), [`getByType`](artifacts.html#gem5art.artifact.artifact.getByType), etc.).
@@ -206,6 +191,47 @@ for disk in disks:
 Here, we assume that there can be multiple disk images/artifacts with the name `npb` and we are only interested in downloading the npb disk image with a particular documentation ('npb disk image created on Nov 20'). Also, note that there is not a single way to download files from the database (although they will eventually use the downloadFile function).
 
 The dual of the [downloadFile](artifacts.html#gem5art.artifact._artifactdb.ArtifactDB.downloadFile) method used above is [upload](artifacts.html#gem5art.artifact._artifactdb.ArtifactDB.upload).
+
+#### Database schema
+
+Alternative, you can use the pymongo Python module or the mongodb command line interface to interact with the database.
+See the [MongoDB documentation](https://docs.mongodb.com/) for more information on how to query the MongoDB database.
+
+gem5art has two collections.
+`artifact_database.artifacts` stores all of the metadata for the artifacts and `artifact_database.fs` is a [GridFS](https://docs.mongodb.com/manual/core/gridfs/) store for all of the files.
+The files in the GridFS use the same UUIDs as the Artifacts as their primary keys.
+
+You can list all of the details of all of the artifacts by running the following in Python.
+
+```python
+#!/usr/bin/env python3
+
+from pymongo import MongoClient
+
+db = MongoClient().artifact_database
+for i in db.artifacts.find():
+    print(i)
+```
+
+gem5art also provides a few methods to search the database for artifacts of a particular type or name. For example, to find all disk images in a database you can do the following:
+
+```python
+import gem5art.artifact
+db = gem5art.artifact.getDBConnection('mongodb://localhost')
+for i in gem5art.artifact.getDiskImages(db):
+    print(i)
+```
+
+Other similar methods include: `getLinuxBinaries()`, `getgem5Binaries()`
+
+You can use getByName() method to search database for artifacts using the name attribute. For example, to search for gem5 named artifacts:
+
+```python
+import gem5art.artifact
+db = gem5art.artifact.getDBConnection('mongodb://localhost')
+for i in gem5art.artifact.getByName(db, "gem5"):
+    print(i)
+```
 
 ## Artifacts API Documentation
 

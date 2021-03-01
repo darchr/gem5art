@@ -1,8 +1,10 @@
 import os
 import sys
 from uuid import UUID
+from itertools import starmap
+from itertools import product
 
-from gem5art.artifact import Artifact
+from gem5art.artifact.artifact import Artifact
 from gem5art.run import gem5Run
 from gem5art.tasks.tasks import run_gem5_instance
 
@@ -14,42 +16,35 @@ packer = Artifact.registerArtifact(
     name = 'packer',
     path =  'disk-image/packer',
     cwd = 'disk-image',
-    documentation = 'Program to build disk images. Downloaded sometime in August from hashicorp.'
+    documentation = 'Program to build disk images. Downloaded sometime in August/19 from hashicorp.'
 )
 
 experiments_repo = Artifact.registerArtifact(
     command = 'git clone https://your-remote-add/npb-tests.git',
     typ = 'git repo',
-    name = 'npb-tests',
+    name = 'npb_tests',
     path =  './',
     cwd = '../',
-    documentation = 'main repo to run npb with gem5'
+    documentation = 'main repo to run npb multicore tests with gem5 20.1'
 )
 
 gem5_repo = Artifact.registerArtifact(
-    command = '''
-        git clone https://gem5.googlesource.com/public/gem5;
-        cd gem5;
-        git remote add darchr https://github.com/darchr/gem5;
-        git fetch darchr;
-        git cherry-pick 6450aaa7ca9e3040fb9eecf69c51a01884ac370c;
-        git cherry-pick 3403665994b55f664f4edfc9074650aaa7ddcd2c;
-    ''',
+    command = 'git clone https://gem5.googlesource.com/public/gem5',
     typ = 'git repo',
     name = 'gem5',
     path =  'gem5/',
     cwd = './',
-    documentation = 'cloned gem5 master branch from googlesource (Nov 18, 2019) and cherry-picked 2 commits from darchr/gem5'
+    documentation = 'cloned gem5 from googlesource and checked out v20.1.0.0'
 )
 
 m5_binary = Artifact.registerArtifact(
-    command = 'make -f Makefile.x86',
+    command = 'scons build/x86/out/m5',
     typ = 'binary',
     name = 'm5',
-    path =  'gem5/util/m5/m5',
+    path =  'gem5/util/m5/build/x86/out/m5',
     cwd = 'gem5/util/m5',
     inputs = [gem5_repo,],
-    documentation = 'm5 utility'
+    documentation = 'm5 utility with gem5-20.1'
 )
 
 disk_image = Artifact.registerArtifact(
@@ -59,17 +54,33 @@ disk_image = Artifact.registerArtifact(
     cwd = 'disk-image',
     path = 'disk-image/npb/npb-image/npb',
     inputs = [packer, experiments_repo, m5_binary,],
-    documentation = 'Ubuntu with m5 binary and NPB (with ROI annotations: darchr/npb-hooks/gem5art-npb-tutorial) installed.'
+    documentation = 'Ubuntu with m5 binary and NPB (with ROI annotations: darchr/npb-hooks/master) installed.'
 )
 
 gem5_binary = Artifact.registerArtifact(
-    command = 'scons build/X86/gem5.opt',
+    command = '''cd gem5;
+    git checkout v20.1.0.0;
+    scons build/X86/gem5.opt -j8
+    ''',
     typ = 'gem5 binary',
     name = 'gem5',
     cwd = 'gem5/',
     path =  'gem5/build/X86/gem5.opt',
     inputs = [gem5_repo,],
-    documentation = 'gem5 binary based on googlesource (Nov 18, 2019) gem5 with cherry-picked commits from darchr/gem5'
+    documentation = 'gem5 binary based on v20.1.0.0'
+)
+
+gem5_binary_MESI_Two_Level = Artifact.registerArtifact(
+    command = '''cd gem5;
+    git checkout v20.1.0.0;
+    scons build/X86_MESI_Two_Level/gem5.opt --default=X86 PROTOCOL=MESI_Two_Level SLICC_HTML=True -j8
+    ''',
+    typ = 'gem5 binary',
+    name = 'gem5',
+    cwd = 'gem5/',
+    path =  'gem5/build/X86_MESI_Two_Level/gem5.opt',
+    inputs = [gem5_repo,],
+    documentation = 'gem5 binary based on v20.1.0.0'
 )
 
 linux_repo = Artifact.registerArtifact(
@@ -98,28 +109,39 @@ linux_binary = Artifact.registerArtifact(
 
 
 if __name__ == "__main__":
-    num_cpus = ['1', '4']
+    num_cpus = ['1', '8']
     benchmarks = ['is.x', 'ep.x', 'cg.x', 'mg.x','ft.x', 'bt.x', 'sp.x', 'lu.x']
 
-    classes = ['A', 'B', 'C', 'D']
-    cpus = ['kvm', 'atomic']
+    classes = ['A']
+    mem_sys = ['MESI_Two_Level']
+    cpus = ['kvm', 'timing']
 
-for cpu in cpus:
-    for num_cpu in num_cpus:
-        for clas in classes:
-            for bm in benchmarks:
-                if cpu == 'atomic' and clas != 'A':
-                    continue
-                run = gem5Run.createFSRun(
-                    'npb_tests',
-                    'gem5/build/X86/gem5.opt',
-                    'configs-npb-tests/run_npb.py',
-                    f'''results/run_npb/{bm}/{clas}/{cpu}/{num_cpu}''',
-                    gem5_binary, gem5_repo, experiments_repo,
-                    'linux-stable/vmlinux-4.19.83',
-                    'disk-image/npb/npb-image/npb',
-                    linux_binary, disk_image,
-                    cpu, bm.replace('.x', f'.{clas}.x'), num_cpu,
-                    timeout = 24*60*60 #24 hours
-                    )
-                run_gem5_instance.apply_async((run, os.getcwd()))
+
+    def createRun(bench, clas, cpu, mem, num_cpu):
+
+        if mem == 'MESI_Two_Level':
+            binary_gem5 = 'gem5/build/X86_MESI_Two_Level/gem5.opt'
+            artifact_gem5 = gem5_binary_MESI_Two_Level
+        else:
+            binary_gem5 = 'gem5/build/X86/gem5.opt'
+            artifact_gem5 = gem5_binary
+
+        return gem5Run.createFSRun(
+            'npb with gem5-20.1',
+            binary_gem5,
+            'configs-npb-tests-gem5-20.1/run_npb.py',
+            f'''results/run_npb_multicore/{bench}/{clas}/{cpu}/{num_cpu}''',
+            artifact_gem5, gem5_repo, experiments_repo,
+            'linux-stable/vmlinux-4.19.83',
+            'disk-image/npb/npb-image/npb',
+            linux_binary, disk_image,
+            cpu, mem, bench.replace('.x', f'.{clas}.x'), num_cpu,
+            timeout = 240*60*60 #240 hours
+            )
+
+
+    # For the cross product of tests, create a run object.
+    runs = starmap(createRun, product(benchmarks, classes, cpus, mem_sys, num_cpus))
+    # Run all of these experiments in parallel
+    for run in runs:
+        run_gem5_instance.apply_async((run, os.getcwd(),))

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2019 The Regents of the University of California
 # All Rights Reserved.
 #
@@ -24,8 +23,6 @@
 # THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
-# Authors: Jason Lowe-Power
 
 """
 This file defines a gem5Run object which contains all information needed to
@@ -315,8 +312,8 @@ class gem5Run:
                 new = artifact.artifact.getHash(cwd / v.path)
                 old = v.hash
 
-            if new != v.hash:
-                status = f"Failed artifact check for {cwd / v.path}"
+            if new != old:
+                self.status = f"Failed artifact check for {cwd / v.path}"
                 return False
 
         return True
@@ -338,10 +335,21 @@ class gem5Run:
                 f.seek(-1000, os.SEEK_END)
             except OSError:
                 return False
-            last = f.readlines()[-1].decode()
-            if 'Kernel panic' in last:
-                return True
-            else:
+            try:
+                # There was a case where reading `term_path` resulted in a
+                # UnicodeDecodeError. It is known that the terminal output
+                # (content of 'system.pc.com_1.device') is written from a
+                # buffer from gem5, and when gem5 stops, the content of the
+                # buffer is stopped being copied to the file. The buffer is
+                # not flushed as well. So, it might be a case that the content
+                # of the `term_path` is corrupted as a Unicode character could
+                # be longer than a byte.
+                last = f.readlines()[-1].decode()
+                if 'Kernel panic' in last:
+                    return True
+                else:
+                    return False
+            except UnicodeDecodeError:
                 return False
 
     def _getSerializable(self) -> Dict[str, Union[str, UUID]]:
