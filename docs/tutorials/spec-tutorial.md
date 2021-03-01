@@ -181,6 +181,13 @@ m5 binary should be compiled before we build the disk image.
 **Note:** it's important to compile the m5 binary with `-DM5_ADDR=0xFFFF0000` as is default in the SConscript.
 If you don't compile with `-DM5_ADDR` and try to run with KVM, you'll get an illegal instruction error.
 
+**Note:** it's important to compile the m5 binary with `-DM5_ADDR=0xFFFF0000` as is default in the SConscript.
+This address is used by the guest binary to communicate with the simulator.
+If you change the address in the guest binary, you also have to update the simulator to use the new address.
+Additionally, when running in KVM, it is required that you use the *address* form of guest<->simulator communication
+and not the pseudo instruction form (i.e., using `-DM5_ADDR` is *required* when compiling a guest binary for which
+you want to run in KVM mode on gem5).
+
 To compile m5 binary, in the root folder of the experiment,
 
 ```sh
