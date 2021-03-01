@@ -377,7 +377,7 @@ from uuid import UUID
 
 from gem5art.artifact import Artifact
 from gem5art.run import gem5Run
-from gem5art.tasks.tasks import run_gem5_instance
+from gem5art.tasks.tasks import run_job_pool
 ```
 
 And then, we put the launch function at the end of launch_spec2017_experiments.py,
@@ -399,6 +399,7 @@ if __name__ == "__main__":
                   "600.perlbench_s", "602.gcc_s", "605.mcf_s", "620.omnetpp_s", "623.xalancbmk_s", "625.x264_s",
                   "631.deepsjeng_s", "641.leela_s", "648.exchange2_s", "657.xz_s", "998.specrand_is"]
 
+    runs = []
     for cpu in cpus:
         for size in benchmark_sizes[cpu]:
             for benchmark in benchmarks:
@@ -417,7 +418,10 @@ if __name__ == "__main__":
                     cpu, benchmark, size, # params
                     timeout = 10*24*60*60 # 10 days
                 )
-                run_gem5_instance.apply_async((run,))
+                runs.append(run)
+
+
+    run_job_pool(runs)
 ```
 The above launch function will run the all the available benchmarks with kvm, atomic, timing, and o3 cpus.
 For kvm, both test and ref sizes will be run, while for the rest, only benchmarks of size test will be run.
