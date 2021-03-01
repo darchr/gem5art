@@ -144,7 +144,6 @@ scons build/X86/gem5.opt -j8
 ```
 
 We have two artifacts: one is the gem5 source code (the gem5 git repo), and the gem5 binary (`gem5.opt`).
-The documentation of this step would be how we get the source code and how we compile the gem5 binary.
 In `launch_spec2017_experiments.py`, we document the step in Artifact objects as follows,
 
 ```python
@@ -346,6 +345,10 @@ deactivate
 ### Running the Database Server
 The following script will run the MongoDB database server in a docker container.
 
+```sh
+docker run -p 27017:27017 -v /path/in/host:/data/db --name mongo-1 -d mongo
+```
+
 The -p 27017:27017 option maps the port 27017 in the container to port 27017 on the host.
 The -v /path/in/host:/data/db option mounts the /data/db folder in the docker container to the folder /path/in/host in the host.
 The path of the host folder should an absoblute path, and the database files created by MongoDB will be in that folder.
@@ -354,9 +357,6 @@ We can use this name to identify to the container.
 The -d option will let the container run in the background.
 mongo is the name of [the offical mongo image](https://hub.docker.com/_/mongo).
 
-```sh
-docker run -p 27017:27017 -v /path/in/host:/data/db --name mongo-1 -d mongo
-```
 
 ### Running Celery Server (optional)
 This step is only necessary if you want to use Celery to manage processes.
@@ -452,7 +452,7 @@ The working status of SPEC 2017 workloads is available here: [https://www.gem5.o
 `disk-image/spec-2017/install-spec2017.sh`: a Bash script that will be executed on the guest machine after Ubuntu Server is installed in the disk image; this script installs depedencies to compile and run SPEC workloads, mounts the SPEC ISO and installs the benchmark suite on the disk image, and creates a SPEC configuration from gcc42 template.
 
 
-`disk-image/spec-2017/post-installation.sh`: a script that will be executed on the guest machine; this script copies the `serial-getty@.service` file to the `systemd` folder, copies m5 binary to `/sbin`, and appends the content of `runscript.sh` to `.bashrc`.
+`disk-image/spec-2017/post-installation.sh`: a script that will be executed on the guest machine; this script copies the `serial-getty@.service` file to the `systemd` folder, copies m5 binary to `/sbin`, and appends the content of `runscript.sh` to the disk image's `.bashrc` file, which will be executed after the booting process is done.
 
 `disk-image/spec-2017/runscript.sh`: a script that will be copied to `.bashrc` on the disk image so that the commands in this script will be run immediately after the booting process.
 
