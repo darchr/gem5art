@@ -7,7 +7,7 @@ Authors:
 
 ## Introduction
 In this tutorial, we will demonstrate how to utilize [gem5art](https://github.com/darchr/gem5art) and [gem5-resources](https://gem5.googlesource.com/public/gem5-resources/) to run [SPEC CPU 2017 benchmarks](https://www.spec.org/cpu2017/) in gem5 full system mode. 
-The scripts in this tutorial work with gem5art v1.3.0, gem5 20.1.0.2, and gem5-resources 20.1.0.2.
+The scripts in this tutorial work with gem5art v1.3.0, gem5 20.1.0.4, and gem5-resources 20.1.0.4.
 
 The content of this tutorial is mostly for conducting SPEC CPU 2017 experiments.
 However, due to the similarity of SPEC 2006 and SPEC 2017 resources, this tutorial also applies to conducting SPEC 2006 experiment by using `src/spec-2006` folder instead of `src/spec-2017` of gem5-resources.
@@ -70,19 +70,20 @@ We will structure the [SPEC 2017 resources as laid out by gem5-resources](https:
 The script `launch_spec2017_experiment.py` will contain the documentation about the artifacts we create and will also serve as Python script that launches the experiment.
 
 ### Acquiring gem5-resources and Setting up the Experiment Folder
-First, we clone the gem5-resource repo and check out the stable branch upto the `cee972a1727abd80924dad73d9f3b5cf0f13012d` commit, which is the most recent version of gem5-resources that is compatible with gem5 20.1.0.2 as of December 2020.
+First, we clone the gem5-resource repo and check out the stable branch upto the `1fe56ffc94005b7fa0ae5634c6edc5e2cb0b7357` commit, which is the most recent version of gem5-resources that is compatible with gem5 20.1.0.4 as of March 2021.
 ```sh
 git clone https://gem5.googlesource.com/public/gem5-resources
 cd gem5-resources
-git checkout cee972a1727abd80924dad73d9f3b5cf0f13012d
+git checkout 1fe56ffc94005b7fa0ae5634c6edc5e2cb0b7357
 ```
 Since all resources related to the SPEC CPU 2006 benchmark suite are in the `src/spec-2017` and other folders in `src/` are not related to this experiment, we set the root folder of the experiment in the `src/spec-2017` folder of the cloned repo.
-To keep track of changes that are specific to `src/spec-2017`, we set up a git structure in the folder.
+To keep track of changes that are specific to `src/spec-2017`, we set up a git structure for the folder.
+Also, the git remote pointing to `origin` should also be setup as gem5art will use `origin` information.
 In the `gem5-resources` folder,
 ```sh
 cd src/spec-2017
 git init
-git remote add origin https://remote-address/spec-expriment.git
+git remote add origin https://remote-address/spec-experiment.git
 ```
 We document the root folder of the experiment in `launch_spec2017_experiment.py` as follows,
 ```sh
@@ -90,10 +91,10 @@ experiments_repo = Artifact.registerArtifact(
     command = '''
         git clone https://gem5.googlesource.com/public/gem5-resources
         cd gem5-resources
-        git checkout cee972a1727abd80924dad73d9f3b5cf0f13012d
+        git checkout 1fe56ffc94005b7fa0ae5634c6edc5e2cb0b7357
         cd src/spec-2017
         git init
-        git remote add origin https://remote-address/spec-expriment.git
+        git remote add origin https://remote-address/spec-experiment.git
     ''',
     typ = 'git repo',
     name = 'spec2017 Experiment',
@@ -101,12 +102,12 @@ experiments_repo = Artifact.registerArtifact(
     cwd = './',
     documentation = '''
         local repo to run spec 2017 experiments with gem5 full system mode;
-        resources cloned from https://gem5.googlesource.com/public/gem5-resources upto commit cee972a1727abd80924dad73d9f3b5cf0f13012d of stable branch
+        resources cloned from https://gem5.googlesource.com/public/gem5-resources upto commit 1fe56ffc94005b7fa0ae5634c6edc5e2cb0b7357 of stable branch
     '''
 )
 ```
-We use .gitignore file to ingore changes of certain files and folders.
-In this experiment, we will use this .gitignore file,
+We use `.gitignore` file to ingore changes of certain files and folders.
+In this experiment, we will use this `.gitignore` file,
 ```
 *.pyc
 m5out
@@ -133,11 +134,11 @@ Essentially, we tend to keep small-size files (such as scripts and texts) in a g
 Another important difference is that gem5art does **not** keep track of files in a git Artifact, while it does upload other types of Artifact to its database.
 
 ### Building gem5
-In this step, we download the source code and build gem5 v20.1.0.2.
+In this step, we download the source code and build gem5 v20.1.0.4.
 In the root folder of the experiment,
 
 ```sh
-git clone -b v20.1.0.2 https://gem5.googlesource.com/public/gem5
+git clone -b v20.1.0.4 https://gem5.googlesource.com/public/gem5
 cd gem5
 scons build/X86/gem5.opt -j8
 ```
@@ -149,7 +150,7 @@ In `launch_spec2017_experiments.py`, we document the step in Artifact objects as
 ```python
 gem5_repo = Artifact.registerArtifact(
     command = '''
-        git clone -b v20.1.0.2 https://gem5.googlesource.com/public/gem5
+        git clone -b v20.1.0.4 https://gem5.googlesource.com/public/gem5
         cd gem5
         scons build/X86/gem5.opt -j8
     ''',
@@ -157,18 +158,18 @@ gem5_repo = Artifact.registerArtifact(
     name = 'gem5',
     path =  'gem5/',
     cwd = './',
-    documentation = 'cloned gem5 v20.1.0.2'
+    documentation = 'cloned gem5 v20.1.0.4'
 )
 
 
 gem5_binary = Artifact.registerArtifact(
     command = 'scons build/X86/gem5.opt -j8',
     typ = 'gem5 binary',
-    name = 'gem5-20.1.0.2',
+    name = 'gem5-20.1.0.4',
     cwd = 'gem5/',
     path =  'gem5/build/X86/gem5.opt',
     inputs = [gem5_repo,],
-    documentation = 'compiled gem5 v20.1.0.2 binary'
+    documentation = 'compiled gem5 v20.1.0.4 binary'
 )
 ```
 
@@ -249,7 +250,7 @@ cd disk-image/
 The process should take about than an hour to complete on a fairly recent machine with a cable internet speed.
 The disk image will be in `disk-image/spec-2017/spec-2017-image/spec-2017`.
 
-**Note:** Packer will output a VNC port that could be used to inspect the building process.
+**Note:** Packer will output a URL to a VNC server that could be connected to to inspect the building process.
 
 **Note:** [More about using packer and building disk images](../main-doc/disks.md).
 
@@ -285,7 +286,7 @@ Now, `in launch_spec2017_experiments.py`, we make an Artifact object of the Linu
 linux_binary = Artifact.registerArtifact(
     name = 'vmlinux-4.19.83',
     typ = 'kernel',
-    path = '/vmlinux-4.19.83',
+    path = './vmlinux-4.19.83',
     cwd = './',
     command = ''' wget http://dist.gem5.org/dist/v20-1/kernels/x86/static/vmlinux-4.19.83''',
     inputs = [experiments_repo,],
@@ -357,7 +358,8 @@ mongo is the name of [the offical mongo image](https://hub.docker.com/_/mongo).
 docker run -p 27017:27017 -v /path/in/host:/data/db --name mongo-1 -d mongo
 ```
 
-### Running Celery Server
+### Running Celery Server (optional)
+This step is only necessary if you want to use Celery to manage processes.
 Inisde the path in the host specified above,
 
 ```sh
@@ -401,7 +403,7 @@ if __name__ == "__main__":
         for size in benchmark_sizes[cpu]:
             for benchmark in benchmarks:
                 run = gem5Run.createFSRun(
-                    'gem5 19 spec 2017 experiment', # name
+                    'gem5 v20.1.0.4 spec 2017 experiment', # name
                     'gem5/build/X86/gem5.opt', # gem5_binary
                     'gem5-configs/run_spec.py', # run_script
                     'results/{}/{}/{}'.format(cpu, size, benchmark), # relative_outdir
@@ -413,7 +415,7 @@ if __name__ == "__main__":
                     linux_binary, # linux_binary_artifact
                     disk_image, # disk_image_artifact
                     cpu, benchmark, size, # params
-                    timeout = 5*24*60*60 # 5 days
+                    timeout = 10*24*60*60 # 10 days
                 )
                 run_gem5_instance.apply_async((run,))
 ```
@@ -432,9 +434,15 @@ In the root folder of the experiment,
 python3 launch_spec2017_experiment.py
 ```
 
+**Note:** The URI to a remote database server could be specified by specifying the environment variable `GEM5ART_DB`.
+For example, if the mongo database server is running at `localhost123`, the command to run the launch script would be,
+```sh
+GEM5ART_DB="mongodb://localhost123" python3 launch_spec2017_experiment.py
+```
+
 ## Appendix I. Working Status
 Not all benchmarks are compiled in the above set up as of March 2020.
-The working status of SPEC 2017 workloads is available here: [https://www.gem5.org/documentation/benchmark_status/gem5-20#spec-2017-tests](https://www.gem5.org/documentation/benchmark_status/gem5-20#spec-2006-tests).
+The working status of SPEC 2017 workloads is available here: [https://www.gem5.org/documentation/benchmark_status/gem5-20#spec-2017-tests](https://www.gem5.org/documentation/benchmark_status/gem5-20#spec-2017-tests).
 
 ## Appendix II. Disk Image Generation Scripts
 `disk-image/spec-2017/install-spec2017.sh`: a Bash script that will be executed on the guest machine after Ubuntu Server is installed in the disk image; this script installs depedencies to compile and run SPEC workloads, mounts the SPEC ISO and installs the benchmark suite on the disk image, and creates a SPEC configuration from gcc42 template.
