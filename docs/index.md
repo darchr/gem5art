@@ -70,8 +70,7 @@ Tutorials
    tutorials/boot-tutorial.md
    tutorials/npb-tutorial.md
    tutorials/microbench-tutorial.md
-   tutorials/spec2006-tutorial.md
-   tutorials/spec2017-tutorial.md
+   tutorials/spec-tutorial.md
    tutorials/parsec-tutorial.md
 
 Indices and tables
