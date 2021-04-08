@@ -519,7 +519,7 @@ class gem5Run:
                 proc.kill()
                 self.kill_reason = "kernel panic"
 
-            if self.check_failure():
+            if self.check_failure(self):
                 proc.kill()
                 self.kill_reason = "User defined kill"
 
