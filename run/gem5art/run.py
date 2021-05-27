@@ -121,7 +121,8 @@ class gem5Run:
         run.params = params
         run.timeout = timeout
 
-        run.check_failure = check_failure
+        # Note: Mypy doesn't support monkey patching like this
+        run.check_failure = check_failure # type: ignore
 
         run._id = uuid4()
 
