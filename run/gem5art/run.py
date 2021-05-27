@@ -121,8 +121,7 @@ class gem5Run:
         run.params = params
         run.timeout = timeout
 
-        # Note: Mypy doesn't support monkey patching like this
-        run.check_failure = check_failure # type: ignore
+        run.check_failure = check_failure
 
         run._id = uuid4()
 
@@ -519,7 +518,12 @@ class gem5Run:
                 proc.kill()
                 self.kill_reason = "kernel panic"
 
-            if self.check_failure(self):
+            # Assigning a function/lambda to an object variable does not make
+            # the function/lambda become a bound one. Therefore, the
+            # user-defined function must pass `self` in.
+            # Here, mypy classifies self.check_failure() as a bound function,
+            # so we tell mypy to ignore it./
+            if self.check_failure(self): # type: ignore
                 proc.kill()
                 self.kill_reason = "User defined kill"
 
