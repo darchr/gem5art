@@ -94,6 +94,8 @@ class gem5Run:
     results: Optional[Artifact]
     artifacts: List[Artifact]
 
+    rerunnable: bool
+
     @classmethod
     def _create(
         cls,
@@ -146,6 +148,8 @@ class gem5Run:
 
         # Initially, there are no results
         run.results = None
+
+        run.rerunnable = False
 
         return run
 
@@ -454,7 +458,7 @@ class gem5Run:
         d = self._convertForJson(self._getSerializable())
         return json.dumps(d)
 
-    def run(self, task: Any = None, cwd: str = ".") -> None:
+    def _run(self, task: Any = None, cwd: str = ".") -> None:
         """Actually run the test.
 
         Calls Popen with the command to fork a new process.
@@ -468,12 +472,9 @@ class gem5Run:
         process to run in a different directory than the running process. Note
         that only the spawned process runs in the new directory.
         """
-        # Check if the run is already in the database
+        # Connect to the database
         db = artifact.getDBConnection()
-        if self.hash in db:
-            print(f"Error: Have already run {self.command}. Exiting!")
-            return
-
+        
         self.status = "Begin run"
         self.dumpJson("info.json")
 
@@ -553,6 +554,45 @@ class gem5Run:
         db.put(self._id, self._getSerializable())
 
         print("Done storing the results of {}".format(" ".join(self.command)))
+
+    def run(self, task: Any = None, cwd: str = ".") -> None:
+        """Actually run the test.
+
+        Calls Popen with the command to fork a new process.
+        Then, this function polls the process every 5 seconds to check if it
+        has finished or not. Each time it checks, it dumps the json info so
+        other applications can poll those files.
+
+        task is the celery task that is running this gem5 instance.
+
+        cwd is the directory to change to before running. This allows a server
+        process to run in a different directory than the running process. Note
+        that only the spawned process runs in the new directory.
+        """
+        # Check if the run is already in the database
+        db = artifact.getDBConnection()
+        if self.hash in db:
+            print(f"Error: Have already run {self.command}. Exiting!")
+            return
+        self._run(task, cwd)
+
+    def rerun(self, task: Any = None, cwd: str = ".") -> None:
+        """ Rerun the test.
+
+        Calls Popen with the command to fork a new process.
+        Then, this function polls the process every 5 seconds to check if it
+        has finished or not. Each time it checks, it dumps the json info so
+        other applications can poll those files.
+
+        task is the celery task that is running this gem5 instance.
+
+        cwd is the directory to change to before running. This allows a server
+        process to run in a different directory than the running process. Note
+        that only the spawned process runs in the new directory.
+        """
+        # TODO: remove the old runs?
+        self._run(task, cwd)
+
 
     def saveResults(self) -> None:
         """Zip up the output directory and store the results in the
@@ -641,3 +681,20 @@ def getRunsByNameLike(
 
     for run in fsruns:
         yield gem5Run.loadFromDict(run)
+
+
+def getRerunnableRunsByNameLike(
+    db: ArtifactDB, name: str, fs_only: bool = False, limit: int = 0
+) -> Iterable[gem5Run]:
+
+    """ Returns a generator of gem5Run objects having `rerunnable == True`
+    and the object "name" containing the name parameter as a substring. The
+    parameter is case sensitive.
+
+    If fs_only is True, then only full system runs will be returned.
+    Limit specifies the maximum number of runs to return.
+    """
+
+    for run in getRunsByNameLike(db, name, fs_only, limit):
+        if run.rerunnable:
+            yield run
