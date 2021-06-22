@@ -149,8 +149,8 @@ class Artifact:
                          is_zipped: bool = False,
                          md5sum: str = "",
                          url: str = "",
-                         supported_gem5_versions: [],
-                         version: ""
+                         supported_gem5_versions: List[str] = [],
+                         version: str = ""
                          ) -> 'Artifact':
         """Constructs a new artifact.
 
