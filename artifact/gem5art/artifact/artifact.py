@@ -152,7 +152,7 @@ class Artifact:
                          url: str = "",
                          supported_gem5_versions: List[str] = [],
                          version: str = "",
-                         **kwargs
+                         **kwargs: str
                          ) -> 'Artifact':
         """Constructs a new artifact.
 
@@ -206,8 +206,6 @@ class Artifact:
         data['version'] = version
 
         for k, v in kwargs.items():
-            if k in data:
-                raise Exception("Field `{}` is redefined".format(k))
             data[k] = str(v)
 
         if data['hash'] in _db:
