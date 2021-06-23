@@ -100,6 +100,19 @@ class Artifact:
     6) ID: unique identifier of the artifact
     7) inputs: list of the input artifacts used to create this artifact stored
        as a list of uuids
+
+    Optional fields:
+    a) architecture: name of the ISA (e.g. x86, riscv) ("" by default)
+    b) size: size of the artifact in bytes (None by default)
+    c) is_zipped: True when the artifact must be decompressed before using,
+       False otherwise (False by default)
+    d) md5sum: the md5 checksum of the artifact, used for integrity checking
+       ("" by default)
+    e) url: URL to download the artifact ("" by default)
+    f) supported_gem5_versions: a list of supported gem5 versions that the
+       artifact should be used with (an empty list by default)
+    g) version: version of the artifact, e.g. "v21-0" ("" by default)
+    h) **kwargs: other fields, values must have __str__() defined.
     """
 
     _id: UUID
@@ -114,6 +127,14 @@ class Artifact:
     cwd: Path
     inputs: List['Artifact']
 
+    # Optional fields
+    architecture: str
+    size: int
+    is_zipped: bool
+    md5sum: str
+    url: str
+    supported_gem5_versions: List[str]
+    version: str
 
     @classmethod
     def registerArtifact(cls,
@@ -123,7 +144,15 @@ class Artifact:
                          typ: str,
                          path: Union[str, Path],
                          documentation: str,
-                         inputs: List['Artifact'] = []
+                         inputs: List['Artifact'] = [],
+                         architecture: str = "",
+                         size: int = None,
+                         is_zipped: bool = False,
+                         md5sum: str = "",
+                         url: str = "",
+                         supported_gem5_versions: List[str] = [],
+                         version: str = "",
+                         **kwargs: str
                          ) -> 'Artifact':
         """Constructs a new artifact.
 
@@ -167,6 +196,19 @@ class Artifact:
             raise Exception("cwd {} is not a directory".format(pcwd))
 
         data['inputs'] = [i._id for i in inputs]
+
+        data['architecture'] = architecture
+        data['size'] = size
+        data['is_zipped'] = is_zipped
+        data['md5sum'] = md5sum
+        data['url'] = url
+        data['supported_gem5_versions'] = supported_gem5_versions
+        data['version'] = version
+
+        for k, v in kwargs.items():
+            if k in data or k == "_id":
+                raise Exception("Field {} is reserved.".format(k))
+            data[k] = str(v)
 
         if data['hash'] in _db:
             old_artifact = Artifact(_db.get(data['hash']))
