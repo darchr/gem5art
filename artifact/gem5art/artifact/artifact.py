@@ -206,6 +206,8 @@ class Artifact:
         data['version'] = version
 
         for k, v in kwargs.items():
+            if k in data or k == "_id":
+                raise Exception("Field {} is reserved.".format(k))
             data[k] = str(v)
 
         if data['hash'] in _db:
