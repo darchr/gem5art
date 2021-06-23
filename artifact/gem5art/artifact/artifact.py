@@ -288,15 +288,18 @@ class Artifact:
 
         # Optional fields
         self.architecture = other['architecture'] if 'architecture' in other else ''
-        self.size = other['size'] if 'size' in other else None
-        self.is_zipped = other['is_zipped'] if 'is_zipped' in other else False
+        self.size = int(other['size']) if 'size' in other else None
+        self.is_zipped = bool(other['is_zipped']) if 'is_zipped' in other else False
         self.md5sum = other['md5sum'] if 'md5sum' in other else ''
         self.url = other['url'] if 'url' in other else ''
-        self.supported_gem5_versions = \
-            other['supported_gem5_versions'][:] if 'supported_gem5_versions' in other else []
+        self.supported_gem5_versions = []
+        if 'supported_gem5_versions' in other:
+            self.supported_gem5_versions = [for str(v) for v in other['supported_gem5_versions']]
         self.version = other['version'] if 'version' in other else ''
 
-        self.extra = {k: v for k, v in other['extra'].items()} if 'extra' in other else {}
+        self.extra = {}
+        if 'extra' in other:
+            self.extra = {k: v for k, v in other['extra'].items()}
 
     def __str__(self) -> str:
         inputs = ', '.join([i.name+':'+str(i._id) for i in self.inputs])
