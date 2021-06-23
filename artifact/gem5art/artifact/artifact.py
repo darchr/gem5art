@@ -235,10 +235,10 @@ class Artifact:
 
         _db = getDBConnection()
 
-        self = cls.createArtifact(cls, command, name, cwd, typ, path,
-                                  documentation, inputs, architecture, size,
-                                  is_zipped, md5sum, url,
-                                  supported_gem5_versions, version, **kwargs)
+        self = cls.createArtifact(command, name, cwd, typ, path, documentation,
+                                  inputs, architecture, size, is_zipped, md5sum,
+                                  url, supported_gem5_versions, version,
+                                  **kwargs)
 
         if self.hash in _db:
             old_artifact = Artifact(_db.get(self.hash))
