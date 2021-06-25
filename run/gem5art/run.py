@@ -57,7 +57,7 @@ class gem5Run:
     hash: str
     type: str
     name: str
-    gem5_binary: Path
+    gem5_binary_path: Path
     run_script: Path
     gem5_artifact: Artifact
     gem5_git_artifact: Artifact
@@ -74,8 +74,8 @@ class gem5Run:
 
     outdir: Path
 
-    linux_binary: Path
-    disk_image: Path
+    linux_binary_path: Path
+    disk_image_path: Path
     linux_binary_artifact: Artifact
     disk_image_artifact: Artifact
 
@@ -114,7 +114,7 @@ class gem5Run:
         """
         run = cls()
         run.name = name
-        run.gem5_binary = gem5_artifact.path
+        run.gem5_binary_path = gem5_artifact.path
         run.run_script = run_script
         run.gem5_artifact = gem5_artifact
         run.gem5_git_artifact = gem5_git_artifact
@@ -130,7 +130,7 @@ class gem5Run:
         run.outdir = outdir.resolve()  # ensure this is absolute
 
         # Assumes **/<gem5_name>/gem5.<anything>
-        run.gem5_name = run.gem5_binary.parent.name
+        run.gem5_name = run.gem5_binary_path.parent.name
         # Assumes **/<script_name>.py
         run.script_name = run.run_script.stem
 
@@ -182,7 +182,7 @@ class gem5Run:
         a file `info.json` in the outdir which contains a serialized version
         of this class.
         """
-        
+
         run = cls._create(
             name,
             Path(run_script),
@@ -205,7 +205,7 @@ class gem5Run:
         run.string += " ".join(run.params)
 
         run.command = [
-            str(run.gem5_binary),
+            str(run.gem5_binary_path),
             "-re",
             f"--outdir={run.outdir}",
             str(run.run_script),
@@ -264,13 +264,13 @@ class gem5Run:
             timeout,
             check_failure
         )
-        run.linux_binary = Path(linux_binary_artifact.path)
-        run.disk_image = Path(disk_image_artifact.path)
+        run.linux_binary_path = Path(linux_binary_artifact.path)
+        run.disk_image_path = Path(disk_image_artifact.path)
         run.linux_binary_artifact = linux_binary_artifact
         run.disk_image_artifact = disk_image_artifact
 
         # Assumes **/<linux_name>
-        run.linux_name = run.linux_binary.name
+        run.linux_name = run.linux_binary_path.name
         # Assumes **/<disk_name>
         run.disk_name = disk_image_artifact.name
 
@@ -286,12 +286,12 @@ class gem5Run:
         run.string += f"{run.linux_name} {run.disk_name} "
         run.string += " ".join(run.params)
         run.command = [
-            str(run.gem5_binary),
+            str(run.gem5_binary_path),
             "-re",
             f"--outdir={run.outdir}",
             str(run.run_script),
-            str(run.linux_binary),
-            str(run.disk_image),
+            str(run.linux_binary_path),
+            str(run.disk_image_path),
         ]
         run.command += list(params)
 
