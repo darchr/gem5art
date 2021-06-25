@@ -10,7 +10,7 @@ class FileDB:
         An artifact database with a json file backend.
     """
 
-    __json_backend: Path
+    __json_file: Path
     __uuid_artifact_map: Dict[UUID, Dict[str,str]]
     __hash_uuid_map: Dict[str, List[UUID]]
 
@@ -71,6 +71,7 @@ class FileDB:
         if not the_hash in self.__hash_uuid_map:
             self.__hash_uuid_map[the_hash] = []
         self.__hash_uuid_map[the_hash].append(key)
+        self.__save_to_file(self.__json_file)
         return True
     
     def find_exact(self, attr: Dict[str, str], limit: int)\
