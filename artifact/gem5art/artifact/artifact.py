@@ -29,11 +29,12 @@
 
 import hashlib
 from inspect import cleandoc
+import json
 import os
 from pathlib import Path
 import subprocess
 import time
-from typing import Any, Dict, Iterator, List, Union
+from typing import Any, Dict, Iterator, List, Union, Optional
 from uuid import UUID, uuid4
 
 from ._artifactdb import getDBConnection
@@ -129,38 +130,41 @@ class Artifact:
 
     # Optional fields
     architecture: str
-    size: int
+    size: Optional[int]
     is_zipped: bool
     md5sum: str
     url: str
     supported_gem5_versions: List[str]
     version: str
 
+    extra: Dict[str, str]
+
     @classmethod
-    def registerArtifact(cls,
-                         command: str,
-                         name: str,
-                         cwd: str,
-                         typ: str,
-                         path: Union[str, Path],
-                         documentation: str,
-                         inputs: List['Artifact'] = [],
-                         architecture: str = "",
-                         size: int = None,
-                         is_zipped: bool = False,
-                         md5sum: str = "",
-                         url: str = "",
-                         supported_gem5_versions: List[str] = [],
-                         version: str = "",
-                         **kwargs: str
-                         ) -> 'Artifact':
-        """Constructs a new artifact.
+    def createArtifact(cls,
+                       command: str,
+                       name: str,
+                       cwd: str,
+                       typ: str,
+                       path: Union[str, Path],
+                       documentation: str,
+                       inputs: List['Artifact'] = [],
+                       architecture: str = "",
+                       size: int = None,
+                       is_zipped: bool = False,
+                       md5sum: str = "",
+                       url: str = "",
+                       supported_gem5_versions: List[str] = [],
+                       version: str = "",
+                       **kwargs: str
+                       ) -> 'Artifact':
 
-        This assume either it's not in the database or it is the exact same as
-        when it was added to the database
+        """ Constructs a new artifact without using the database.
+        
+            Different from registerArtifact(), this method won't use database.
+            As a result, this method won't check whether the artifact has
+            already existed in the database, as well as it won't add the artifact
+            to the database.
         """
-
-        _db = getDBConnection()
 
         # Dictionary with all of the kwargs for construction.
         data: Dict[str, Any] = {}
@@ -202,28 +206,56 @@ class Artifact:
         data['is_zipped'] = is_zipped
         data['md5sum'] = md5sum
         data['url'] = url
-        data['supported_gem5_versions'] = supported_gem5_versions
+        data['supported_gem5_versions'] = supported_gem5_versions[:]
         data['version'] = version
 
-        for k, v in kwargs.items():
-            if k in data or k == "_id":
-                raise Exception("Field {} is reserved.".format(k))
-            data[k] = str(v)
+        data['extra'] = kwargs
 
-        if data['hash'] in _db:
-            old_artifact = Artifact(_db.get(data['hash']))
-            data['_id'] = old_artifact._id
+        data['_id'] = uuid4()
 
-            # Now that we have a complete object, construct it
-            self = cls(data)
+        # Now that we have a complete object, construct it
+        self = cls(data)
+
+        return self
+
+    @classmethod
+    def registerArtifact(cls,
+                         command: str,
+                         name: str,
+                         cwd: str,
+                         typ: str,
+                         path: Union[str, Path],
+                         documentation: str,
+                         inputs: List['Artifact'] = [],
+                         architecture: str = "",
+                         size: Optional[int] = None,
+                         is_zipped: bool = False,
+                         md5sum: str = "",
+                         url: str = "",
+                         supported_gem5_versions: List[str] = [],
+                         version: str = "",
+                         **kwargs: str
+                         ) -> 'Artifact':
+        """Constructs a new artifact and adds to the database.
+
+        This assume either it's not in the database or it is the exact same as
+        when it was added to the database
+        """
+
+        self = cls.createArtifact(command, name, cwd, typ, path, documentation,
+                                  inputs, architecture, size, is_zipped, md5sum,
+                                  url, supported_gem5_versions, version,
+                                  **kwargs)
+
+        _db = getDBConnection()
+
+        if self.hash in _db:
+            old_artifact = Artifact(_db.get(self.hash))
+            self._id = old_artifact._id
+
             self._checkSimilar(old_artifact)
 
         else:
-            data['_id'] = uuid4()
-
-            # Now that we have a complete object, construct it
-            self = cls(data)
-
             # Upload the file if there is one.
             if self.path.is_file():
                 _db.upload(self._id, self.path)
@@ -235,14 +267,17 @@ class Artifact:
         return self
 
     def __init__(self, other: Union[str, UUID, Dict[str, Any]]) -> None:
-        """Constructs the object from the database based on a UUID or
-        dictionary from the database
+        """Constructs an artifact object from the database based on a UUID or
+        dictionary from the database. Note that if the variable `other` is of
+        type `Dict[str, Any]`, this function will not try to establish a
+        connection to the database.
         """
-        _db = getDBConnection()
-        if isinstance(other, str):
-            other = UUID(other)
-        if isinstance(other, UUID):
-            other = _db.get(other)
+        if not isinstance(other, Dict):
+            _db = getDBConnection()
+            if isinstance(other, str):
+                other = UUID(other)
+            if isinstance(other, UUID):
+                other = _db.get(other)
 
         if not other:
             raise Exception("Cannot construct artifact")
@@ -260,6 +295,27 @@ class Artifact:
         self.cwd = Path(other['cwd'])
         self.inputs = [Artifact(i) for i in other['inputs']]
 
+        # Optional fields
+        self.architecture = other.get('architecture', '')
+        if 'size' in other:
+            if isinstance(other['size'], int):
+                self.size = other['size']
+            else:
+                self.size = None
+        self.is_zipped = bool(other.get('is_zipped', False))
+        self.md5sum = other.get('md5sum', '')
+        self.url = other.get('url', '')
+        self.supported_gem5_versions = []
+        if 'supported_gem5_versions' in other:
+            assert isinstance(other['supported_gem5_versions'], list)
+            self.supported_gem5_versions = other['supported_gem5_versions'][:]
+        self.version = other.get('version', '')
+
+        self.extra = {}
+        if 'extra' in other:
+            assert isinstance(other['extra'], dict)
+            self.extra = {k: v for k, v in other['extra'].items()}
+
     def __str__(self) -> str:
         inputs = ', '.join([i.name+':'+str(i._id) for i in self.inputs])
         return "\n    ".join([self.name, f'id: {self._id}',
@@ -275,6 +331,8 @@ class Artifact:
         data['inputs'] = [input._id for input in self.inputs]
         data['cwd'] = str(data['cwd'])
         data['path'] = str(data['path'])
+        data['supported_gem5_versions'] = json.dumps(self.supported_gem5_versions)
+        data['extra'] = json.dumps(self.extra)
         return data
 
     def __eq__(self, other: object) -> bool:

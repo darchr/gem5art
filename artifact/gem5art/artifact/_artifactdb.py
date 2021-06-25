@@ -50,7 +50,7 @@ class ArtifactDB(ABC):
     """
 
     @abstractmethod
-    def __init__(self, uri: str):
+    def __init__(self, uri: str) -> None:
         """Initialize the database with a URI"""
         pass
 
