@@ -33,7 +33,7 @@ import os
 from pathlib import Path
 import subprocess
 import time
-from typing import Any, Dict, Iterator, List, Union
+from typing import Any, Dict, Iterator, List, Union, Optional
 from uuid import UUID, uuid4
 
 from ._artifactdb import getDBConnection
