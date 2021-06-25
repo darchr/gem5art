@@ -40,9 +40,11 @@ import gridfs # type: ignore
 import os
 from pathlib import Path
 from pymongo import MongoClient # type: ignore
-from typing import Any, Dict, Iterable, Union, Type
+from typing import Any, Dict, Iterable, Union, Type, List
 from urllib.parse import urlparse
 from uuid import UUID
+
+from ._filedb import FileDB
 
 class ArtifactDB(ABC):
     """
@@ -198,12 +200,83 @@ class ArtifactMongoDB(ArtifactDB):
         for d in data:
             yield d
 
+class ArtifactFileDB(ArtifactDB):
+    """
+    This is a file-based database where Artifacts (as defined in artifacts.py)
+    are stored in a JSON file. This database does not keep track of files.
+
+    This database stores the data in three collections:
+    - artifacts: This stores the json serialized Artifact class
+    """
+
+    def __init__(self, uri :str) -> None:
+        """Initialize the mongodb connection and grab pointers to the databases
+           uri is the location of the database in a mongodb compatible form.
+           http://dochub.mongodb.org/core/connections.
+        """
+        self.db = FileDB(uri)
+
+    def put(self, key: UUID, artifact: Dict[str,Union[str,UUID]]) -> None:
+        """Insert the artifact into the database with the key"""
+        assert artifact['_id'] == key
+        assert isinstance(artifact['hash'], str)
+        self.db.insert_artifact(key, artifact['hash'], artifact)
+
+    def upload(self, key: UUID, path: Path) -> None:
+        """Upload the file at path to the database with _id of key"""
+        #with open(path, 'rb') as f:
+        #    self.fs.upload_from_stream_with_id(key, str(path), f)
+        self.db.register_file(key, path)
+
+    def __contains__(self, key: Union[UUID, str]) -> bool:
+        """Key can be a UUID or a string. Returns true if item in DB"""
+        if isinstance(key, UUID):
+            return self.db.has_uuid(key)
+        return self.db.has_hash(key)
+
+    def get(self, key: Union[UUID,str]) -> Dict[str,str]:
+        """Key can be a UUID or a string. Returns a dictionary to construct
+        an artifact.
+        """
+        artifact: List[Dict[str, str]] = []
+        if isinstance(key, UUID):
+            artifact = list(self.db.get_artifact_by_uuid(key))
+        else:
+            # This is a hash.
+            artifact = list(self.db.get_artifact_by_hash(key))
+        return artifact[0]
+
+    def downloadFile(self, key: UUID, path: Path) -> None:
+        """Do nothing."""
+        pass
+
+    def searchByName(self, name: str, limit: int) -> Iterable[Dict[str, Any]]:
+        """Returns an iterable of all artifacts in the database that match
+        some name."""
+        raise Exception("Not implemented!")
+
+    def searchByType(self, typ: str, limit: int) -> Iterable[Dict[str, Any]]:
+        """Returns an iterable of all artifacts in the database that match
+        some type."""
+        raise Exception("Not implemented!")
+
+    def searchByNameType(self, name: str, typ: str, limit: int) -> Iterable[Dict[str, Any]]:
+        """Returns an iterable of all artifacts in the database that match
+        some name and type."""
+        raise Exception("Not implemented!")
+
+    def searchByLikeNameType(self, name: str, typ: str, limit: int) -> Iterable[Dict[str, Any]]:
+        """Returns an iterable of all artifacts in the database that match
+        some type and a regex name."""
+        raise Exception("Not implemented!")
+
 _db = None
 
 _default_uri = "mongodb://localhost:27017"
 
 _db_schemes : Dict[str, Type[ArtifactDB]] = {
-    'mongodb': ArtifactMongoDB
+    'mongodb': ArtifactMongoDB,
+    'file': ArtifactFileDB
 }
 
 def _getDBType(uri: str) -> Type[ArtifactDB]:
