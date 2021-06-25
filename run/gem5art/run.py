@@ -100,7 +100,6 @@ class gem5Run:
     def _create(
         cls,
         name: str,
-        gem5_binary: Path,
         run_script: Path,
         outdir: Path,
         gem5_artifact: Artifact,
@@ -115,7 +114,7 @@ class gem5Run:
         """
         run = cls()
         run.name = name
-        run.gem5_binary = gem5_binary
+        run.gem5_binary = gem5_artifact.path
         run.run_script = run_script
         run.gem5_artifact = gem5_artifact
         run.gem5_git_artifact = gem5_git_artifact
@@ -157,7 +156,6 @@ class gem5Run:
     def createSERun(
         cls,
         name: str,
-        gem5_binary: str,
         run_script: str,
         outdir: str,
         gem5_artifact: Artifact,
@@ -171,8 +169,7 @@ class gem5Run:
         name is the name of the run. The name is not necessarily unique. The
         name could be used to query the results of the run.
 
-        gem5_binary and run_script are the paths to the binary to run
-        and the script to pass to gem5. Full paths are better.
+        run_script is the path to the run script to pass to gem5.
 
         The artifact parameters (gem5_artifact, gem5_git_artifact, and
         run_script_git_artifact) are used to ensure this is reproducible run.
@@ -188,7 +185,6 @@ class gem5Run:
 
         run = cls._create(
             name,
-            Path(gem5_binary),
             Path(run_script),
             Path(outdir),
             gem5_artifact,
@@ -229,14 +225,11 @@ class gem5Run:
     def createFSRun(
         cls,
         name: str,
-        gem5_binary: str,
         run_script: str,
         outdir: str,
         gem5_artifact: Artifact,
         gem5_git_artifact: Artifact,
         run_script_git_artifact: Artifact,
-        linux_binary: str,
-        disk_image: str,
         linux_binary_artifact: Artifact,
         disk_image_artifact: Artifact,
         *params: str,
@@ -247,11 +240,7 @@ class gem5Run:
         name is the name of the run. The name is not necessarily unique. The
         name could be used to query the results of the run.
 
-        gem5_binary and run_script are the paths to the binary to run
-        and the script to pass to gem5.
-
-        The linux_binary is the kernel to run and the disk_image is the path
-        to the disk image to use.
+        run_script is the path to the run script to pass to gem5.
 
         Further parameters can be passed via extra arguments. These
         parameters will be passed in order to the gem5 run script.
@@ -264,10 +253,8 @@ class gem5Run:
         a file `info.json` in the outdir which contains a serialized version
         of this class.
         """
-
         run = cls._create(
             name,
-            Path(gem5_binary),
             Path(run_script),
             Path(outdir),
             gem5_artifact,
@@ -277,15 +264,15 @@ class gem5Run:
             timeout,
             check_failure
         )
-        run.linux_binary = Path(linux_binary)
-        run.disk_image = Path(disk_image)
+        run.linux_binary = Path(linux_binary_artifact.path)
+        run.disk_image = Path(disk_image_artifact.path)
         run.linux_binary_artifact = linux_binary_artifact
         run.disk_image_artifact = disk_image_artifact
 
         # Assumes **/<linux_name>
         run.linux_name = run.linux_binary.name
         # Assumes **/<disk_name>
-        run.disk_name = run.disk_image.name
+        run.disk_name = disk_image_artifact.name
 
         run.artifacts = [
             gem5_artifact,
@@ -298,7 +285,6 @@ class gem5Run:
         run.string = f"{run.gem5_name} {run.script_name} "
         run.string += f"{run.linux_name} {run.disk_name} "
         run.string += " ".join(run.params)
-
         run.command = [
             str(run.gem5_binary),
             "-re",
@@ -415,7 +401,8 @@ class gem5Run:
         del d["artifacts"]
 
         # Doesn't make sense to serialize the user-specified fail function
-        del d["check_failure"]
+        if 'check_failure' in d.keys():
+            del d["check_failure"]
 
         # Replace the artifacts with their UUIDs
         for k, v in d.items():
