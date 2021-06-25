@@ -129,7 +129,7 @@ class Artifact:
 
     # Optional fields
     architecture: str
-    size: int
+    size: Optional[int]
     is_zipped: bool
     md5sum: str
     url: str
@@ -219,7 +219,7 @@ class Artifact:
                          documentation: str,
                          inputs: List['Artifact'] = [],
                          architecture: str = "",
-                         size: int = None,
+                         size: Optional[int] = None,
                          is_zipped: bool = False,
                          md5sum: str = "",
                          url: str = "",
