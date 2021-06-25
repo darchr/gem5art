@@ -288,7 +288,11 @@ class Artifact:
 
         # Optional fields
         self.architecture = other['architecture'] if 'architecture' in other else ''
-        self.size = int(other['size']) if 'size' in other else None
+        if 'size' in other:
+            if isinstance(other['size'], int):
+                self.size = other['size']
+            else:
+                self.size = None
         self.is_zipped = bool(other['is_zipped']) if 'is_zipped' in other else False
         self.md5sum = other['md5sum'] if 'md5sum' in other else ''
         self.url = other['url'] if 'url' in other else ''
