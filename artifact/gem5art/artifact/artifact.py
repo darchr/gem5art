@@ -29,6 +29,7 @@
 
 import hashlib
 from inspect import cleandoc
+import json
 import os
 from pathlib import Path
 import subprocess
@@ -157,6 +158,14 @@ class Artifact:
                        **kwargs: str
                        ) -> 'Artifact':
 
+        """ Constructs a new artifact without using the database.
+        
+            Different from registerArtifact(), this method won't use database.
+            As a result, this method won't check whether the artifact has
+            already existed in the database, as well as it won't add the artifact
+            to the database.
+        """
+
         # Dictionary with all of the kwargs for construction.
         data: Dict[str, Any] = {}
 
@@ -233,12 +242,12 @@ class Artifact:
         when it was added to the database
         """
 
-        _db = getDBConnection()
-
         self = cls.createArtifact(command, name, cwd, typ, path, documentation,
                                   inputs, architecture, size, is_zipped, md5sum,
                                   url, supported_gem5_versions, version,
                                   **kwargs)
+
+        _db = getDBConnection()
 
         if self.hash in _db:
             old_artifact = Artifact(_db.get(self.hash))
@@ -287,20 +296,20 @@ class Artifact:
         self.inputs = [Artifact(i) for i in other['inputs']]
 
         # Optional fields
-        self.architecture = other['architecture'] if 'architecture' in other else ''
+        self.architecture = other.get('architecture', '')
         if 'size' in other:
             if isinstance(other['size'], int):
                 self.size = other['size']
             else:
                 self.size = None
-        self.is_zipped = bool(other['is_zipped']) if 'is_zipped' in other else False
-        self.md5sum = other['md5sum'] if 'md5sum' in other else ''
-        self.url = other['url'] if 'url' in other else ''
+        self.is_zipped = bool(other.get('is_zipped', False))
+        self.md5sum = other.get('md5sum', '')
+        self.url = other.get('url', '')
         self.supported_gem5_versions = []
         if 'supported_gem5_versions' in other:
             assert isinstance(other['supported_gem5_versions'], list)
             self.supported_gem5_versions = other['supported_gem5_versions'][:]
-        self.version = other['version'] if 'version' in other else ''
+        self.version = other.get('version', '')
 
         self.extra = {}
         if 'extra' in other:
@@ -322,8 +331,8 @@ class Artifact:
         data['inputs'] = [input._id for input in self.inputs]
         data['cwd'] = str(data['cwd'])
         data['path'] = str(data['path'])
-        data['supported_gem5_versions'] = str(self.supported_gem5_versions)
-        data['extra'] = str(self.extra)
+        data['supported_gem5_versions'] = json.dumps(self.supported_gem5_versions)
+        data['extra'] = json.dumps(self.extra)
         return data
 
     def __eq__(self, other: object) -> bool:
