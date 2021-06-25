@@ -36,15 +36,15 @@ Some common queries can be found in common_queries.py
 
 from abc import ABC, abstractmethod
 
+import copy
+import json
 import gridfs # type: ignore
 import os
 from pathlib import Path
 from pymongo import MongoClient # type: ignore
-from typing import Any, Dict, Iterable, Union, Type, List
+from typing import Any, Dict, Iterable, Union, Type, List, Tuple
 from urllib.parse import urlparse
 from uuid import UUID
-
-from ._filedb import FileDB
 
 class ArtifactDB(ABC):
     """
@@ -209,30 +209,42 @@ class ArtifactFileDB(ArtifactDB):
     - artifacts: This stores the json serialized Artifact class
     """
 
+    class ArtifactEncoder(json.JSONEncoder):
+        def default(self, obj):
+            print(type(obj))
+            if isinstance(obj, UUID):
+                return str(obj)
+            return ArtifactFileDB.ArtifactEncoder(self, obj)
+
+    _json_file: Path
+    _uuid_artifact_map: Dict[str, Dict[str,str]]
+    _hash_uuid_map: Dict[str, List[str]]
+
     def __init__(self, uri :str) -> None:
         """Initialize the mongodb connection and grab pointers to the databases
            uri is the location of the database in a mongodb compatible form.
            http://dochub.mongodb.org/core/connections.
         """
-        self.db = FileDB(uri)
+        filepath = uri.split("file://")[1]
+        self._json_file = Path(filepath)
+        self._uuid_artifact_map, self._hash_uuid_map = \
+            self._load_from_file(self._json_file)
 
     def put(self, key: UUID, artifact: Dict[str,Union[str,UUID]]) -> None:
         """Insert the artifact into the database with the key"""
         assert artifact['_id'] == key
         assert isinstance(artifact['hash'], str)
-        self.db.insert_artifact(key, artifact['hash'], artifact)
+        self.insert_artifact(key, artifact['hash'], artifact)
 
     def upload(self, key: UUID, path: Path) -> None:
         """Upload the file at path to the database with _id of key"""
-        #with open(path, 'rb') as f:
-        #    self.fs.upload_from_stream_with_id(key, str(path), f)
-        self.db.register_file(key, path)
+        self.register_file(key, path)
 
     def __contains__(self, key: Union[UUID, str]) -> bool:
         """Key can be a UUID or a string. Returns true if item in DB"""
         if isinstance(key, UUID):
-            return self.db.has_uuid(key)
-        return self.db.has_hash(key)
+            return self.has_uuid(key)
+        return self.has_hash(key)
 
     def get(self, key: Union[UUID,str]) -> Dict[str,str]:
         """Key can be a UUID or a string. Returns a dictionary to construct
@@ -240,10 +252,10 @@ class ArtifactFileDB(ArtifactDB):
         """
         artifact: List[Dict[str, str]] = []
         if isinstance(key, UUID):
-            artifact = list(self.db.get_artifact_by_uuid(key))
+            artifact = list(self.get_artifact_by_uuid(key))
         else:
             # This is a hash.
-            artifact = list(self.db.get_artifact_by_hash(key))
+            artifact = list(self.get_artifact_by_hash(key))
         return artifact[0]
 
     def downloadFile(self, key: UUID, path: Path) -> None:
@@ -269,6 +281,78 @@ class ArtifactFileDB(ArtifactDB):
         """Returns an iterable of all artifacts in the database that match
         some type and a regex name."""
         raise Exception("Not implemented!")
+
+    def _load_from_file(self, json_file: Path) -> Tuple[Dict[str, Dict[str,str]], Dict[str, List[str]]]:
+        uuid_mapping: Dict[str, Dict[str,str]] = {}
+        hash_mapping: Dict[str, List[str]] = {}
+        if json_file.exists():
+            with open(json_file, 'r') as f:
+                j = json.load(f)
+                self._hash_uuid_map = j['hashes']
+                self._uuid_artifact_map = j['artifacts']
+        return uuid_mapping, hash_mapping
+    
+    def _save_to_file(self, json_file: Path) -> None:
+        content = {'artifacts': self._uuid_artifact_map,
+                   'hashes': self._hash_uuid_map}
+        with open(json_file, 'w') as f:
+            json.dump(content, f, indent=4, cls=ArtifactFileDB.ArtifactEncoder)
+    
+    def has_uuid(self, the_uuid: UUID) -> bool:
+        return str(the_uuid) in self._uuid_artifact_map
+    
+    def has_hash(self, the_hash: str) -> bool:
+        return the_hash in self._hash_uuid_map
+    
+    def get_artifact_by_uuid(self, the_uuid: UUID) -> Iterable[Dict[str,str]]:
+        uuid_str = str(the_uuid)
+        if not uuid_str in self._uuid_artifact_map:
+            return
+        yield self._uuid_artifact_map[uuid_str]
+
+    def get_artifact_by_hash(self, the_hash: str) -> Iterable[Dict[str,str]]:
+        if not the_hash in self._hash_uuid_map:
+            return
+        for the_uuid in self._hash_uuid_map[the_hash]:
+            yield self._uuid_artifact_map[the_uuid]
+    
+    def register_file(self, key: UUID, path: Path) -> None:
+        pass
+
+    def insert_artifact(self, the_uuid: UUID, the_hash: str,
+                        the_artifact: Dict[str,Union[str,UUID]]) -> bool:
+        """
+            Put the artifact to the database.
+
+            Return True if the artifact uuid does not exist in the database prior
+            to calling this function; return False otherwise.
+        """
+        uuid_str = str(the_uuid)
+        if uuid_str in self._uuid_artifact_map:
+            return False
+        artifact_copy = copy.deepcopy(the_artifact)
+        artifact_copy['_id'] = str(artifact_copy['_id'])
+        self._uuid_artifact_map[uuid_str] = artifact_copy # type: ignore[]
+        if not the_hash in self._hash_uuid_map:
+            self._hash_uuid_map[the_hash] = []
+        self._hash_uuid_map[the_hash].append(uuid_str)
+        self._save_to_file(self._json_file)
+        return True
+    
+    def find_exact(self, attr: Dict[str, str], limit: int) \
+                                             -> Iterable[Dict[str, Any]]:
+        """
+            Return all artifacts such that, for every yielded artifact,
+            and for every (k,v) in attr, the attribute `k` of the artifact has
+            the value of `v`.
+        """
+        count = 0
+        if count >= limit:
+            return
+        for artifact in self._uuid_artifact_map.values():
+            # https://docs.python.org/3/library/stdtypes.html#frozenset.issubset
+            if attr.items() <= artifact.items():
+                yield artifact
 
 _db = None
 
