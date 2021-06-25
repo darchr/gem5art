@@ -182,7 +182,7 @@ class gem5Run:
         a file `info.json` in the outdir which contains a serialized version
         of this class.
         """
-        print(name, run_script, outdir, gem5_artifact, gem5_git_artifact, run_script_git_artifact, params)
+        
         run = cls._create(
             name,
             Path(run_script),
