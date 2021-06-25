@@ -81,7 +81,7 @@ class TestSERun(unittest.TestCase):
 		'test SE run',
 		'configs-tests/run_test.py',
 		'results/run_test/out',
-        self.gem5art,
+                self.gem5art,
 		self.gem5gitart,
 		self.runscptart,
 		'extra','params'
