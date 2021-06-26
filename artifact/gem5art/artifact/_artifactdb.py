@@ -170,7 +170,6 @@ class ArtifactMongoDB(ArtifactDB):
         with open(path, 'wb') as f:
             self.fs.download_to_stream(key, f)
 
-
     def searchByName(self, name: str, limit: int) -> Iterable[Dict[str, Any]]:
         """Returns an iterable of all artifacts in the database that match
         some name."""
@@ -180,7 +179,7 @@ class ArtifactMongoDB(ArtifactDB):
     def searchByType(self, typ: str, limit: int) -> Iterable[Dict[str, Any]]:
         """Returns an iterable of all artifacts in the database that match
         some type."""
-        for d in self.artifacts.find({'type':typ}, limit=limit):
+        for d in self.artifacts.find({'type': typ}, limit=limit):
             yield d
 
     def searchByNameType(self, name: str, typ: str, limit: int) -> Iterable[Dict[str, Any]]:
@@ -193,12 +192,14 @@ class ArtifactMongoDB(ArtifactDB):
         """Returns an iterable of all artifacts in the database that match
         some type and a regex name."""
 
-        data = self.artifacts.find({'type':typ,
-                                    'name': {'$regex': '{}'.format(name)}
+        data = self.artifacts.find({"type": typ,
+                                    "name": {"$regex": "{}".format(name)}
                                    },
-                                   limit=limit)
+                                   limit=limit
+        )
         for d in data:
             yield d
+
 
 class ArtifactFileDB(ArtifactDB):
     """
@@ -220,25 +221,24 @@ class ArtifactFileDB(ArtifactDB):
     _uuid_artifact_map: Dict[str, Dict[str,str]]
     _hash_uuid_map: Dict[str, List[str]]
 
-    def __init__(self, uri :str) -> None:
-        """Initialize the mongodb connection and grab pointers to the databases
-           uri is the location of the database in a mongodb compatible form.
-           http://dochub.mongodb.org/core/connections.
+    def __init__(self, uri: str) -> None:
+        """Initialize the file-driven database from a JSON file.
+        If the file doesn't exist, a new file will be created.
         """
-        filepath = uri.split("file://")[1]
+        filepath = urlparse(uri).netloc
         self._json_file = Path(filepath)
         self._uuid_artifact_map, self._hash_uuid_map = \
             self._load_from_file(self._json_file)
 
     def put(self, key: UUID, artifact: Dict[str,Union[str,UUID]]) -> None:
-        """Insert the artifact into the database with the key"""
+        """Insert the artifact into the database with the key."""
         assert artifact['_id'] == key
         assert isinstance(artifact['hash'], str)
         self.insert_artifact(key, artifact['hash'], artifact)
 
     def upload(self, key: UUID, path: Path) -> None:
-        """Upload the file at path to the database with _id of key"""
-        self.register_file(key, path)
+        """Do nothing."""
+        pass
 
     def __contains__(self, key: Union[UUID, str]) -> bool:
         """Key can be a UUID or a string. Returns true if item in DB"""
@@ -260,27 +260,27 @@ class ArtifactFileDB(ArtifactDB):
 
     def downloadFile(self, key: UUID, path: Path) -> None:
         """Do nothing."""
-        pass
+        assert(path.exists())
 
     def searchByName(self, name: str, limit: int) -> Iterable[Dict[str, Any]]:
         """Returns an iterable of all artifacts in the database that match
         some name."""
-        raise Exception("Not implemented!")
+        raise NotImplementedError()
 
     def searchByType(self, typ: str, limit: int) -> Iterable[Dict[str, Any]]:
         """Returns an iterable of all artifacts in the database that match
         some type."""
-        raise Exception("Not implemented!")
+        raise NotImplementedError()
 
     def searchByNameType(self, name: str, typ: str, limit: int) -> Iterable[Dict[str, Any]]:
         """Returns an iterable of all artifacts in the database that match
         some name and type."""
-        raise Exception("Not implemented!")
+        raise NotImplementedError()
 
     def searchByLikeNameType(self, name: str, typ: str, limit: int) -> Iterable[Dict[str, Any]]:
         """Returns an iterable of all artifacts in the database that match
         some type and a regex name."""
-        raise Exception("Not implemented!")
+        raise NotImplementedError()
 
     def _load_from_file(self, json_file: Path) -> Tuple[Dict[str, Dict[str,str]], Dict[str, List[str]]]:
         uuid_mapping: Dict[str, Dict[str,str]] = {}
@@ -291,19 +291,19 @@ class ArtifactFileDB(ArtifactDB):
                 self._hash_uuid_map = j['hashes']
                 self._uuid_artifact_map = j['artifacts']
         return uuid_mapping, hash_mapping
-    
+
     def _save_to_file(self, json_file: Path) -> None:
         content = {'artifacts': self._uuid_artifact_map,
                    'hashes': self._hash_uuid_map}
         with open(json_file, 'w') as f:
             json.dump(content, f, indent=4, cls=ArtifactFileDB.ArtifactEncoder)
-    
+
     def has_uuid(self, the_uuid: UUID) -> bool:
         return str(the_uuid) in self._uuid_artifact_map
-    
+
     def has_hash(self, the_hash: str) -> bool:
         return the_hash in self._hash_uuid_map
-    
+
     def get_artifact_by_uuid(self, the_uuid: UUID) -> Iterable[Dict[str,str]]:
         uuid_str = str(the_uuid)
         if not uuid_str in self._uuid_artifact_map:
@@ -315,9 +315,6 @@ class ArtifactFileDB(ArtifactDB):
             return
         for the_uuid in self._hash_uuid_map[the_hash]:
             yield self._uuid_artifact_map[the_uuid]
-    
-    def register_file(self, key: UUID, path: Path) -> None:
-        pass
 
     def insert_artifact(self, the_uuid: UUID, the_hash: str,
                         the_artifact: Dict[str,Union[str,UUID]]) -> bool:
@@ -332,13 +329,13 @@ class ArtifactFileDB(ArtifactDB):
             return False
         artifact_copy = copy.deepcopy(the_artifact)
         artifact_copy['_id'] = str(artifact_copy['_id'])
-        self._uuid_artifact_map[uuid_str] = artifact_copy # type: ignore[]
+        self._uuid_artifact_map[uuid_str] = artifact_copy  # type: ignore
         if not the_hash in self._hash_uuid_map:
             self._hash_uuid_map[the_hash] = []
         self._hash_uuid_map[the_hash].append(uuid_str)
         self._save_to_file(self._json_file)
         return True
-    
+
     def find_exact(self, attr: Dict[str, str], limit: int) \
                                              -> Iterable[Dict[str, Any]]:
         """
