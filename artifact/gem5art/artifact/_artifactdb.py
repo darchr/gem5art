@@ -179,7 +179,7 @@ class ArtifactMongoDB(ArtifactDB):
     def searchByType(self, typ: str, limit: int) -> Iterable[Dict[str, Any]]:
         """Returns an iterable of all artifacts in the database that match
         some type."""
-        for d in self.artifacts.find({'type': typ}, limit=limit):
+        for d in self.artifacts.find({'type':typ}, limit=limit):
             yield d
 
     def searchByNameType(self, name: str, typ: str, limit: int) -> Iterable[Dict[str, Any]]:
@@ -192,11 +192,10 @@ class ArtifactMongoDB(ArtifactDB):
         """Returns an iterable of all artifacts in the database that match
         some type and a regex name."""
 
-        data = self.artifacts.find({"type": typ,
-                                    "name": {"$regex": "{}".format(name)}
+        data = self.artifacts.find({'type': typ,
+                                    'name': {'$regex': '{}'.format(name)}
                                    },
-                                   limit=limit
-        )
+                                   limit=limit)
         for d in data:
             yield d
 
