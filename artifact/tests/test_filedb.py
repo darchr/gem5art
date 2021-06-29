@@ -26,6 +26,7 @@
 
 """Tests for ArtifactFileDB"""
 
+"""
 import unittest
 from pathlib import Path
 import json
@@ -69,3 +70,4 @@ class TestArtifactFileDB(unittest.TestCase):
         self.assertTrue(j['hashes'][artifact['hash']] == the_uuid)
 
 
+"""
