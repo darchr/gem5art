@@ -204,10 +204,15 @@ class ArtifactMongoDB(ArtifactDB):
 class ArtifactFileDB(ArtifactDB):
     """
     This is a file-based database where Artifacts (as defined in artifacts.py)
-    are stored in a JSON file. This database does not keep track of files.
+    are stored in a JSON file.
 
-    This database stores the data in three collections:
-    - artifacts: This stores the json serialized Artifact class
+    This database stores the data in two collections:
+    - artifacts: A map from uuid to corresponding serialized Artifact object,
+                 i.e. the key is a UUID, and the value is a serialized Artifact
+                 object whose the same UUID.
+    - hashes: A map from Artifact hash to a list of corresponding UUID, i.e.
+              the key is a hash, and the value is a list of UUID, where each
+              UUID is of an Artifact having the hash equals to the key.
     """
 
     class ArtifactEncoder(json.JSONEncoder):
