@@ -42,6 +42,7 @@ import gridfs # type: ignore
 import os
 from pathlib import Path
 from pymongo import MongoClient # type: ignore
+import shutil
 from typing import Any, Dict, Iterable, Union, Type, List, Tuple
 from urllib.parse import urlparse
 from uuid import UUID
@@ -219,6 +220,8 @@ class ArtifactFileDB(ArtifactDB):
     _json_file: Path
     _uuid_artifact_map: Dict[str, Dict[str,str]]
     _hash_uuid_map: Dict[str, List[str]]
+    _storage_enabled: bool
+    _storage_path: Path
 
     def __init__(self, uri: str) -> None:
         """Initialize the file-driven database from a JSON file.
@@ -226,6 +229,15 @@ class ArtifactFileDB(ArtifactDB):
         """
         filepath = urlparse(uri).netloc
         self._json_file = Path(filepath)
+        storage_path = os.environ.get("GEM5ART_STORAGE", _default_uri)
+        self._storage_enabled = True if storage_path else False
+        self._storage_path = Path(storage_path)
+        if self._storage_enabled \
+            and self._storage_path.exists() \
+            and not self._storage_path.is_dir():
+            raise Exception(f"GEM5ART_STORAGE={storage_path} exists and is not"
+                            f" a directory")
+        os.makedirs(self._storage_path, exist_ok = True)
         self._uuid_artifact_map, self._hash_uuid_map = \
             self._load_from_file(self._json_file)
 
@@ -236,8 +248,13 @@ class ArtifactFileDB(ArtifactDB):
         self.insert_artifact(key, artifact['hash'], artifact)
 
     def upload(self, key: UUID, path: Path) -> None:
-        """Do nothing."""
-        pass
+        """Copy the artifact to the folder specified by GEM5ART_STORAGE."""
+        if not self._storage_enabled:
+            return
+        src_path = path
+        dst_path = self._storage_path / str(key)
+        if not dst_path.exists():
+            shutil.copy2(src_path, dst_path)
 
     def __contains__(self, key: Union[UUID, str]) -> bool:
         """Key can be a UUID or a string. Returns true if item in DB"""
@@ -260,6 +277,11 @@ class ArtifactFileDB(ArtifactDB):
     def downloadFile(self, key: UUID, path: Path) -> None:
         """Do nothing."""
         assert(path.exists())
+        if not self._storage_enabled:
+            return
+        src_path = self._storage_path / str(key)
+        dst_path = path
+        shutil.copy2(src_path, dst_path)
 
     def searchByName(self, name: str, limit: int) -> Iterable[Dict[str, Any]]:
         """Returns an iterable of all artifacts in the database that match
@@ -353,6 +375,7 @@ class ArtifactFileDB(ArtifactDB):
 _db = None
 
 _default_uri = "mongodb://localhost:27017"
+_default_storage = ""
 
 _db_schemes : Dict[str, Type[ArtifactDB]] = {
     'mongodb': ArtifactMongoDB,
