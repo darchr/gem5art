@@ -217,7 +217,6 @@ class ArtifactFileDB(ArtifactDB):
 
     class ArtifactEncoder(json.JSONEncoder):
         def default(self, obj):
-            print(type(obj))
             if isinstance(obj, UUID):
                 return str(obj)
             return ArtifactFileDB.ArtifactEncoder(self, obj)
@@ -232,7 +231,7 @@ class ArtifactFileDB(ArtifactDB):
         """Initialize the file-driven database from a JSON file.
         If the file doesn't exist, a new file will be created.
         """
-        filepath = urlparse(uri).netloc
+        filepath = urlparse(uri).path
         self._json_file = Path(filepath)
         storage_path = os.environ.get("GEM5ART_STORAGE", _default_uri)
         self._storage_enabled = True if storage_path else False
@@ -245,6 +244,7 @@ class ArtifactFileDB(ArtifactDB):
         os.makedirs(self._storage_path, exist_ok = True)
         self._uuid_artifact_map, self._hash_uuid_map = \
             self._load_from_file(self._json_file)
+
 
     def put(self, key: UUID, artifact: Dict[str,Union[str,UUID]]) -> None:
         """Insert the artifact into the database with the key."""
@@ -314,8 +314,8 @@ class ArtifactFileDB(ArtifactDB):
         if json_file.exists():
             with open(json_file, 'r') as f:
                 j = json.load(f)
-                self._hash_uuid_map = j['hashes']
-                self._uuid_artifact_map = j['artifacts']
+                hash_mapping = j['hashes']
+                uuid_mapping = j['artifacts']
         return uuid_mapping, hash_mapping
 
     def _save_to_file(self, json_file: Path) -> None:
