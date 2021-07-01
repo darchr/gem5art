@@ -284,7 +284,7 @@ class Artifact:
             raise Exception("Cannot construct artifact")
 
         if isinstance(other['_id'], str):
-            other['_id'] = UUID(other['_id'])
+            other['_id'] = UUID(other['_id']) # type: ignore
         assert isinstance(other['_id'], UUID)
         self._id = other['_id']
         self.name = other['name']
