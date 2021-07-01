@@ -1,3 +1,5 @@
+**THIS REPOSITORY HAS BEEN MERGED WITH GEM5 AS OF VERSION 21.0! SEE https://gem5.googlesource.com/public/gem5/ FOR THE CURRENT CODE!**
+
 <img alt="gem5art logo" src="/gem5art.svg" width=150>
 
 # gem5art: Artifact, reproducibility, and testing utilities for gem5
