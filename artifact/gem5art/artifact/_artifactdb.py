@@ -206,13 +206,8 @@ class ArtifactFileDB(ArtifactDB):
     This is a file-based database where Artifacts (as defined in artifacts.py)
     are stored in a JSON file.
 
-    This database stores the data in two collections:
-    - artifacts: A map from uuid to corresponding serialized Artifact object,
-                 i.e. the key is a UUID, and the value is a serialized Artifact
-                 object whose the same UUID.
-    - hashes: A map from Artifact hash to a list of corresponding UUID, i.e.
-              the key is a hash, and the value is a list of UUID, where each
-              UUID is of an Artifact having the hash equals to the key.
+    This database stores a list of serialized artifacts in a JSON file.
+    This database is not thread-safe.
     """
 
     class ArtifactEncoder(json.JSONEncoder):
@@ -318,14 +313,17 @@ class ArtifactFileDB(ArtifactDB):
         if json_file.exists():
             with open(json_file, 'r') as f:
                 j = json.load(f)
-                hash_mapping = j['hashes']
-                for an_artifact in j['artifacts']:
-                    uuid_mapping[an_artifact['_id']] = an_artifact
+                for an_artifact in j:
+                    the_uuid = an_artifact['_id']
+                    the_hash = an_artifact['hash']
+                    uuid_mapping[the_uuid] = an_artifact
+                    if not the_hash in hash_mapping:
+                        hash_mapping[the_hash] = []
+                    hash_mapping[the_hash].append(the_uuid)
         return uuid_mapping, hash_mapping
 
     def _save_to_file(self, json_file: Path) -> None:
-        content = {'artifacts': list(self._uuid_artifact_map.values()),
-                   'hashes': self._hash_uuid_map}
+        content = list(self._uuid_artifact_map.values())
         with open(json_file, 'w') as f:
             json.dump(content, f, indent=4, cls=ArtifactFileDB.ArtifactEncoder)
 
