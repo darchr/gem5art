@@ -36,6 +36,7 @@ import subprocess
 import time
 from typing import Any, Dict, Iterator, List, Union, Optional
 from uuid import UUID, uuid4
+import json
 
 from ._artifactdb import getDBConnection
 
@@ -282,6 +283,8 @@ class Artifact:
         if not other:
             raise Exception("Cannot construct artifact")
 
+        if isinstance(other['_id'], str):
+            other['_id'] = UUID(other['_id']) # type: ignore
         assert isinstance(other['_id'], UUID)
         self._id = other['_id']
         self.name = other['name']
@@ -307,14 +310,18 @@ class Artifact:
         self.url = other.get('url', '')
         self.supported_gem5_versions = []
         if 'supported_gem5_versions' in other:
-            assert isinstance(other['supported_gem5_versions'], list)
-            self.supported_gem5_versions = other['supported_gem5_versions'][:]
+            if isinstance(other['supported_gem5_versions'], list):
+                self.supported_gem5_versions = other['supported_gem5_versions'][:]
+            elif isinstance(other['supported_gem5_versions'], str):
+                self.supported_gem5_versions = json.loads(other['supported_gem5_versions'])
         self.version = other.get('version', '')
 
         self.extra = {}
         if 'extra' in other:
-            assert isinstance(other['extra'], dict)
-            self.extra = {k: v for k, v in other['extra'].items()}
+            if isinstance(other['extra'], dict):
+                self.extra = {k: v for k, v in other['extra'].items()}
+            elif isinstance(other['extra'], str):
+                self.extra = json.loads(other['extra'])
 
     def __str__(self) -> str:
         inputs = ', '.join([i.name+':'+str(i._id) for i in self.inputs])
