@@ -231,8 +231,12 @@ class ArtifactFileDB(ArtifactDB):
         """Initialize the file-driven database from a JSON file.
         If the file doesn't exist, a new file will be created.
         """
-        filepath = urlparse(uri).path
-        self._json_file = Path(filepath)
+        parsed_uri = urlparse(uri)
+        # using urlparse to parse relative/absolute file path
+        # abs path: urlparse("file:///path/to/file") = (netloc='', path='/path/to/file')
+        # rel path: urlparse("file://path/to/file") = (netloc='path', path='/to/file')
+        # so, the filepath would be netloc+path for both cases
+        self._json_file = Path(parsed_uri.netloc) / Path(parsed_uri.path)
         storage_path = os.environ.get("GEM5ART_STORAGE", _default_uri)
         self._storage_enabled = True if storage_path else False
         self._storage_path = Path(storage_path)
@@ -379,7 +383,7 @@ class ArtifactFileDB(ArtifactDB):
 
 _db = None
 
-_default_uri = "mongodb://localhost:27017"
+_default_uri = "file://db.json"
 _default_storage = ""
 
 _db_schemes : Dict[str, Type[ArtifactDB]] = {
