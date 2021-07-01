@@ -284,7 +284,7 @@ class ArtifactFileDB(ArtifactDB):
         return artifact[0]
 
     def downloadFile(self, key: UUID, path: Path) -> None:
-        """Do nothing."""
+        """Copy the file from the storage to specified path."""
         assert(path.exists())
         if not self._storage_enabled:
             return
@@ -319,11 +319,12 @@ class ArtifactFileDB(ArtifactDB):
             with open(json_file, 'r') as f:
                 j = json.load(f)
                 hash_mapping = j['hashes']
-                uuid_mapping = j['artifacts']
+                for an_artifact in j['artifacts']:
+                    uuid_mapping[an_artifact['_id']] = an_artifact
         return uuid_mapping, hash_mapping
 
     def _save_to_file(self, json_file: Path) -> None:
-        content = {'artifacts': self._uuid_artifact_map,
+        content = {'artifacts': list(self._uuid_artifact_map.values()),
                    'hashes': self._hash_uuid_map}
         with open(json_file, 'w') as f:
             json.dump(content, f, indent=4, cls=ArtifactFileDB.ArtifactEncoder)
