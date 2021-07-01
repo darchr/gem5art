@@ -26,22 +26,24 @@
 
 """Tests for ArtifactFileDB"""
 
-"""
-import unittest
-from pathlib import Path
+
 import json
+import os
+from pathlib import Path
+import unittest
+from uuid import UUID
 
 from gem5art.artifact import Artifact
 from gem5art.artifact._artifactdb import getDBConnection
 
-_db = getDBConnection('file://test.json')
-
 class TestArtifactFileDB(unittest.TestCase):
-    def setup(self):
+    def setUp(self):
+        _db = getDBConnection('file://test.json')
+
         with open("test-file.txt", "w") as f:
             f.write("This is a test file.")
-        
-        Artifact.registerArtifact(
+
+        self.artifact = Artifact.registerArtifact(
             name = f'test-artifact',
             typ = 'text',
             path = f'test-file.txt',
@@ -51,23 +53,20 @@ class TestArtifactFileDB(unittest.TestCase):
             documentation = f"This artifact is made for testing."
         )
 
-    def testInitFunction(self):
+    def tearDown(self):
+        os.remove('test-file.txt')
+        os.remove('test.json')
+
+    def test_init_function(self):
         self.assertTrue(Path("test.json").exists())
-    
-    def testJSONContent(self):
+
+    def test_json_content(self):
         with open('test.json', 'r') as f:
-            j = json.load(f)
-        self.assertTrue('artifacts' in j)
-        self.assertTrue('hashes' in j)
-        artifact = None
-        the_uuid = None
-        for k, v in j['artifacts'].items():
-            the_uuid = k
-            artifact = v
-        self.assertTrue(artifact['hash'] == "a050576dc384f9f90da04a26819c6d78")
-        self.assertTrue(artifact['_id'] == the_uuid)
-        self.assertTrue(artifact['hash'] in j['hashes'])
-        self.assertTrue(j['hashes'][artifact['hash']] == the_uuid)
+            artifacts = json.load(f)
+        self.assertTrue(len(artifacts) == 1)
+        artifact = artifacts[0]
+        self.assertTrue(artifact['hash'] == self.artifact.hash)
+        self.assertTrue(UUID(artifact['_id']) == self.artifact._id)
 
 
-"""
+

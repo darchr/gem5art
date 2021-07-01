@@ -214,6 +214,10 @@ class ArtifactFileDB(ArtifactDB):
 
     This database stores a list of serialized artifacts in a JSON file.
     This database is not thread-safe.
+
+    If the user specifies a valid path in the environment variable
+    GEM5ART_STORAGE then this database will copy all artifacts to that
+    directory named with their UUIDs.
     """
 
     class ArtifactEncoder(json.JSONEncoder):
@@ -238,7 +242,7 @@ class ArtifactFileDB(ArtifactDB):
         # rel path: urlparse("file://path/to/file") = (netloc='path', path='/to/file')
         # so, the filepath would be netloc+path for both cases
         self._json_file = Path(parsed_uri.netloc) / Path(parsed_uri.path)
-        storage_path = os.environ.get("GEM5ART_STORAGE", _default_uri)
+        storage_path = os.environ.get("GEM5ART_STORAGE", "")
         self._storage_enabled = True if storage_path else False
         self._storage_path = Path(storage_path)
         if self._storage_enabled \
@@ -246,7 +250,9 @@ class ArtifactFileDB(ArtifactDB):
             and not self._storage_path.is_dir():
             raise Exception(f"GEM5ART_STORAGE={storage_path} exists and is not"
                             f" a directory")
-        os.makedirs(self._storage_path, exist_ok = True)
+        if self._storage_enabled:
+            os.makedirs(self._storage_path, exist_ok = True)
+
         self._uuid_artifact_map, self._hash_uuid_map = \
             self._load_from_file(self._json_file)
 
@@ -292,26 +298,6 @@ class ArtifactFileDB(ArtifactDB):
         src_path = self._storage_path / str(key)
         dst_path = path
         shutil.copy2(src_path, dst_path)
-
-    def searchByName(self, name: str, limit: int) -> Iterable[Dict[str, Any]]:
-        """Returns an iterable of all artifacts in the database that match
-        some name."""
-        raise NotImplementedError()
-
-    def searchByType(self, typ: str, limit: int) -> Iterable[Dict[str, Any]]:
-        """Returns an iterable of all artifacts in the database that match
-        some type."""
-        raise NotImplementedError()
-
-    def searchByNameType(self, name: str, typ: str, limit: int) -> Iterable[Dict[str, Any]]:
-        """Returns an iterable of all artifacts in the database that match
-        some name and type."""
-        raise NotImplementedError()
-
-    def searchByLikeNameType(self, name: str, typ: str, limit: int) -> Iterable[Dict[str, Any]]:
-        """Returns an iterable of all artifacts in the database that match
-        some type and a regex name."""
-        raise NotImplementedError()
 
     def _load_from_file(self, json_file: Path) -> Tuple[Dict[str, Dict[str,str]], Dict[str, List[str]]]:
         uuid_mapping: Dict[str, Dict[str,str]] = {}
