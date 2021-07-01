@@ -38,14 +38,20 @@ from abc import ABC, abstractmethod
 
 import copy
 import json
-import gridfs # type: ignore
 import os
 from pathlib import Path
-from pymongo import MongoClient # type: ignore
 import shutil
 from typing import Any, Dict, Iterable, Union, Type, List, Tuple
 from urllib.parse import urlparse
 from uuid import UUID
+
+try:
+    import gridfs # type: ignore
+    from pymongo import MongoClient # type: ignore
+    MONGO_SUPPORT = True
+except ModuleNotFoundError:
+    # If pymongo isn't installed, then disable support for it
+    MONGO_SUPPORT = False
 
 class ArtifactDB(ABC):
     """
@@ -382,13 +388,18 @@ class ArtifactFileDB(ArtifactDB):
 
 _db = None
 
-_default_uri = "file://db.json"
+if MONGO_SUPPORT:
+    _default_uri = "mongodb://localhost:27017"
+else:
+    _default_uri = "file://db.json"
+
 _default_storage = ""
 
 _db_schemes : Dict[str, Type[ArtifactDB]] = {
-    'mongodb': ArtifactMongoDB,
     'file': ArtifactFileDB
 }
+if MONGO_SUPPORT:
+    _db_schemes['mongodb'] = ArtifactMongoDB
 
 def _getDBType(uri: str) -> Type[ArtifactDB]:
     """Internal function to take a URI and return a class that can be
@@ -398,6 +409,10 @@ def _getDBType(uri: str) -> Type[ArtifactDB]:
     Supported types:
         **ArtifactMongoDB**: mongodb://...
             See http://dochub.mongodb.org/core/connections for details.
+        **ArtifactFileDB**: file://...
+            A simple flat file database with optional storage for the binary
+            artifacts. The filepath is where the json file is stored and the
+            data storage can be specified with GEM5ART_STORAGE
     """
     result = urlparse(uri)
     if result.scheme in _db_schemes:
